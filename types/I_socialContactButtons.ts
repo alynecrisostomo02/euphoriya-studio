@@ -1,0 +1,56 @@
+export interface I_socialContactButton {
+
+  /**
+   * Label of the button (text beside the icon). Use an empty string when the icon is self-contained (for example the Reddit wordmark asset).
+   */
+  label: string
+
+  /**
+   * URL to be opened when the button is clicked
+   */
+  url: string
+
+  /**
+   * Image icon to be displayed on the button
+   */
+  icon: string
+
+  /**
+   * Width of the icon in pixels
+   */
+  width: number
+
+  /**
+   * Height of the icon in pixels
+   */
+  height: number
+
+  /**
+   * CSS class to be applied to the button
+   */
+  cssClass: string
+
+}
+
+/**
+ * Full set of social/contact buttons rendered on the welcome screen and related chrome.
+ */
+export interface I_socialContactButtonSet {
+  buttonPatreon: I_socialContactButton
+  buttonKofi: I_socialContactButton
+
+  buttonWebsite: I_socialContactButton
+  buttonGitHub: I_socialContactButton
+
+  buttonDiscord: I_socialContactButton
+  buttonReddit: I_socialContactButton
+  buttonTwitter: I_socialContactButton
+}
+
+/** Static fields for a single social button (URLs, icons, layout). */
+export type I_socialContactButtonStaticFields = Omit<I_socialContactButton, 'label'>
+
+/** Full static config map for SocialContactButtons. */
+export type T_socialContactButtonStaticConfig = {
+  [K in keyof I_socialContactButtonSet]: I_socialContactButtonStaticFields
+}

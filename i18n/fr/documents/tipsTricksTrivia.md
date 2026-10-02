@@ -1,0 +1,22 @@
+# Trucs, astuces et anecdotes
+----------
+
+- Taper `@` lors de l'édition de grands champs de texte vous permet de créer des liens vers d'autres documents directement dans l'éditeur de texte !
+- `Ctrl+Shift+F` ouvre la recherche dans le document actuel lorsque vous avez besoin d'un mot particulier sur la page !
+- N'importe quel champ en mode édition de document avec la petite flèche déroulante permet des valeurs personnalisées ! Fermez le menu des valeurs prédéfinies avec Esc, saisissez la valeur souhaitée et confirmez avec Enter.
+- Vous pouvez effectuer une recherche dans tous les documents et tous leurs champs à la fois en utilisant ce qui suit dans la fenêtre contextuelle de recherche rapide ou dans l'une des recherches de relation : `%field-name:whatever-you-need`
+- Il existe toute une liste de raccourcis clavier vraiment utiles qui peuvent rendre votre utilisation de FA beaucoup plus rapide et plus facile !
+- Le menu des paramètres contient tout un assortiment de petits et grands ajustements pour adapter l'application à vos besoins !
+- FA a un mode sombre qui n'est pas une simple réflexion après coup et qui est entièrement utilisable !
+- De nombreuses parties de l'application réagissent à un clic central de la souris. Par exemple, vous pouvez fermer les onglets du document ou ouvrir directement les éléments de l'arborescence hiérarchique !
+- Fantasia Archive est gratuit ; sans aucune condition : pas de publicité, pas de trackers, pas de crypto-mining sur votre PC et vos données restent entièrement les vôtres !- Si ces astuces vous ennuient, il existe un interrupteur pour les désactiver dans les paramètres de l'application.
+- La recherche de relations regorge de fonctionnalités supplémentaires que vous pouvez utiliser pour trouver ce dont vous avez besoin ! Lisez tout à ce sujet dans le « Guide de recherche avancée » dans le menu Aide !
+- Votre projet est automatiquement enregistré à la sortie, mais il est recommandé d'utiliser la fonction « Enregistrer » de temps en temps pour vous assurer que les données restent en sécurité.
+- L'arborescence hiérarchique de gauche est extensible en faisant glisser le séparateur, et l'application se souvient de l'endroit où vous l'avez laissé au prochain lancement !
+- N'hésitez pas à ajouter autant de sous-catégories que vous le souhaitez. Vous pouvez toujours déplacer des éléments plus tard et réorganiser la structure de votre projet.
+- Les balises sont une fonctionnalité très puissante qui vous permet d'ajouter des semi-catégories à l'arborescence du projet et de créer des paramètres de recherche supplémentaires pour faciliter la navigation.
+- Il existe une feuille de route des fonctionnalités prévues sur Patreon ! Si vous êtes curieux de savoir ce qui va finir par arriver, n’hésitez pas à le lire.
+- Ce logiciel est en fait un site Web local se faisant passer pour une application de bureau ! La technologie est folle !
+- Si jamais vous avez besoin d'un bon logiciel de création de cartes hors ligne, regardez Wonderdraft et Dungeondraft de Megasploot !- L'adorable petit dragon arcanique que vous avez peut-être vu en utilisant l'application s'appelle Fantasia et elle est la mascotte officielle de FA !
+- Si jamais vous avez envie de sponsoriser le développement, il y a Patreon. Si vous ne pouvez pas ou ne voulez pas le faire, c'est très bien aussi : amusez-vous simplement avec l'application et créez quelque chose de cool avec !
+- AVIS DE NON-RESPONSABILITÉ : Aucune créature magique n'a été blessée lors de la création de ce logiciel.

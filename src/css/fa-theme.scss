@@ -1,0 +1,63 @@
+@use './app.palette.scss' as *;
+
+/* Default theme token values. Custom app CSS may override any --fa-color-* on :root or body. */
+
+:root {
+  --fa-color-accent: #{$accent};
+  --fa-color-black: #{$black};
+  --fa-color-brand-discord: #{$brand-discord};
+  --fa-color-brand-patreon: #{$brand-patreon};
+  --fa-color-brand-reddit: #{$brand-reddit};
+  --fa-color-code-token-background: #{$codeToken-background};
+  --fa-color-dark: #{$dark};
+  --fa-color-dark-lighter: #{$dark-lighter};
+  --fa-color-dark-middle: #{$dark-middle};
+  --fa-color-dark-page: #{$dark-page};
+  --fa-color-dialog-rim-cyan: #{$dialog-rim-cyan};
+  --fa-color-dialog-rim-cyan-bright: #{$dialog-rim-cyan-bright};
+  --fa-color-dialog-rim-cyan-deep: #{$dialog-rim-cyan-deep};
+  --fa-color-fantasy-dark: #{$fantasy-dark};
+  --fa-color-fantasy-dark-light: #{$fantasy-dark-light};
+  --fa-color-fantasy-medium: #{$fantasy-medium};
+  --fa-color-gold-muted-border: #{$gold-muted-border-raw};
+  --fa-color-grey: #{$grey};
+  --fa-color-grey-lighter: #{$grey-lighter};
+  --fa-color-hierarchy-tree-connector: #{$hierarchy-tree-connector};
+  --fa-color-hierarchy-tree-open-icon: #{$hierarchy-tree-open-icon};
+  --fa-color-hierarchy-tree-order-number-badge: #{$hierarchy-tree-order-number-badge};
+  --fa-color-icon-spellcheck-refresh: #{$icon-spellcheck-refresh};
+  --fa-color-info: #{$info};
+  --fa-color-light-background: #{$light-background};
+  --fa-color-negative: #{$negative};
+  --fa-color-neutral-border: #{$neutral-border};
+  --fa-color-positive: #{$positive};
+  --fa-color-primary: #{$primary};
+  --fa-color-primary-bright: #{$primary-bright};
+  --fa-color-scrollbar-thumb: #{$scrollbar-thumb-raw};
+  --fa-color-scrollbar-thumb-hover: #{$scrollbar-thumb-hover-raw};
+  --fa-color-scrollbar-track: transparent;
+  --fa-color-secondary: #{$secondary};
+  --fa-color-select-background-dark: #{$select-background-dark};
+  --fa-color-select-background-light: #{$select-background-light};
+  --fa-color-select-text: #{$select-text};
+  --fa-color-surface-error: #{$surface-error};
+  --fa-color-text-checkbox-disabled: #{$text-checkbox-disabled};
+  --fa-color-text-checkbox-idle: #{$text-checkbox-idle};
+  --fa-color-text-danger-emphasis: #{$text-danger-emphasis};
+  --fa-color-text-icon-help: #{$text-icon-help};
+  --fa-color-text-keybind-dim: #{$text-keybind-dim};
+  --fa-color-text-keybind-hint: #{$text-keybind-hint};
+  --fa-color-text-label: #{$text-label};
+  --fa-color-text-menu-separator: #{$text-menu-separator};
+  --fa-color-text-muted: #{$text-muted};
+  --fa-color-text-placement-nickname-highlight: #{$text-placement-nickname-highlight};
+  --fa-color-text-status-queued: #{$text-status-queued};
+  --fa-color-text-workspace-row: #{$text-workspace-row};
+  --fa-color-toggle-moon-silver: #{$toggle-moon-silver};
+  --fa-color-tooltip-background: #{$info};
+  --fa-color-tooltip-text: #{$tooltip-text};
+  --fa-color-warning: #{$warning};
+  --fa-color-white: #{$white};
+  /* Distinct from --fa-color-*: textarea ink; Custom App CSS help panel lists --fa-color-* only. */
+  --fa-content-fields-text-color: #{$content-fields-text-color};
+}

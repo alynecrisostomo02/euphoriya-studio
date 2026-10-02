@@ -1,0 +1,84 @@
+@use 'sass:color';
+@use 'sass:string';
+
+/* Quasar SCSS: app color source (see project-scss.mdc). Re-exported via quasar.variables.scss.
+ * Runtime theming: matching --fa-color-* tokens are declared on :root in fa-theme.scss; override in Custom app CSS.
+ * Use fa-v for properties that should respect those variables at paint time. */
+
+/* QUASAR COLORS - GENERAL */
+$accent: #f5f5f5;
+$dark: #1b333e;
+$dark-lighter: #194456;
+$dark-middle: #183e4d; /* Between $dark and $dark-lighter; app header + window controls chrome */
+$dark-page: #303742;
+/* Fantasy dialog card shells (darker than $dark). */
+$fantasy-dark: #152229;
+/* $fantasy-dark +10% lightness, then −25% — fantasy submenu panels. */
+$fantasy-dark-light: color.scale(
+  color.scale($fantasy-dark, $lightness: 10%),
+  $lightness: -25%
+);
+/* $dark-lighter darkened by same HSL lightness drop as $dark → $fantasy-dark (≈ -5.294%). */
+$fantasy-medium: #133341;
+
+$primary: #d7ac47;
+$primary-bright: #ffd673;
+$secondary: #f75746;
+
+$negative: #ff4040;
+$positive: #128262;
+$info: #f7eeda;
+$warning: #ffb939;
+
+$light-background: #ede4d0;
+$gold-muted-border-raw: color.scale($primary, $saturation: -35%, $lightness: 14%);
+$scrollbar-thumb-raw: color.adjust($dark, $lightness: 28%);
+$scrollbar-thumb-hover-raw: color.adjust($dark, $lightness: 48%);
+
+/* APP COLORS - SHARED (single home for shared literals; @use this file in partials) */
+$white: #fff;
+$black: #000;
+$grey: #d4d0c9;
+$grey-lighter: #dde4e4;
+$brand-discord: #7289da;
+$brand-patreon: #ff424d;
+$brand-reddit: #ff4500;
+$codeToken-background: #366c82;
+$dialog-rim-cyan: #59a5b3;
+$dialog-rim-cyan-bright: #79c8d5;
+$dialog-rim-cyan-deep: color.scale($dialog-rim-cyan, $lightness: -52%); /* Extended top bloom (darker teal) */
+$neutral-border: #c8c8c8;
+$select-background-dark: #bb3b32;
+$select-background-light: #aa2a21;
+$select-text: #eedbb0;
+$surface-error: #f7eeda;
+/* QToggle moon pill (PoC 03): silver track rim + off thumb. */
+$toggle-moon-silver: #5e6a72;
+
+/* APP COLORS - SEMANTIC TEXT & ACCENTS
+ * Shapes and shade roles previously expressed as Quasar Material text-* (grey-5, red-12, etc.).
+ * Exposed on :root as --fa-color-* in fa-theme.scss; use globals/faSemanticText.scss helper classes.
+ * Textarea ink is --fa-content-fields-text-color (not --fa-color-*) — see fa-theme.scss. */
+$content-fields-text-color: #dcdcdc;
+$hierarchy-tree-connector: color.change($primary, $alpha: 0.35);
+$hierarchy-tree-open-icon: #9e9e9e;
+$hierarchy-tree-order-number-badge: #374540;
+$icon-spellcheck-refresh: #e53935;
+$text-checkbox-disabled: #b0bec5;
+$text-checkbox-idle: #eceff1;
+$text-danger-emphasis: #ff4c4c;
+$text-icon-help: #78909b;
+$text-keybind-dim: #455a64;
+$text-keybind-hint: #78909c;
+$text-label: #e0e0e0;
+$text-menu-separator: #78909c;
+$text-muted: #9e9e9e;
+$text-placement-nickname-highlight: #7bbdd5;
+$text-status-queued: #2196f3;
+$text-workspace-row: #dcdcdc;
+$tooltip-text: #453426; /* Parchment tooltip ink (sepia) */
+
+/// Pairs with --fa-color-#{$token} on :root (see fa-theme.scss). $value must stay a real color for Sass color.* APIs elsewhere.
+@function fa-v($token, $value) {
+  @return string.unquote("var(--fa-color-#{$token}, #{$value})");
+}

@@ -1,0 +1,15 @@
+{
+  "extends": "./.quasar/tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  },
+  "exclude": [
+    "dist",
+    ".quasar",
+    "node_modules",
+    ".storybook-workspace/storybook-static",
+    "**/*.stories.ts"
+  ]
+}

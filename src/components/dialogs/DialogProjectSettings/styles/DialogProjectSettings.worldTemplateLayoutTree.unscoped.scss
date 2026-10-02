@@ -1,0 +1,72 @@
+@use './variables' as *;
+@use '../../../../css/globals/faHeTreeSlotChrome.mixin.scss' as heTreeSlot;
+@use '../../../../css/globals/faHeTreeSlotChrome.variables.scss' as *;
+
+.dialogProjectSettingsWorldTemplateLayoutTreeHost {
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutTree {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  width: 100%;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--group),
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--template) {
+  cursor: $faVerticalDraggableTabs-tab-cursor-default;
+
+  &:active {
+    cursor: $faVerticalDraggableTabs-tab-cursor-active !important;
+  }
+}
+
+/*
+ * Chrome on the node (inside he-tree indent padding), not .tree-node —
+ * otherwise hover box spans the indent gutter.
+ */
+.dialogProjectSettingsWorldTemplateLayoutTreeNode--group,
+.dialogProjectSettingsWorldTemplateLayoutTreeNode--template {
+  @include heTreeSlot.fa-he-tree-slot-chrome-idle;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--group):hover .dialogProjectSettingsWorldTemplateLayoutTreeNode--group,
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--template):hover .dialogProjectSettingsWorldTemplateLayoutTreeNode--template,
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--group):active .dialogProjectSettingsWorldTemplateLayoutTreeNode--group,
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--template):active .dialogProjectSettingsWorldTemplateLayoutTreeNode--template {
+  @include heTreeSlot.fa-he-tree-slot-chrome($faHeTreeSlotChrome-hoverStrength);
+}
+
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--group):hover,
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--template):hover,
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--group):active,
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node:has(.dialogProjectSettingsWorldTemplateLayoutTreeNode--template):active {
+  .dialogProjectSettingsWorldTemplateLayoutTreeNode > .q-focus-helper {
+    opacity: 0 !important;
+  }
+}
+
+.dialogProjectSettingsWorldTemplateLayoutTree--listDragging {
+  .dialogProjectSettingsWorldTemplateLayoutTreeNode--group,
+  .dialogProjectSettingsWorldTemplateLayoutTreeNode--template {
+    cursor: $faVerticalDraggableTabs-tab-cursor-default;
+  }
+
+  .dialogProjectSettingsWorldTemplateLayoutTreeNode > .q-focus-helper {
+    opacity: 0 !important;
+  }
+}
+
+.dialogProjectSettingsWorldTemplateLayoutTree .he-tree-drag-placeholder {
+  @include heTreeSlot.fa-he-tree-slot-chrome(1);
+
+  min-height: $dialogProjectSettings-worldTemplateLayout-treeNode-minHeight;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutTree .tree-node {
+  align-items: center;
+  width: 100%;
+}

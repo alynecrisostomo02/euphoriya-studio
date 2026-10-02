@@ -1,0 +1,68 @@
+import type { Meta, StoryObj } from '@storybook/vue3-vite'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
+
+import { FA_KEYBINDS_STORE_DEFAULTS } from 'app/src-electron/mainScripts/keybinds/keybinds_managerDefaults'
+import { S_FaKeybinds } from 'app/src/stores/S_FaKeybinds'
+import L_helpInfo from 'app/i18n/en-US/components/globals/AppControlMenus/L_helpInfo'
+
+import AppControlMenus from '../AppControlMenus.vue'
+
+const meta = {
+  title: 'Components/globals/AppControlMenus',
+  component: AppControlMenus,
+  tags: ['autodocs'],
+  args: {
+    embedDialogs: false
+  },
+  parameters: {
+    docs: {
+      story: {
+        inline: false,
+        iframeHeight: '320px'
+      },
+      description: {
+        component:
+          'Top menu composition: four `AppControlSingleMenu` groups (**Project**, **Content**, **App controls**, **Help**) from `_data/` builders. **Project** lists **Create new project**, then **Load existing project** and **Load Recent Project**, then **Show Project Dashboard**, then **Toggle Project Noteboard**, **Custom Project CSS**, and **Project Settings**, then **Advanced Project Tools** (merge / convert submenu), with separators between those groups. **Content** lists Quick-Add, Quick-Search, Mass Delete, and Export Project / Documents (last row); **App controls** lists **Toggle App Noteboard**, **Toggle Hierarchical Tree**, custom **CSS**, keybinds, App Settings, then **Import / Export App Configuration** (final row below a separator). Those rows may set `keybindCommandId` for live shortcut hints when `S_FaKeybinds.snapshot` is populated (**Help** includes **Action Monitor** and **Toggle Developer Tools** hints when defaults load). Set `embedDialogs` true to mount markdown and settings dialogs used by menu triggers (they stay closed until an action runs).'
+      }
+    }
+  }
+} satisfies Meta<typeof AppControlMenus>
+
+export default meta
+
+export const Default: StoryObj<typeof meta> = {}
+
+export const CompositionProductionMenuContract: StoryObj<typeof meta> = {
+  name: 'States/CompositionProductionMenuContract',
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getAllByRole('button').length).toBeGreaterThan(0)
+    await expect(canvasElement.querySelectorAll('[data-test-menu-any="appControlMenus-anyMenu"]').length).toBe(4)
+
+    const keybinds = S_FaKeybinds()
+    keybinds.snapshot = {
+      platform: 'win32',
+      store: { ...FA_KEYBINDS_STORE_DEFAULTS }
+    }
+
+    await userEvent.click(canvas.getByRole('button', { name: L_helpInfo.title }))
+    await waitFor(async () => {
+      const hints = document.body.querySelectorAll('[data-test-locator="AppControlSingleMenu-menuItem-keybind"]')
+      await expect(hints.length).toBeGreaterThan(0)
+    })
+  }
+}
+
+export const WithEmbeddedDialogs: StoryObj<typeof meta> = {
+  name: 'States/WithEmbeddedDialogs',
+  args: {
+    embedDialogs: true
+  },
+  parameters: {
+    docs: {
+      story: {
+        iframeHeight: '420px'
+      }
+    }
+  }
+}

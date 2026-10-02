@@ -1,0 +1,56 @@
+---
+description: FaIconPickerInput reusable element and faIcons catalog pipeline
+globs: "src/components/elements/FaIconPickerInput/**/*,src/scripts/faIcons/**/*,.utility-scripts/generateFaQuasarIconCatalogs.mjs,types/I_faIconPickerInput.ts"
+alwaysApply: false
+---
+
+# FaIconPickerInput and icon catalogs
+
+## Reuse the shared element
+
+Renderer **q-icon name** field (template icon, document type icon, future custom fields) → **`FaIconPickerInput`** from **`src/components/elements/FaIconPickerInput/`** with **`v-model`** + required **`test-locator`**. **No** duplicate **`q-menu`** + virtual-scroll icon grids in feature folders.
+
+Playbook: [fantasia-icon-picker skill](../skills/fantasia-icon-picker/SKILL.md).
+
+## Stored value contract
+
+- Persist **exact q-icon string** Quasar expects on **`q-icon`** / **`q-btn icon=`** (e.g. **`mdi-file-outline`**, **`fa-solid fa-dragon`**, **`person`**).
+- Empty model shows **`FA_ICON_PICKER_EMPTY_PLACEHOLDER_ICON`** (**`mdi-file-outline`**) in trigger only; emit **`''`** when cleared unless feature defines otherwise.
+- Icon sets at runtime aligned with **`quasar.config.ts`** **`extras`** + **`FA_ICON_PICKER_PACK_IDS`** in **`types/I_faIconPickerInput.ts`**.
+
+## Catalog pipeline
+
+| Piece | Role |
+| --- | --- |
+| **`yarn generate:icon-catalogs`** | Regenerate **`src/scripts/faIcons/catalogs/*.catalog.json`** from **`@quasar/extras`** |
+| **`faIconPickerCatalogLazyLoadWiring.ts`** | Dynamic **`import()`** of JSON per pack |
+| **`faIconPickerMergedCatalogLoadWiring.ts`** | Parallel load + merge for picker menu |
+| **`functions/faIconPickerCatalogFilter.ts`** | Search filter + row chunking for **`QVirtualScroll`** |
+| **`types/I_faIconPickerInput.ts`** | Pack ids, **`FA_ICON_PICKER_ICONS_PER_ROW`**, **`FA_ICON_PICKER_VIRTUAL_ROW_HEIGHT_PX`** |
+
+After **`@quasar/extras`** upgrades or icon-set changes: run **`yarn generate:icon-catalogs`**, commit catalog JSON — no hand-maintained large lists.
+
+## Layout constants (TS ↔ SCSS)
+
+**`FA_ICON_PICKER_ICONS_PER_ROW`** (16) + **`FA_ICON_PICKER_VIRTUAL_ROW_HEIGHT_PX`** (52) must match **`styles/_variables.scss`** (**`$faIconPickerInput-iconsPerRow`**, **`$faIconPickerInput-virtualRow-height`**) + **`FaIconPickerInputMenuPanel`** **`:virtual-scroll-item-size`**.
+
+## Menu grid styling
+
+- List cells: **flat** **`q-btn`** (**`dense`**, **`flat`**) — **not** **`round`** — wide glyphs not clipped.
+- **`overflow: visible`** on row/cell when adjusting layout; **`place-items: center`** on icon grid row.
+
+## i18n and Storybook
+
+- Strings: **`i18n/<locale>/components/elements/FaIconPickerInput/`**, keyed **`faIconPickerInput`** in **`index.ts`**.
+- Extend copy → add matching imports to **`.storybook-workspace/.storybook/mocks/externalFileLoader.ts`**.
+
+## Two-level architecture
+
+- **`src/scripts/faIcons/functions/`** — level-1 pure helpers only.
+- **`faIconPickerInput_manager.ts`** — wiring-only manager for **`useFaIconPickerInput`**.
+- Feature composable factory: **`faIconPickerInputComposableWiring.ts`** (not under **`functions/`**).
+
+## Tests
+
+- Extend **`FaIconPickerInput`** Vitest + **`src/scripts/faIcons`** **`_tests/`** on catalog/menu behavior changes.
+- User flows: Playwright via **`data-test-locator`**, **`data-test-icon-name`**, menu search + cell click (**`DialogProjectSettings.playwright.test.ts`**).

@@ -1,0 +1,178 @@
+import { beforeEach, expect, test, vi } from 'vitest'
+
+import { FA_EXTERNAL_LINKS_IPC } from 'app/src-electron/electron-ipc-bridge'
+
+const mocks = vi.hoisted(() => {
+  const ipcMainHandleMock = vi.fn()
+  const openExternalMock = vi.fn(() => Promise.resolve())
+  const assertMainWindowSenderMock = vi.fn(() => true)
+
+  return {
+    assertMainWindowSenderMock,
+    ipcMainHandleMock,
+    openExternalMock
+  }
+})
+
+vi.mock('electron', () => {
+  return {
+    ipcMain: {
+      handle: mocks.ipcMainHandleMock
+    },
+    shell: {
+      openExternal: mocks.openExternalMock
+    }
+  }
+})
+
+vi.mock('app/src-electron/mainScripts/ipcManagement/assertMainWindowSenderWiring', () => {
+  return {
+    assertMainWindowSender: mocks.assertMainWindowSenderMock
+  }
+})
+
+beforeEach(async () => {
+  vi.resetModules()
+  mocks.ipcMainHandleMock.mockReset()
+  mocks.openExternalMock.mockReset()
+  mocks.openExternalMock.mockImplementation(() => Promise.resolve())
+  mocks.assertMainWindowSenderMock.mockReset()
+  mocks.assertMainWindowSenderMock.mockReturnValue(true)
+})
+
+async function handlerFor (
+  channel: string
+): Promise<(event: unknown, url: unknown) => Promise<void>> {
+  const call = mocks.ipcMainHandleMock.mock.calls.find((c) => c[0]! === channel)
+  expect(call).toBeDefined()
+
+  return call?.[1]! as (event: unknown, url: unknown) => Promise<void>
+}
+
+/**
+ * registerFaExternalLinksIpc
+ * Registers openExternalAsync once.
+ */
+test('Test that registerFaExternalLinksIpc registers openExternalAsync channel once', async () => {
+  const { registerFaExternalLinksIpc } = await import('../registerFaExternalLinksIpc')
+  registerFaExternalLinksIpc()
+
+  expect(mocks.ipcMainHandleMock).toHaveBeenCalledOnce()
+  expect(mocks.ipcMainHandleMock.mock.calls[0]![0]!).toBe(
+    FA_EXTERNAL_LINKS_IPC.openExternalAsync
+  )
+})
+
+/**
+ * registerFaExternalLinksIpc
+ * Second registration is a no-op.
+ */
+test('Test that registerFaExternalLinksIpc skips duplicate registration', async () => {
+  const { registerFaExternalLinksIpc } = await import('../registerFaExternalLinksIpc')
+  registerFaExternalLinksIpc()
+  const afterFirst = mocks.ipcMainHandleMock.mock.calls.length
+  registerFaExternalLinksIpc()
+  expect(mocks.ipcMainHandleMock.mock.calls.length).toBe(afterFirst)
+})
+
+/**
+ * registerFaExternalLinksIpc
+ * Handler opens allowed external https URL in shell.
+ */
+test('Test that registerFaExternalLinksIpc opens external https URL', async () => {
+  const { registerFaExternalLinksIpc } = await import('../registerFaExternalLinksIpc')
+  registerFaExternalLinksIpc()
+
+  const handler = await handlerFor(FA_EXTERNAL_LINKS_IPC.openExternalAsync)
+  await handler({}, 'https://www.example.com/')
+
+  expect(mocks.openExternalMock).toHaveBeenCalledWith('https://www.example.com/')
+})
+
+/**
+ * registerFaExternalLinksIpc
+ * Non-string url is ignored.
+ */
+test('Test that registerFaExternalLinksIpc ignores non-string url', async () => {
+  const { registerFaExternalLinksIpc } = await import('../registerFaExternalLinksIpc')
+  registerFaExternalLinksIpc()
+
+  const handler = await handlerFor(FA_EXTERNAL_LINKS_IPC.openExternalAsync)
+  await handler({}, 123)
+
+  expect(mocks.openExternalMock).not.toHaveBeenCalled()
+})
+
+/**
+ * registerFaExternalLinksIpc
+ * Localhost URL is not opened (matches preload checkIfExternal rules).
+ */
+test('Test that registerFaExternalLinksIpc does not open localhost URL', async () => {
+  const { registerFaExternalLinksIpc } = await import('../registerFaExternalLinksIpc')
+  registerFaExternalLinksIpc()
+
+  const handler = await handlerFor(FA_EXTERNAL_LINKS_IPC.openExternalAsync)
+  await handler({}, 'http://localhost:3000/')
+
+  expect(mocks.openExternalMock).not.toHaveBeenCalled()
+})
+
+/**
+ * registerFaExternalLinksIpc
+ * IPv4 loopback is not opened.
+ */
+test('Test that registerFaExternalLinksIpc does not open 127.0.0.1 URL', async () => {
+  const { registerFaExternalLinksIpc } = await import('../registerFaExternalLinksIpc')
+  registerFaExternalLinksIpc()
+
+  const handler = await handlerFor(FA_EXTERNAL_LINKS_IPC.openExternalAsync)
+  await handler({}, 'http://127.0.0.1:8080/')
+
+  expect(mocks.openExternalMock).not.toHaveBeenCalled()
+})
+
+/**
+ * registerFaExternalLinksIpc
+ * RFC1918 private IPv4 is not opened.
+ */
+test('Test that registerFaExternalLinksIpc does not open private IPv4 URL', async () => {
+  const { registerFaExternalLinksIpc } = await import('../registerFaExternalLinksIpc')
+  registerFaExternalLinksIpc()
+
+  const handler = await handlerFor(FA_EXTERNAL_LINKS_IPC.openExternalAsync)
+  await handler({}, 'http://192.168.1.1/')
+
+  expect(mocks.openExternalMock).not.toHaveBeenCalled()
+})
+
+/**
+ * registerFaExternalLinksIpc
+ * shell.openExternal failures are logged without throwing.
+ */
+test('Test that registerFaExternalLinksIpc logs openExternal failures', async () => {
+  const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  mocks.openExternalMock.mockRejectedValueOnce(new Error('shell failed'))
+  const { registerFaExternalLinksIpc } = await import('../registerFaExternalLinksIpc')
+  registerFaExternalLinksIpc()
+
+  const handler = await handlerFor(FA_EXTERNAL_LINKS_IPC.openExternalAsync)
+  await handler({}, 'https://www.example.com/')
+
+  expect(errorSpy).toHaveBeenCalledWith('[faExternalLinks] openExternal failed', expect.any(Error))
+  errorSpy.mockRestore()
+})
+
+/**
+ * registerFaExternalLinksIpc
+ * Foreign sender is ignored before URL checks.
+ */
+test('Test that registerFaExternalLinksIpc ignores non-main-window sender', async () => {
+  mocks.assertMainWindowSenderMock.mockReturnValue(false)
+  const { registerFaExternalLinksIpc } = await import('../registerFaExternalLinksIpc')
+  registerFaExternalLinksIpc()
+
+  const handler = await handlerFor(FA_EXTERNAL_LINKS_IPC.openExternalAsync)
+  await handler({}, 'https://www.example.com/')
+
+  expect(mocks.openExternalMock).not.toHaveBeenCalled()
+})

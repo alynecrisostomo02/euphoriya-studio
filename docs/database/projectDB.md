@@ -1,0 +1,395 @@
+# `.faproject` SQLite schema and APIs
+
+User project = single SQLite **`.faproject`**. Main opens **`better-sqlite3`**, runs migrations, serves renderer via preload IPC. Canonical schema + module map.
+
+## Naming: `documents` table vs UI markdown documents
+
+SQLite **`documents`** = worldbuilding entities (world + optional template). ≠ help/license **markdown** from **`i18n/.../documents/*.md`** or **`T_documentName`** dialogs. Keep SQL/table copy separate from markdown dialog naming.
+
+## Schema version (`PRAGMA user_version`)
+
+Fresh files bootstrap to **v11**. Live upgrade ladder **v1→v11** ships. Pre-release flatten (squash to single bootstrap) separate — [fantasia-flatten-database-schemas](../../.cursor/skills/fantasia-flatten-database-schemas/SKILL.md).
+
+| Version | Contents |
+|---------|----------|
+| **0** | Uninitialized file (bootstrap target on first open/create). |
+| **1** | Full schema: **`project_data`** KV, worldbuilding **content tables** (**`worlds`** incl. **`color_palette`** + **`display_name_translations_json`**, **`document_templates`** incl. **`sort_order`**, **`world_appendix`**, **`icon`**, **`title_translations_json`** + **`title_singular_translations_json`** + **`world_appendix_translations_json`**, **`documents`** incl. **`tree_placement_id`** + **`tree_parent_document_id`** + **`tree_custom_sort_order`** + **`document_text_color`** + **`document_background_color`**, **`media`**, **`document_media`**, **`world_template_groups`** + **`world_template_placements`** layout incl. **`nickname`** + **`nickname_translations_json`** + **`nickname_singular_translations_json`** + **`display_name_translations_json`**, **`opened_documents`** singleton snapshot, **`document_last_opened`** MRU), default **world** seed on create. Idempotent **`applyFaProjectDocumentsHierarchySchemaPatch`** runs on every open at version **1** for legacy files missing hierarchy columns or still using pre-rename **`placement_id`** / **`parent_document_id`** / **`sort_order`** on **`documents`**; **`tree_custom_sort_order`** creation-time backfill runs **only when that column is first added**, not on re-apply. Idempotent **`applyFaProjectOpenedDocumentsSchemaV1`** creates **`opened_documents`** when missing on existing v1 files. Idempotent **`applyFaProjectDocumentLastOpenedSchemaPatch`** creates **`document_last_opened`** when missing. |
+| **2** | Adds **`documents.is_category`** (`INTEGER NOT NULL DEFAULT 0`, `CHECK (is_category IN (0, 1))`). Idempotent **`applyFaProjectDocumentCategorySchemaPatch`** runs on every open at version **2** for legacy files missing the column. Idempotent **`applyFaProjectWorldColorEmptyAllowedSchemaPatch`** rebuilds **`worlds`** when **`color`** CHECK still requires strict **`#RRGGBB`** (no empty), so optional empty world color can persist. Idempotent **`applyFaProjectDocumentAppearanceEmptyColorSchemaPatch`** rebuilds **`documents`** when appearance color CHECKs still reject empty string (NULL-or-hex only). |
+| **3** | Adds **`documents.is_finished`**, **`documents.is_minor`**, **`documents.is_dead`** (each `INTEGER NOT NULL DEFAULT 0`, `CHECK (… IN (0, 1))`). Idempotent **`applyFaProjectDocumentStatusFlagsSchemaPatch`** runs on every open at version **3** for legacy files missing any column. |
+| **4** | Adds **`documents.tree_order_number`** (`INTEGER NOT NULL DEFAULT -9007199254740991`, empty sentinel = **`Number.MIN_SAFE_INTEGER`**). Display-only hierarchy badge value; **does not** change sibling sort (**`tree_custom_sort_order`** only). Idempotent **`applyFaProjectDocumentTreeOrderNumberSchemaPatch`** runs on every open at version **4** for legacy files missing the column. |
+| **5** | Adds **`documents.extra_classes`** (`TEXT NOT NULL DEFAULT ''`, max length **512**). Space-separated HTML class list for **Custom Project CSS** targeting on the document workspace page. Idempotent **`applyFaProjectDocumentExtraClassesSchemaPatch`** runs on every open at version **5** for legacy files missing the column. |
+| **6** | Renames **worlds.color_pallete** → **worlds.color_palette** (ALTER TABLE … RENAME COLUMN). Idempotent when **color_palette** already present or **color_pallete** absent. Fresh bootstrap DDL uses **color_palette** directly. |
+| **7** | Adds per-world **`tags`** (`id`, `world_id`, `name`, timestamps) + **`document_tags`** M:N (`document_id`, `tag_id`, `sort_order`) with case-insensitive unique tag names per world. Idempotent **`applyFaProjectTagsSchemaPatch`** runs on every open at version **7**. Fresh bootstrap DDL includes both tables. |
+| **8** | Adds **`document_last_opened`** (`document_id` PK → **`documents(id)`** ON DELETE CASCADE, **`opened_at_ms`**) for Project overview MRU (newest first, max **50**). Idempotent **`applyFaProjectDocumentLastOpenedSchemaPatch`** runs on every open at version **8**. Fresh bootstrap DDL includes the table. |
+| **9** | Adds **`media.type`**, **`media.internal_type`**, **`media.external_type`**, **`media.external_link`**, **`media.internal_link`**, **`media.internal_embed`**, **`media.internal_is_project_included`**. Idempotent **`applyFaProjectMediaTypeColumnsSchemaPatch`** runs on every open (now at max **11** as well) for legacy files missing type/link/embed columns. Does **not** add the include column (dropped in **v10**). New + backfilled rows **`type = 'external'`**; TEXT empty **`'' NOT NULL DEFAULT ''`**; BLOB empty **NULL**. Per-column CHECKs only — no combo CHECKs. |
+| **10** | Rebuilds **`media`**: drops **`internal_is_project_included`**. **`internal_type`** CHECK is **`''`**, **`embedded`**, **`linked_outside`**, **`linked_in_project`**. Copies existing **`internal_type`** as-is (no **`linked`** → **`linked_outside`** map). Idempotent **`applyFaProjectMediaInternalTypeV10SchemaPatch`** rebuilds when the include column remains or sqlite_master still has the v9 **`IN ('', 'embedded', 'linked')`** CHECK. v10 rebuild stays v10-shaped (no **`external_embed`**). |
+| **11** | Rebuilds **`media`**: adds **`external_embed`** TEXT NOT NULL DEFAULT **`''`**. **`external_type`** CHECK is **`''`**, **`linked`**, **`embed`**. Copies **`external_embed`** when the column already exists, else **`''`**. Idempotent **`applyFaProjectMediaExternalEmbedV11SchemaPatch`** rebuilds when the column is missing or sqlite_master still has the v10 **`IN ('', 'linked')`** CHECK. Fresh bootstrap DDL is v11-shaped. |
+
+**Supported max:** **`FA_PROJECT_USER_VERSION_SUPPORTED_MAX = 11`** in **`faProjectDbMigrateWiring.ts`**.
+
+**Migration entry:** **`applyFaProjectMigrations(db, displayProjectName)`** — fresh files start at **0**, bootstrap to **v11** + seed a default **world** when empty; files at **v11** run idempotent patches only; files at **v10** migrate to **v11** then run patches; earlier versions climb **vN→…→v11** then run patches. Any other version is unsupported and throws. Older pre-release dev **.faproject** files must be recreated after a flatten.
+
+**Worlds vs document templates on create:** **`seedFaProjectDefaultWorldIfEmpty`** runs after bootstrap and inserts one default **world** when the table is empty. **Document templates are never auto-seeded** — a new **`.faproject`** may have zero **`document_templates`** rows until the user adds them in **Project Settings**.
+
+**DDL source:** **`src-electron/mainScripts/projectManagement/functions/faProjectDbSchemaDdl.ts`** (**`applyFaProjectProjectDataSchemaV1`**, **`applyFaProjectContentSchemaV1`** — single exec block with all content tables, layout tables, and indexes).
+
+**Pre-release flatten:** Dev may squash schema versions back to **1**; no upgrade for older local files — **`.cursor/skills/fantasia-flatten-database-schemas/SKILL.md`**.
+
+**Product ↔ SQL naming:** UI world name → **`display_name_translations_json`** on **`worlds`** (denormalized **`display_name`** cache for sort). Document template titles → **`title_translations_json`** (**plural**) + **`title_singular_translations_json`**; **`display_name`** on **`document_templates`** = write-through **en-US** plural title cache. Template **World appendix** → **`world_appendix_translations_json`** (denormalized **`world_appendix`** cache). Per-world template layout group labels → **`world_template_groups.display_name_translations_json`** (denormalized **`display_name`** cache). Placement nicknames → **`world_template_placements.nickname_translations_json`** (**plural**) + **`nickname_singular_translations_json`** (denormalized **`nickname`** cache from **en-US** plural resolution; empty active locale = use joined template title). Per-world template layout in **`world_template_groups`** + **`world_template_placements`**; each template at most once per world. **Project Settings** enforces invariant client-side before save (duplicate **`document_template_id`** placements block **Save settings** with validation chrome).
+
+## Table: `project_data` (key–value)
+
+| `option_name` | Role |
+|---------------|------|
+| **`project_name`** | Display name (also surfaced as project settings **`projectName`**) |
+| **`project_uuid`** | Stable logical project id (UUID string) |
+| **`project_noteboard_content`** | Project noteboard text |
+| **`project_noteboard_x`**, **`project_noteboard_y`**, **`project_noteboard_width`**, **`project_noteboard_height`** | Project noteboard frame (pixels) |
+| **`project_styling_content`** | Per-project custom CSS |
+| **`project_styling_x`**, **`project_styling_y`**, **`project_styling_width`**, **`project_styling_height`** | Project styling floating window frame |
+| **`sidebar_width`** | Workspace left sidebar width (pixels, integer) |
+| **`hierarchy_tree_ui_state`** | Workspace hierarchy tree expand/collapse + scroll JSON (`expandedNodeIds`, `scrollTopPx`) |
+| **`last_selected_world_id`** | Shared last world UUID for Quick-add / Quick-search (and future dialogs via allowlisted dialog UI pref IPC) |
+
+**Modules:** **`faProjectDataKvWiring.ts`**, **`faProjectSettingsPersistWiring.ts`**, **`faProjectNoteboardPersistWiring.ts`**, **`faProjectStylingPersistWiring.ts`**, **`faProjectSidebarPersistWiring.ts`**, **`faProjectHierarchyTreeUiStatePersistWiring.ts`**, **`faProjectDialogUiPrefPersistWiring.ts`**.
+
+## Content tables (schema version 1)
+
+PKs **TEXT UUID v4** on entity tables. Timestamps **`created_at_ms`** / **`updated_at_ms`** (Unix ms).
+
+### `worlds`
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `id` | TEXT PK | UUID |
+| `display_name` | TEXT | Denormalized canonical name cache (non-empty after save; **en-US** resolution) |
+| `display_name_translations_json` | TEXT | JSON keyed by interface language code; at least one non-empty locale required on save |
+| `color` | TEXT | Optional **`#RRGGBB`** hex; empty string allowed (UI falls back to theme primary); column default **empty** on insert without override; `CHECK (color = '' OR (length(color) = 7 AND substr(color, 1, 1) = '#'))` |
+| `color_palette` | TEXT | Semicolon-separated **`#RRGGBB`** hex list (max **2000** chars); default empty |
+| `sort_order` | INTEGER | Zero-based GUI order; new worlds append **`MAX(sort_order) + 1`** |
+| `created_at_ms`, `updated_at_ms` | INTEGER | |
+
+Index: **`idx_worlds_sort_order`**. New **`.faproject`** files receive one default world row whose **`display_name`** matches the project name at create time.
+
+### `document_templates`
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `id` | TEXT PK | UUID |
+| `display_name` | TEXT | Denormalized canonical title cache (non-empty after save; **en-US** plural resolution) |
+| `title_translations_json` | TEXT | JSON object keyed by interface language code (**plural** forms); at least one non-empty locale required on save |
+| `title_singular_translations_json` | TEXT | JSON object keyed by interface language code (**singular** forms); optional on save |
+| `sort_order` | INTEGER | Zero-based GUI order from Project Settings draggable list |
+| `world_appendix` | TEXT | Denormalized canonical appendix cache (max **500** chars; default empty) |
+| `world_appendix_translations_json` | TEXT | JSON keyed by interface language code; empty object when no appendix copy |
+| `icon` | TEXT | Optional icon name string (max **128** chars; default empty) |
+| `created_at_ms`, `updated_at_ms` | INTEGER | |
+
+Index: **`idx_document_templates_sort_order`**. Unlike **worlds**, new projects **do not** receive a default template row at create time.
+
+### `media`
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `id` | TEXT PK | UUID |
+| `display_name` | TEXT | Non-empty |
+| `type` | TEXT NOT NULL DEFAULT `'external'` | **`external`** or **`internal`**. New + v9 backfill **`external`**. |
+| `internal_type` | TEXT NOT NULL DEFAULT `''` | **`''`**, **`embedded`**, **`linked_outside`**, or **`linked_in_project`**. v9 used **`linked`**; v10 copies as-is (legacy **`linked`** fails the new CHECK if any such row existed). |
+| `external_type` | TEXT NOT NULL DEFAULT `''` | **`''`**, **`linked`**, or **`embed`**. |
+| `external_link` | TEXT NOT NULL DEFAULT `''` | Path or URL; empty **`''`**. Unused when **`external_type`** is **`embed`** (value kept). |
+| `external_embed` | TEXT NOT NULL DEFAULT `''` | iframe / embed HTML body; empty **`''`**. v11+. |
+| `internal_link` | TEXT NOT NULL DEFAULT `''` | Path or URL; empty **`''`**. |
+| `internal_embed` | BLOB, nullable | Bytes or **NULL** (empty). SQL name **`internal_embed`**. |
+| `created_at_ms`, `updated_at_ms` | INTEGER | |
+
+Create/update IPC (`create-media-async` / `update-media-async`) still **`displayName`** only; SQL defaults fill type/link/embed on those paths. **`upsert-media-async`** inserts or updates by **`id`** (title, type, subtypes, links, **`external_embed`**). Does not write **`internal_embed`** blob. **`list-media-async`** / **`listFaProjectMedia`**: **ORDER BY created_at_ms DESC, id DESC** (newest add first; not **`updated_at_ms`**, not **`display_name`**).
+
+### `documents`
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `id` | TEXT PK | UUID |
+| `world_id` | TEXT FK → `worlds.id` | **ON DELETE RESTRICT** |
+| `template_id` | TEXT FK → `document_templates.id`, nullable | **ON DELETE RESTRICT** |
+| `tree_placement_id` | TEXT FK → `world_template_placements.id`, nullable | **ON DELETE RESTRICT**; denormalized anchor for hierarchy queries and DnD fence |
+| `tree_parent_document_id` | TEXT FK → `documents.id`, nullable | **ON DELETE CASCADE**; NULL = top-level under placement |
+| `tree_custom_sort_order` | INTEGER | Sibling order under same parent (or under placement when `tree_parent_document_id` NULL); default **0** |
+| `display_name` | TEXT | |
+| `document_text_color` | TEXT, nullable | `#RRGGBB`, empty string, or NULL (cleared UI → NULL; CHECK also allows `''`) |
+| `document_background_color` | TEXT, nullable | `#RRGGBB`, empty string, or NULL (cleared UI → NULL; CHECK also allows `''`) |
+| `is_category` | INTEGER NOT NULL DEFAULT 0 | `CHECK (is_category IN (0, 1))`; category-mode document flag for tree icon + placement counters |
+| `is_finished` | INTEGER NOT NULL DEFAULT 0 | `CHECK (is_finished IN (0, 1))`; finished document flag (workspace toggle; no hide-empty-fields behavior in this pass) |
+| `is_minor` | INTEGER NOT NULL DEFAULT 0 | `CHECK (is_minor IN (0, 1))`; minor document flag (muted tree/tab label when no custom text color) |
+| `is_dead` | INTEGER NOT NULL DEFAULT 0 | `CHECK (is_dead IN (0, 1))`; dead/gone/destroyed flag (dagger prefix + strikethrough on tree/tab label) |
+| `tree_order_number` | INTEGER NOT NULL DEFAULT -9007199254740991 | Display-only order badge in hierarchy tree; empty UI → sentinel **`Number.MIN_SAFE_INTEGER`**; does **not** affect sibling sort |
+| `extra_classes` | TEXT NOT NULL DEFAULT '' | Space-separated HTML class list applied on the document workspace page; max length **512**; styled via **Custom Project CSS** |
+| `created_at_ms`, `updated_at_ms` | INTEGER | |
+
+**World → documents (1:N):** enforced by required **`world_id`**. Deleting a **world** that still has **documents** fails at the database (**RESTRICT**).
+
+**Document → template (N:1):** optional **`template_id`**. Deleting a **template** referenced by documents fails (**RESTRICT**).
+
+**Document hierarchy (within placement):** **`tree_parent_document_id`** + **`tree_custom_sort_order`**; **`tree_placement_id`** must match the placement for the document's world/template assignment. Cross-placement moves are rejected in main.
+
+**Create IPC:** **`create-document-async`** accepts optional client **`id`**; main uses it when no row exists, otherwise assigns a fresh UUID. Supports promoting a temporary opened tab id on first save.
+
+### `document_media` (M:N)
+
+| Column | Notes |
+|--------|--------|
+| `document_id` | FK → `documents.id` **ON DELETE CASCADE** |
+| `media_id` | FK → `media.id` **ON DELETE CASCADE** |
+| PRIMARY KEY (`document_id`, `media_id`) | |
+
+### `tags` (per-world labels)
+
+| Column | Notes |
+|--------|--------|
+| `id` | TEXT PK (UUID) |
+| `world_id` | FK → **`worlds.id`** **ON DELETE CASCADE** |
+| `name` | Non-empty trimmed display name; **UNIQUE (`world_id`, `name` COLLATE NOCASE)** |
+| `created_at_ms`, `updated_at_ms` | INTEGER |
+
+Empty tags are not kept: after document save/delete (or explicit tag delete), tags with zero **`document_tags`** rows are removed.
+
+### `document_tags` (M:N + per-tag order)
+
+| Column | Notes |
+|--------|--------|
+| `document_id` | FK → `documents.id` **ON DELETE CASCADE** |
+| `tag_id` | FK → `tags.id` **ON DELETE CASCADE** |
+| `sort_order` | INTEGER — document order under that tag (DnD within one tag only) |
+| PRIMARY KEY (`document_id`, `tag_id`) | |
+
+Index: **`idx_document_tags_tag_id_sort`**.
+
+### `world_template_groups`
+
+| Column | Notes |
+|--------|--------|
+| `id` | TEXT PK (UUID) |
+| `world_id` | FK → **`worlds.id`** **ON DELETE CASCADE** |
+| `display_name` | Denormalized canonical group label cache (non-empty after save; **en-US** resolution) |
+| `display_name_translations_json` | TEXT | JSON keyed by interface language code; at least one non-empty locale required on save |
+| `root_sort_order` | Position among root-level groups and root-level template placements |
+| `created_at_ms`, `updated_at_ms` | INTEGER |
+
+Index: **`idx_world_template_groups_world_root_sort`**.
+
+### `world_template_placements`
+
+| Column | Notes |
+|--------|--------|
+| `id` | TEXT PK (UUID placement id) |
+| `world_id` | FK → **`worlds.id`** **ON DELETE CASCADE** |
+| `document_template_id` | FK → **`document_templates.id`** **ON DELETE CASCADE** |
+| `group_id` | NULL for root placement; else FK → **`world_template_groups.id`** **ON DELETE SET NULL** |
+| `root_sort_order` | Set when **`group_id`** is NULL |
+| `group_sort_order` | Set when **`group_id`** is not NULL |
+| `nickname` | Denormalized canonical nickname cache (max **120** chars; default empty; **en-US** resolution) |
+| `nickname_translations_json` | TEXT | JSON keyed by interface language code (**plural** nickname overrides); empty object when no nickname overrides |
+| `nickname_singular_translations_json` | TEXT | JSON keyed by interface language code (**singular** nickname overrides); optional on save |
+| `created_at_ms`, `updated_at_ms` | INTEGER |
+
+**Constraints:** **`UNIQUE (world_id, document_template_id)`**; CHECK enforces exactly one of **`root_sort_order`** / **`group_sort_order`** matching **`group_id`**.
+
+Indexes: **`idx_world_template_placements_world_root_sort`**, **`idx_world_template_placements_group_sort`**, **`idx_world_template_placements_document_template_id`**.
+
+**Pre-release history:** A legacy **`world_document_templates`** M:N junction existed in flattened-away schema revisions; it is gone and existing links are not migrated.
+
+Indexes: **`idx_documents_world_id`**, **`idx_documents_template_id`**, **`idx_documents_tree_placement_parent_sort`**, **`idx_document_media_media_id`**, **`idx_tags_world_id_name_nocase`**, **`idx_tags_world_id`**, **`idx_document_tags_tag_id_sort`**, **`idx_document_last_opened_opened_at_ms`**, **`idx_worlds_sort_order`**, **`idx_document_templates_sort_order`**.
+
+### `document_last_opened` (MRU for Project overview)
+
+| Column | Notes |
+|--------|--------|
+| `document_id` | TEXT PK, FK → **`documents.id`** **ON DELETE CASCADE** |
+| `opened_at_ms` | INTEGER Unix ms — last open time |
+
+Retains newest **50** rows (`FA_PROJECT_DOCUMENT_LAST_OPENED_MAX`). **Modules:** **`faProjectDocumentLastOpenedQueryWiring.ts`**, **`faProjectDocumentLastOpenedPersistWiring.ts`**, **`faProjectDocumentDistributionQueryWiring.ts`**, **`faProjectDocumentLastOpenedSchemaPatchWiring.ts`**.
+
+### `opened_documents`
+
+Singleton workspace tab snapshot (one row, **`id = 1`**).
+
+| Column | Notes |
+|--------|--------|
+| `id` | INTEGER PK, CHECK **`id = 1`** |
+| `snapshot_json` | TEXT JSON: **`schemaVersion`** (**1** legacy, **2** current), **`activeDocumentId`**, ordered **`tabs`**. Each tab: document id, **`persistenceState`** (**`persisted`** or **`temporary`**), labels, template icon, name draft, saved baseline, unsaved flag, **`editState`** preview/edit mode. Temporary tabs also store **`worldId`**, **`templateId`**, optional **`parentDocumentId`**, and optional **`temporaryParentResolveDocumentIds`** (ancestor chain for parent resolve at first save) until first save creates the SQLite document row. Legacy v1 snapshots without **`persistenceState`** hydrate as **`persisted`**. |
+| `updated_at_ms` | INTEGER Unix ms |
+
+**Modules:** **`faOpenedDocumentsPersistWiring.ts`**. Renderer store **`S_FaOpenedDocuments`** debounces writes (**500ms**) via **`FA_PROJECT_MANAGEMENT_IPC`**.
+
+## Relationships (summary)
+
+| Relationship | Implementation |
+|--------------|----------------|
+| World → documents | `documents.world_id` |
+| Document → template | `documents.template_id` (nullable) |
+| Document ↔ media | `document_media` |
+| World → tags | `tags.world_id` |
+| Document ↔ tags | `document_tags` (+ per-tag `sort_order`) |
+| Document → last opened | `document_last_opened` (MRU, max 50) |
+| World template layout | **`world_template_groups`** + **`world_template_placements`** (one placement per template per world) |
+| Template → field definitions (planned) | `template_fields` — see [templateCustomFields.md](templateCustomFields.md) |
+| Document → custom field values (planned) | `document_field_values`, link tables — see [templateCustomFields.md](templateCustomFields.md) |
+
+**Link helpers (FK assignment):** **`setFaProjectDocumentWorld`**, **`setFaProjectDocumentTemplate`** in **`faProjectDocumentsPersistWiring.ts`**.
+
+## Planned extensions (after current max)
+
+Template custom fields (defs, typed values, orphan retention) in [templateCustomFields.md](templateCustomFields.md); future migration (**v12+**); table detail lands here when shipped.
+
+## Main-process module map
+
+```
+src-electron/mainScripts/projectManagement/
+  faProjectDbMigrateWiring.ts          # migrations v1→v11 + bootstrap, metadata read helpers
+  faProjectDatabaseEnsureConnectedWiring.ts  # runWithFaProjectDatabase* (required entry)
+  faProjectDataKvWiring.ts
+  faProjectSettingsPersistWiring.ts
+  faProjectNoteboardPersistWiring.ts
+  faProjectStylingPersistWiring.ts
+  faProjectHierarchyTreeUiStatePersistWiring.ts
+  functions/
+    faProjectDbSchemaDdl.ts             # schema v1 DDL
+    faProjectDocumentsHierarchySchemaPatch.ts  # idempotent v1 documents hierarchy patch
+    faProjectDocumentAppearanceSchemaPatchWiring.ts  # idempotent v1 documents appearance color patch
+    faProjectContentRowMap.ts           # row → DTO mappers
+  projectDbContent/
+    faProjectWorldColorEmptyAllowedSchemaPatchWiring.ts  # idempotent worlds.color empty CHECK rebuild
+    faProjectDocumentAppearanceEmptyColorSchemaPatchWiring.ts  # idempotent documents appearance empty CHECK rebuild
+    faProjectContentNamedEntitySqlWiring.ts
+    faProjectWorldsSqlWiring.ts
+    faProjectWorldBootstrapWiring.ts
+    faProjectWorldsPersistWiring.ts
+    faProjectDocumentsPersistWiring.ts
+    faProjectHierarchyTreePersistWiring.ts
+    faProjectDocumentTemplatesPersistWiring.ts
+    faProjectDocumentTemplatesSqlWiring.ts
+    faProjectDocumentTemplatesSnapshotWiring.ts
+    faProjectMediaPersistWiring.ts
+    faProjectMediaTypeColumnsSchemaPatchWiring.ts  # idempotent v9 media type/link columns
+    faProjectMediaInternalTypeV10SchemaPatchWiring.ts  # idempotent v10 internal_type rebuild
+    faProjectMediaExternalEmbedV11SchemaPatchWiring.ts  # idempotent v11 external_embed rebuild
+    faProjectWorldsSnapshotWiring.ts
+    faProjectWorldTemplateLayoutReadWiring.ts
+    faProjectWorldTemplateLayoutSnapshotWiring.ts
+    faProjectWorldTemplateLayoutSqlWiring.ts
+    faProjectDocumentMediaLinksWiring.ts
+    faProjectTagsSchemaPatchWiring.ts
+    faProjectTagsSqlHelpersWiring.ts
+    faProjectTagsQueryWiring.ts
+    faProjectTagsPersistWiring.ts
+    faProjectDocumentLastOpenedSchemaPatchWiring.ts
+    faProjectDocumentLastOpenedQueryWiring.ts
+    faProjectDocumentLastOpenedPersistWiring.ts
+    faProjectDocumentDistributionQueryWiring.ts
+```
+
+**Barrel:** **`projectManagement_manager.ts`** re-exports lifecycle + **`runWithFaProjectDatabase*`**; content persist modules imported from IPC registration.
+
+## IPC: project lifecycle vs content
+
+### `FA_PROJECT_MANAGEMENT_IPC`
+
+Create/open project, recent list, **project settings / styling / noteboard / sidebar / hierarchy tree UI state** patches. Preload: **`projectManagementAPI.ts`**. Registrar: **`registerFaProjectManagementIpc.ts`**, **`registerFaProjectManagementHierarchyTreeUiStateIpc.ts`**.
+
+### `FA_PROJECT_CONTENT_IPC`
+
+CRUD + links for **worlds**, **documents**, **document_templates**, **media**, junction ops. Preload: **`projectContentAPI.ts`** → **`window.faContentBridgeAPIs.projectContent`**. Registrar: **`registerFaProjectContentIpc.ts`** (**`ipcManagementRegistrationWiring.ts`**).
+
+All content handlers wrap **`runWithFaProjectDatabaseForIpcAsync`**.
+
+| IPC channel (suffix `-async`) | Persist / behavior |
+|-----------------------------|-------------------|
+| `create-world-async` | `createFaProjectWorld` |
+| `update-world-async` | `updateFaProjectWorld` |
+| `delete-world-async` | `deleteFaProjectWorld` |
+| `get-world-by-id-async` | `getFaProjectWorldById` |
+| `list-worlds-async` | `listFaProjectWorlds` |
+| `list-worlds-for-project-settings-async` | `listFaProjectWorldsForProjectSettings` (includes per-world document counts) |
+| `save-worlds-snapshot-async` | `replaceFaProjectWorldsSnapshot` (transactional full list replace from Project Settings) |
+| `create-media-async` | `createFaProjectMedia` |
+| `update-media-async` | `updateFaProjectMedia` |
+| `upsert-media-async` | `upsertFaProjectMediaMany` (transactional insert-or-update by id; no blob write) |
+| `delete-media-async` | `deleteFaProjectMedia` |
+| `get-media-by-id-async` | `getFaProjectMediaById` |
+| `list-media-async` | `listFaProjectMedia` (**`created_at_ms DESC`**, **`id DESC`**) |
+| `create-document-template-async` | `createFaProjectDocumentTemplate` |
+| `update-document-template-async` | `updateFaProjectDocumentTemplate` |
+| `delete-document-template-async` | `deleteFaProjectDocumentTemplate` |
+| `get-document-template-by-id-async` | `getFaProjectDocumentTemplateById` |
+| `list-document-templates-async` | `listFaProjectDocumentTemplates` |
+| `list-document-templates-for-project-settings-async` | `listFaProjectDocumentTemplatesForProjectSettings` (ordered rows with document counts for delete guards) |
+| `save-document-templates-snapshot-async` | `replaceFaProjectDocumentTemplatesSnapshot` (transactional full list replace from Project Settings; **empty list allowed**) |
+| `create-document-async` | `createFaProjectDocument` |
+| `update-document-async` | `updateFaProjectDocument` |
+| `delete-document-async` | `deleteFaProjectDocument` |
+| `get-document-by-id-async` | `getFaProjectDocumentById` |
+| `list-documents-async` | `listFaProjectDocuments` (optional `worldId` filter) |
+| `set-document-world-async` | `setFaProjectDocumentWorld` |
+| `set-document-template-async` | `setFaProjectDocumentTemplate` |
+| `link-document-media-async` | `linkFaProjectDocumentMedia` |
+| `unlink-document-media-async` | `unlinkFaProjectDocumentMedia` |
+| `list-document-media-async` | `listFaProjectMediaForDocument` |
+| `list-tags-for-world-async` | `listFaProjectTagsForWorld` |
+| `list-tags-with-document-counts-for-world-async` | `listFaProjectTagsWithDocumentCountsForWorld` |
+| `list-document-tags-async` | `listFaProjectDocumentTags` |
+| `list-documents-under-tag-async` | `listFaProjectDocumentsUnderTag` |
+| `set-document-tags-async` | `setFaProjectDocumentTags` (create/resolve names, replace memberships, GC empty tags) |
+| `reorder-documents-under-tag-async` | `reorderFaProjectDocumentsUnderTag` |
+| `rename-tag-async` | `renameFaProjectTag` (may merge into existing case-insensitive name) |
+| `delete-tag-async` | `deleteFaProjectTag` |
+| `list-document-last-opened-async` | `listFaProjectDocumentLastOpened` |
+| `record-document-last-opened-async` | `recordFaProjectDocumentLastOpened` (upsert + trim to max 50) |
+| `list-document-distribution-async` | `listFaProjectDocumentDistribution` — chart categories = **placed** templates only; payload also **`documentTemplateTotalCount`** (all **`document_templates`** rows, incl. unassigned) for overview empty CTA |
+| `list-workspace-hierarchy-layout-async` | `listFaProjectWorkspaceHierarchyLayout` |
+| `list-placement-document-children-async` | `listFaProjectPlacementDocumentChildren` |
+| `move-document-in-hierarchy-async` | `moveFaProjectDocumentInHierarchy` |
+| `reindex-document-siblings-in-hierarchy-async` | `reindexFaProjectDocumentSiblingsInHierarchy` (same parent bucket sibling **`sort_order`** rewrite after drag reorder) |
+| `search-project-hierarchy-async` | `searchFaProjectHierarchy` |
+
+**`FA_PROJECT_MANAGEMENT_IPC`** (hierarchy UI state): **`get-hierarchy-tree-ui-state-async`** → **`readFaProjectHierarchyTreeUiState`**; **`set-hierarchy-tree-ui-state-patch-async`** → **`upsertFaProjectHierarchyTreeUiStateKv`**.
+
+**`FA_PROJECT_MANAGEMENT_IPC`** (opened document tabs): **`get-opened-documents-snapshot-async`** → **`readFaProjectOpenedDocumentsSnapshot`**; **`save-opened-documents-snapshot-async`** → **`upsertFaProjectOpenedDocumentsSnapshot`**.
+
+Exact channel strings: **`src-electron/electron-ipc-bridge.ts`** (`FA_PROJECT_CONTENT_IPC`).
+
+## Project Settings (renderer ↔ SQLite)
+
+**`DialogProjectSettings`** (**`src/components/dialogs/DialogProjectSettings/`**) — first shipped **`projectContent`** UI.
+
+| Phase | API | Main |
+|-------|-----|------|
+| **Open** | **`projectManagement.getProjectSettings`** (project name KV) + **`projectContent.listWorldsForProjectSettings`** (ordered worlds; each placement carries **`documentCountInWorld`** + **`categoryCountInWorld`** for delete guards / layout UI) + **`projectContent.listDocumentTemplatesForProjectSettings`** (ordered templates with document counts) | **`readFaProjectSettingsRoot`**, **`listFaProjectWorldsForProjectSettings`**, **`listFaProjectDocumentTemplatesForProjectSettings`** |
+| **Save (project name)** | **`projectManagement.setProjectSettings`** via **`S_FaProjectSettings`** | **`faProjectSettingsPersist.ts`** → **`project_name`** KV |
+| **Save (worlds)** | **`projectContent.saveWorldsSnapshot`** with **`I_faProjectWorldSnapshotItem[]`** (optional **`templateLayout`** per world) | **`replaceFaProjectWorldsSnapshot`** in **`faProjectWorldsSnapshotWiring.ts`** — one transaction: upsert/reorder worlds, merge each world's template layout (upsert groups/placements, delete removed ids; **documents in removed placements are deleted first**), delete removed world ids (**RESTRICT** if a world still has documents) |
+| **Save (document templates)** | **`projectContent.saveDocumentTemplatesSnapshot`** with **`I_faProjectDocumentTemplateSnapshotItem[]`** | **`replaceFaProjectDocumentTemplatesSnapshot`** in **`faProjectDocumentTemplatesSnapshotWiring.ts`** — one transaction: upsert/reorder by list index, delete removed ids (**RESTRICT** if documents still reference a template); **zero templates is valid** |
+
+Bridges: **`sFaProjectWorldsBridge.ts`**, **`sFaProjectDocumentTemplatesBridge.ts`**. Action **`saveProjectSettings`** may carry **`settings`**, **`worlds`**, **`documentTemplates`** (**`handleSaveProjectSettings`** in **`createFaActionDefinitionHandlers.ts`**). **Save order:** document templates snapshot **before** worlds snapshot when both present — **`world_template_placements.document_template_id`** FK requires template rows exist first. Draft validation (names, duplicate palette hex) stays in dialog; persist coerces hex via **`coerceFaProjectWorldColorForStorage`**, **`coerceFaProjectWorldColorPaletteForStorage`**.
+
+## Types and validation
+
+- DTOs: **`types/I_faProjectWorldDomain.ts`**, **`I_faProjectDocumentDomain.ts`**, **`I_faProjectDocumentTemplateDomain.ts`**, **`I_faProjectMediaDomain.ts`**, **`I_faProjectContentLinksDomain.ts`**, **`I_faProjectHierarchyTreeDomain.ts`**, **`I_faProjectContentAPI.ts`**
+- Zod (IPC payloads): **`src-electron/shared/faProject*ContentSchema.ts`**, **`faProjectHierarchyTreeContentSchema.ts`**, **`faProjectHierarchyTreeUiStateSchema.ts`**, **`faProjectContentLinksSchema.ts`**, **`faProjectContentSchemaShared.ts`**
+- Bridge typing: **`types/I_faElectronRendererBridgeAPIs.ts`**, **`src/globals.d.ts`**
+
+**Renderer UI:** **`DialogProjectSettings`** (general, worlds, **Document Template Settings**), **`FaColorPickerInput`**, **`FaIconPickerInput`** (template **icon**), **`sFaProjectWorldsBridge`**, **`sFaProjectDocumentTemplatesBridge`**. Other content surfaces IPC-only until wired.
+
+## Errors
+
+Missing entity ids → **`FaProjectContentNotFoundError`** (`faProjectContentNotFoundError.ts`); IPC **`invoke`** rejects to callers.
+
+## Testing
+
+- Migrations: **`src-electron/mainScripts/projectManagement/_tests/faProjectDbMigrate.vitest.test.ts`**
+- DDL / row map: **`functions/_tests/faProjectDbSchemaDdl.vitest.test.ts`**, **`faProjectContentRowMap.vitest.test.ts`**
+- Persist (mock DB): **`projectDbContent/_tests/faProjectContentPersist.vitest.test.ts`**
+- Media type columns patch: **`projectDbContent/_tests/faProjectMediaTypeColumnsSchemaPatchWiring.vitest.test.ts`**
+- Media v10 internal type / v11 external embed patches: **`faProjectMediaInternalTypeV10SchemaPatchWiring.vitest.test.ts`**, **`faProjectMediaExternalEmbedV11SchemaPatchWiring.vitest.test.ts`**
+- IPC: **`ipcManagement/_tests/registerFaProjectContentIpc.vitest.test.ts`**
+- Preload: **`contentBridgeAPIs/_tests/projectContentAPI.vitest.test.ts`**
+- Zod: **`shared/_tests/faProjectContentSchemas.vitest.test.ts`**
+
+Vitest uses mock **`better-sqlite3`** in unit tests; native ABI validated in production Electron builds, not **`unit-electron`**.

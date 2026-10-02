@@ -1,0 +1,143 @@
+<template>
+  <div
+    role="button"
+    tabindex="0"
+    :class="tabClassList"
+    :data-test-validation-error="props.tabHasError ? 'true' : 'false'"
+    :data-test-world-id="props.world.id"
+    data-test-locator="dialogProjectSettings-worlds-tab"
+    @click="onTabClick"
+    @keydown="onTabKeydown"
+  >
+    <div
+      ref="tabBlurTargetRef"
+      class="faVerticalDraggableTabs__tabBlurTarget"
+      tabindex="-1"
+    />
+    <div class="dialogProjectSettingsWorldsTabItem__titleRow">
+      <div class="dialogProjectSettingsWorldsTabItem__titleContent relative-position">
+        <div class="faVerticalDraggableTabs__tabContent relative-position">
+          <span class="faVerticalDraggableTabs__tabLabel">
+            <template v-if="resolvedDisplayName.length > 0">
+              {{ resolvedDisplayName }}
+            </template>
+            <template v-else>
+              {{ $t('dialogs.projectSettings.panels.worlds.defaultNewWorldName') }}
+            </template>
+          </span>
+        </div>
+      </div>
+      <q-icon
+        v-if="showMissingTranslationsWarning"
+        class="dialogProjectSettingsWorldsTabItem__missingTranslationsWarning fa-color-glyph"
+        color="warning"
+        data-test-locator="dialogProjectSettings-worlds-tabMissingTranslationsWarning"
+        :data-test-tooltip-text="$t('dialogs.projectSettings.panels.worlds.missingTranslationsTabTooltip')"
+        name="mdi-alert"
+        size="16px"
+        @click.stop
+      >
+        <q-tooltip content-class="dialogProjectSettings__fieldHelpTooltip">
+          {{ $t('dialogs.projectSettings.panels.worlds.missingTranslationsTabTooltip') }}
+        </q-tooltip>
+      </q-icon>
+    </div>
+    <span
+      v-if="showWorldColorSwatch"
+      class="dialogProjectSettingsWorldsTabItem__colorSwatch"
+      aria-hidden="true"
+      data-test-locator="dialogProjectSettings-worlds-tabColorSwatch"
+      :style="worldColorSwatchStyle"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+
+import type { I_dialogProjectSettingsWorldDraft } from 'app/types/I_dialogProjectSettingsWorlds'
+import type { T_faUserSettingsLanguageCode } from 'app/types/faUserSettingsLanguageRegistry'
+import {
+  isDialogProjectSettingsWorldMissingCurrentLanguageTranslations,
+  resolveDialogProjectSettingsWorldResolvedDisplayName
+} from './scripts/dialogProjectSettingsWorldsDisplayNameDraft'
+
+defineOptions({
+  name: 'DialogProjectSettingsWorldsTabItem'
+})
+
+const props = withDefaults(
+  defineProps<{
+    currentLanguageCode: T_faUserSettingsLanguageCode
+    isBeingDragged?: boolean
+    isListDragging?: boolean
+    isPointerHovered?: boolean
+    isSelected: boolean
+    tabHasError: boolean
+    world: I_dialogProjectSettingsWorldDraft
+  }>(),
+  {
+    isBeingDragged: false,
+    isListDragging: false,
+    isPointerHovered: false
+  }
+)
+
+const emit = defineEmits<{
+  select: [id: string]
+}>()
+
+const tabBlurTargetRef = ref<HTMLDivElement | null>(null)
+
+const resolvedDisplayName = computed(() => {
+  return resolveDialogProjectSettingsWorldResolvedDisplayName(
+    props.world,
+    props.currentLanguageCode
+  )
+})
+
+const showMissingTranslationsWarning = computed(() => {
+  return isDialogProjectSettingsWorldMissingCurrentLanguageTranslations(
+    props.world,
+    props.currentLanguageCode
+  )
+})
+
+const trimmedWorldColor = computed(() => props.world.color.trim())
+
+const showWorldColorSwatch = computed(() => trimmedWorldColor.value.length > 0)
+
+const worldColorSwatchStyle = computed(() => ({
+  backgroundColor: trimmedWorldColor.value
+}))
+
+function onTabClick (): void {
+  emit('select', props.world.id)
+  tabBlurTargetRef.value?.focus()
+}
+
+function onTabKeydown (event: KeyboardEvent): void {
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return
+  }
+  event.preventDefault()
+  emit('select', props.world.id)
+}
+
+const tabClassList = computed(() => {
+  const classList: Record<string, boolean> = {
+    faVerticalDraggableTabs__tab: true,
+    'faVerticalDraggableTabs__tab--active': props.isSelected,
+    'faVerticalDraggableTabs__tab--dragging': props.isBeingDragged,
+    'faVerticalDraggableTabs__tab--error': props.tabHasError,
+    'faVerticalDraggableTabs__tab--pointerHover': props.isPointerHovered,
+    'fa-text-muted': !props.tabHasError && !props.isSelected,
+    'q-focusable': !props.isListDragging,
+    'q-hoverable': !props.isListDragging,
+    'relative-position': true
+  }
+  return classList
+})
+</script>
+
+<style lang="scss" src="./styles/DialogProjectSettings.worldsTabItem.unscoped.scss"></style>

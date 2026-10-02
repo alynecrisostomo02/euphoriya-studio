@@ -1,0 +1,65 @@
+---
+description: Vue 3 Composition API, Quasar UI, i18n, and script organization in SFCs
+globs: "**/*.vue"
+alwaysApply: false
+---
+
+# Vue and Quasar
+
+## Single-file component block order
+
+Every **`.vue`** SFC: top-level blocks **only** in order: **`<template>`**, **`<script>`** (or **`<script setup>`**), **`<style>`**. No **`<script>`** / **`<style>`** above **`<template>`**; no **`<style>`** between **`<template>`** and **`<script>`**. All Vue files (app, layouts, Storybook).
+
+## UI and framework
+
+- Vue 3 **Composition API** (`<script setup>`) consistent with existing components.
+- **Quasar** (`q-*`) components + spacing/typography from siblings in same area.
+- **Scrollable regions**: template root/wrapper that **may show vertical scrollbar** (overflow scroll/auto) + scrollbar presence content-dependent → global class **`hasScrollbar`** (`scrollbar-gutter: stable` prevents layout shift). [scrollbar.scss](../../src/css/globals/scrollbar.scss), [project-scss.mdc](project-scss.mdc).
+- **User-visible copy** in repo-root **i18n/** — never hardcode prose in templates, `_data/`, scripts.
+- **Context menu dividers** — [fa-context-menu-dividers.mdc](fa-context-menu-dividers.mdc), [fantasia-context-menu-dividers skill](../skills/fantasia-context-menu-dividers/SKILL.md): group separator vs **separatorAlt** between consecutive **`q-item`** rows in same section.
+- SFC translations: template `$t('camelCaseKey.subKey')` directly; **no** `useI18n` import only for `t(...)`.
+- Top-level i18n keys: **camelCase**, lowercase first letter (e.g. `globalWindowButtons`, `dialogs`). Sub-keys same.
+- New strings: `L_*.ts` under matching folder (`components/<bucket>/<ComponentName>/` — `<bucket>` = `globals`, `elements`, `other`; not `foundation` Storybook-only; or `dialogs/`, `floatingWindows/`, `pages/`, `globalFunctionality/`); import in `i18n/en-US/index.ts`, assign camelCase top-level key. No hardcoded inline in `index.ts`. App-wide uncategorised → `globalFunctionality/L_unsortedAppTexts.ts` under `globalFunctionality.unsortedAppTexts`.
+- TS scripts + Pinia (outside Vue templates): `import { i18n } from 'app/i18n/externalFileLoader'`, `i18n.global.t('camelCaseKey.subKey')`.
+- **Electron global shortcuts**: app-wide **`keydown`** from **`MainLayout.vue`** (after **`S_FaKeybinds`** loads); definitions/matching **`src/scripts/keybinds/`**. New commands: [fantasia-keybinds skill](../skills/fantasia-keybinds/SKILL.md), [AGENTS.md](../../AGENTS.md) Global keybinds.
+- **Helper / wrapper SFCs**: Only five cross-feature infrastructure **`.vue`** in [AGENTS.md](../../AGENTS.md) **Renderer components** use **`_<PascalCase>`** on folder + **`.vue`** basename. Storybook **`meta.title`** same folder segment.
+- **In-renderer floating windows (`Window*`)**: **`_FaFloatingWindowBodyTeleport`** around frame → **`document.body`**. Wire **`useFaFloatingWindowFrame`**; **no** **`registerComponentDialogStackGuard`** (modal **`QDialog`** roots only). **`WindowAppStyling`**: **`faFloatingWindowPopTransition.ts`** + **`WindowAppStyling.floatingWindowPopTransition.unscoped.scss`**, not Quasar **`q-transition--scale`**, for open/close ([AGENTS.md](../../AGENTS.md) Floating **`Window*`**). No **`@quasar/quasar-ui-qwindow`** (Quasar v1/Vue 2). [fantasia-floating-windows skill](../skills/fantasia-floating-windows/SKILL.md).
+- **Hierarchical trees**: **`@he-tree/vue`** (`BaseTree`, `Draggable`) only — **never** **`QTree`** / **`q-tree`**. Import **`@he-tree/vue/style/default.css`**; Quasar node chrome in slots; **`virtualization`** when lists may grow large. [fa-he-tree.mdc](fa-he-tree.mdc), [fantasia-he-tree skill](../skills/fantasia-he-tree/SKILL.md).
+- **List / table DnD**: Flat lists **`vue-draggable-plus`**; **`QTable`** rows **`v-draggable-table`** from **`quasar-ui-q-draggable-table`** (boot **`q-draggable-table`**). **No** vue-draggable-plus on **`QTable`** or he-tree nodes. [fa-drag-drop-lists.mdc](fa-drag-drop-lists.mdc), [fantasia-drag-drop skill](../skills/fantasia-drag-drop/SKILL.md).
+- Storybook mocks: import specific non-markdown `L_*` locale modules directly — never full `en-US/index.ts`; placeholder strings for `documents.*`. [fantasia-i18n skill](../skills/fantasia-i18n/SKILL.md).
+- **`q-tooltip` hover delay**: default **`FA_Q_TOOLTIP_DELAY_MS`** (**500** ms) via boot **`tooltip-defaults`** — patches Quasar **`QTooltip`** default **`delay`**. **Do not** set **`:delay`** on **`q-tooltip`** unless intentionally different; import **`FA_Q_TOOLTIP_DELAY_MS`** from **`appGlobalManagementUI/functions/faQTooltipDelay`** or **`appGlobalManagementUI_manager`** (no **`faQTooltipDelay_manager`** shim) for custom hover timers (e.g. **`QMenu`** mirroring tooltip timing, or **`QTooltip.show()`** after **`mouseenter`**). Playwright: **`FA_PLAYWRIGHT_Q_TOOLTIP_OPEN_SETTLE_MS`** in **`faPlaywrightElectronLaunchConstants`**.
+
+## After UI changes
+
+- **Dev scoped gate** after edits — [dev-scoped-verify.mdc](dev-scoped-verify.mdc); add/update **Playwright** component tests where project already tests similar UI ([fantasia-testing](../skills/fantasia-testing/SKILL.md)).
+- **`src/components/**`**, **`src/layouts/**`**, **`src/pages/**`**: Vitest parity — each feature **`.vue`** has **`_tests/<Name>.vitest.test.ts`** (1:1). **Each** **`.ts`** / **`.vue`** must hit per-file thresholds (**`thresholds.perFile: true`**) — mount SFC handlers, extend **`scripts/_tests`** for branchy wiring ([vitest-tests.mdc](vitest-tests.mdc)). **`src/components/foundation/**`** excluded.
+- Storybook for `src/components/**`: `*.stories.ts` in `_tests/` (`src/components/**/_tests/*.stories.ts`); **`meta.title`** **`Components/<bucket>/<ComponentName>`** (bucket = **`dialogs`**, **`floatingWindows`**, **`elements`**, **`foundation`**, **`globals`**, **`other`**; **`<ComponentName>`** = folder — **`_<PascalCase>`** only for five infrastructure helpers per [AGENTS.md](../../AGENTS.md) **Renderer components**). Storybook wiring in `.storybook-workspace/.storybook` (Quasar, Pinia, i18n mocks). **`foundation/`** Storybook-only: **`tags: ['skip-visual']`**, **`parameters.docs.disable: true`** per [AGENTS.md](../../AGENTS.md). Optional `src/layouts/**/_tests/*.stories.ts`, `src/pages/**/_tests/*.stories.ts` canvas-only (no Docs/autodocs); [storybook-stories.mdc](storybook-stories.mdc).
+- Storybook i18n: avoid full locale roots (`i18n/index.ts`, `i18n/en-US/index.ts`) in mocks — `documents/*.md` can fail Vite import analysis; import specific non-markdown `L_*` + placeholder document keys.
+
+## `<script setup>` — documentation and size
+
+- Short **JSDoc** above each significant function (`/** ... */`), as [GlobalWindowButtons.vue](src/components/globals/GlobalWindowButtons/GlobalWindowButtons.vue).
+- Strict types in `<script setup lang="ts">`: no `any`; explicit interfaces, generics, unions, `unknown`, utility types.
+
+### When the script section grows
+
+1. **Structured production data** (menus, button sets, large config): colocate **`_data/`** (e.g. [globals/AppControlMenus/_data](src/components/globals/AppControlMenus/_data/)), import into SFC.
+   - **Split big blobs** across several TS files in `_data/` (one concern/surface per file — `project.ts`, `tools.ts`, `buttons.ts`). Aggregator re-export OK when keeps SFC imports simple.
+   - **`_data/`** = normal TS: may call **`i18n.global.t('...')`**, import **`src/scripts/`** helpers, attach **functions** (menu `trigger` callbacks). User-visible strings via **`i18n/`** keys, not hardcoded prose (unless existing local exception). Dynamic menu rows (e.g. recent projects) set stable **`itemKey`** on **`I_appMenuItem`** / **`I_appMenuSubItem`** — see **`types/I_appMenusDataList.ts`**.
+   - **Vitest fixtures** **not** in `_data/` — **inside** `*.vitest.test.ts` only ([vitest-tests.mdc](vitest-tests.mdc)). Component-testing props via **`COMPONENT_PROPS`** from Playwright (inline in `*.playwright.test.ts`). **Embedded** component-mode-only data parent SFC must own (menu when `TEST_ENV === 'components'`) → **`const` in `.vue`** — not `_tests/*.ts` fixture — [playwright-tests.mdc](playwright-tests.mdc).
+   - **No dedicated tests** whose only SUT is `_data/` file; cover via `.vue`/consumers.
+2. **Pure reusable helpers** (no Vue instance, no template state) → **`src/scripts/<feature>/`** ([typescript-scripts.mdc](typescript-scripts.mdc); JSDoc; **group related functions** same module until **250 lines** or **100 lines/function** force split — not one tiny file per helper).
+3. **Composable/feature logic** → `src/scripts/<feature>/` (or next to feature when matches patterns); **one domain concern**, several cohesive exports; no unrelated exports in one file.
+4. **SFC and function size** — [code-size-decomposition.mdc](code-size-decomposition.mdc): **`.vue` ≤250 lines**, **function ≤100 lines**, **TS modules ≤250 lines** (exemptions listed). Split → feature logic **only** **`src/components/<bucket>/<Feature>/scripts/`** + **subcomponents** same folder — **not** loose `.ts` beside `.vue`. Buckets: **`dialogs/`**, **`globals/`**, **`elements/`**, **`foundation/`**, **`other/`** ([README](../../README.md)). Reusable form inputs under **`elements/`** → [AGENTS.md](../../AGENTS.md) subsystems / **`fa-*-input`** rules (**`FaSelectInput`**, **`FaIconPickerInput`**, **`FaLocaleTranslationsInput`**). **`<style>`** extract → **`src/components/<bucket>/<Feature>/styles/`** only ([component-styles-folder.mdc](component-styles-folder.mdc)). `scripts/` **not** substitute for **`_data/`** or **`src/scripts/`**.
+   - **How many `scripts/*.ts`:** fewer larger modules grouping whole concern (table+rows+columns, dialog wiring+suspend, capture pipeline) until file **~250 lines** or function **~100 lines**; **avoid** many **10–20 line** split-for-splitting files. Same as [code-size-decomposition.mdc](code-size-decomposition.mdc) **Module count** + **Return object literals**. **`scripts/_tests/*.vitest.test.ts`** merge when production modules merge.
+
+## Related rules (by concern)
+
+| Concern | Rule |
+|--------|------|
+| BEM classes, scoped SCSS | [vue-bem-scss.mdc](vue-bem-scss.mdc) |
+| Extracted **`<style src>`** (`styles/`) | [component-styles-folder.mdc](component-styles-folder.mdc) |
+| `data-test-locator` / `data-test-*` | [vue-template-test-hooks.mdc](vue-template-test-hooks.mdc) |
+| Global SCSS, Quasar variables | [project-scss.mdc](project-scss.mdc) |
+| Playwright test **files** | [playwright-tests.mdc](playwright-tests.mdc) |
+| Floating **`Window*`** | [AGENTS.md](../../AGENTS.md) Floating **`Window*`**, [fantasia-floating-windows skill](../skills/fantasia-floating-windows/SKILL.md) |

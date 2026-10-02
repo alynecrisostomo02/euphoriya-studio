@@ -1,0 +1,68 @@
+/** @vitest-environment jsdom */
+import { computed, ref, watch } from 'vue'
+import { expect, test, vi } from 'vitest'
+
+import type { I_dialogProjectSettingsProps } from 'app/types/I_dialogProjectSettings'
+import { createDialogProjectSettingsUseHook } from '../createDialogProjectSettingsUseWiring'
+
+/**
+ * createDialogProjectSettingsUseHook
+ * Exposes validation computeds that tolerate null local drafts before hydration.
+ */
+test('Test that useDialogProjectSettings validation computeds tolerate null drafts', () => {
+  const useDialogProjectSettings = createDialogProjectSettingsUseHook({
+    buildDialogProjectSettingsSaveValidationTooltipForDraft: () => ({
+      bullets: [],
+      flatText: '',
+      intro: ''
+    }),
+    computed,
+    createDialogProjectSettingsDialogActions: () => ({
+      addDocumentTemplate: vi.fn(),
+      addWorld: vi.fn(),
+      openDialog: vi.fn(),
+      removeDocumentTemplate: vi.fn(),
+      removeWorld: vi.fn(),
+      saveAndCloseDialog: vi.fn(async () => undefined),
+      saveWithoutClosingDialog: vi.fn(async () => undefined),
+      updateDocumentTemplateTitleTranslations: vi.fn(),
+      updateDocumentTemplateIcon: vi.fn(),
+      updateDocumentTemplateWorldAppendixTranslations: vi.fn(),
+      updateWorldColor: vi.fn(),
+      updateWorldColorPalette: vi.fn(),
+      updateWorldDisplayNameTranslations: vi.fn(),
+      updateWorldTemplateLayout: vi.fn()
+    }),
+    createDialogProjectSettingsRefs: () => ({
+      baselineDocumentTemplates: ref(null),
+      baselineSettings: ref(null),
+      baselineWorlds: ref(null),
+      dialogModel: ref(false),
+      documentName: ref(''),
+      hadWorldTemplatePlacementsAtDialogOpen: ref(false),
+      localDocumentTemplates: ref(null),
+      localSettings: ref(null),
+      localWorlds: ref(null),
+      selectedCategoryTab: ref('generalSettings')
+    }),
+    hasDialogProjectSettingsDocumentTemplateNameValidationError: () => true,
+    hasDialogProjectSettingsWorldColorPaletteValidationError: () => false,
+    hasDialogProjectSettingsWorldNameValidationError: () => false,
+    hasDialogProjectSettingsWorldTemplateLayoutValidationError: () => false,
+    isDialogProjectSettingsFullDialogSaveDisabled: () => true,
+    isDialogProjectSettingsProjectNameInvalid: (name) => name.trim().length === 0,
+    registerComponentDialogStackGuard: vi.fn(),
+    registerDialogProjectSettingsWatchers: vi.fn(),
+    watch
+  })
+
+  const props: I_dialogProjectSettingsProps = {}
+  const api = useDialogProjectSettings(props)
+
+  expect(api.hasGeneralSettingsValidationError.value).toBe(true)
+  expect(api.hasWorldsSettingsValidationError.value).toBe(false)
+  expect(api.hasDocumentTemplatesSettingsValidationError.value).toBe(true)
+  expect(api.isDirty.value).toBe(false)
+  expect(api.isSaveDisabled.value).toBe(true)
+  expect(api.saveValidationErrorsTooltip.value.flatText).toBe('')
+})

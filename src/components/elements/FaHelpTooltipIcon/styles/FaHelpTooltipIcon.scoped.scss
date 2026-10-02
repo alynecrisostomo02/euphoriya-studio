@@ -1,0 +1,50 @@
+.faHelpTooltipIcon {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: $faHelpTooltipIcon-size;
+  justify-content: center;
+  position: relative;
+  width: $faHelpTooltipIcon-size;
+
+  /* Flat: solid white help-circle (fantasy shows diamond instead). */
+  &__circle {
+    color: $faHelpTooltipIcon-circle-color;
+    font-size: $faHelpTooltipIcon-circle-size !important;
+    height: $faHelpTooltipIcon-circle-size !important;
+    width: $faHelpTooltipIcon-circle-size !important;
+  }
+
+  &__diamond {
+    align-items: center;
+    border: $faHelpTooltipIcon-border-width solid currentcolor;
+    box-sizing: border-box;
+    color: $faHelpTooltipIcon-color;
+    display: none;
+    flex-shrink: 0;
+    height: $faHelpTooltipIcon-diamond-size;
+    justify-content: center;
+    position: relative;
+    transform: rotate(45deg);
+    width: $faHelpTooltipIcon-diamond-size;
+  }
+
+  &__glyph {
+    color: currentcolor;
+    font-size: $faHelpTooltipIcon-glyph-font-size !important;
+    height: auto !important;
+    line-height: 1;
+    /* Above diamond ::after ring (fa-color-border-shading) so ? stays visible. */
+    position: relative;
+    transform: rotate(-45deg);
+    width: auto !important;
+    z-index: 1;
+
+    &::before {
+      font-size: inherit;
+      line-height: 1;
+      margin: 0;
+      transform: none;
+    }
+  }
+}

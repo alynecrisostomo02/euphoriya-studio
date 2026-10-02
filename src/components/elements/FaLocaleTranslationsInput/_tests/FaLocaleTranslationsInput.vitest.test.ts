@@ -1,0 +1,402 @@
+/* eslint-disable vue/one-component-per-file -- colocated Quasar stub components for Vue Test Utils mounts */
+
+import { defineComponent } from 'vue'
+import { mount } from '@vue/test-utils'
+import { createI18n } from 'vue-i18n'
+import { expect, test } from 'vitest'
+
+import FaLocaleTranslationsInput from '../FaLocaleTranslationsInput.vue'
+import { resolveFaLocaleTranslationsMenuAnchorElement } from 'app/src/scripts/localeTranslations/functions/resolveFaLocaleTranslationsMenuAnchorElement'
+
+const testLocator = 'faLocaleTranslationsInput-test'
+
+const elementI18n = createI18n({
+  legacy: false,
+  locale: 'en-US',
+  messages: {
+    'en-US': {
+      faLocaleTranslationsInput: {
+        fallbackWarningTooltip:
+          "This field lacks current language's translation.\nFallback used: {fallbackLanguageName}",
+        pluralColumnLabel: 'Plural',
+        singularColumnLabel: 'Singular',
+        translateButtonTooltip: 'Edit translations'
+      },
+      dialogs: {
+        projectSettings: {
+          singularPluralMissing: {
+            bothIntro: 'Missing translations for current language:',
+            pluralBullet: 'Plural form missing',
+            singularBullet: 'Singular form missing',
+            usingFallback: 'Using fallback of {fallbackLanguageName}'
+          }
+        }
+      }
+    }
+  }
+})
+
+const qMenuStub = defineComponent({
+  name: 'QMenu',
+  props: {
+    modelValue: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: [
+    'before-show',
+    'hide',
+    'show',
+    'update:modelValue'
+  ],
+  watch: {
+    modelValue (value: boolean): void {
+      if (value) {
+        this.$emit('before-show')
+        this.$emit('show')
+      }
+    }
+  },
+  template: `
+    <div
+      v-if="modelValue"
+      class="q-menu-stub"
+      v-bind="$attrs"
+    >
+      <slot />
+      <button
+        class="q-menu-stub-close"
+        type="button"
+        @click="$emit('update:modelValue', false)"
+      />
+    </div>
+  `
+})
+
+const qBtnStub = defineComponent({
+  inheritAttrs: true,
+  emits: ['click'],
+  template: `
+    <button
+      type="button"
+      class="q-btn-stub"
+      v-bind="$attrs"
+      @click="$emit('click', $event)"
+    />
+  `
+})
+
+const qInputStub = defineComponent({
+  inheritAttrs: true,
+  props: {
+    modelValue: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: [
+    'click',
+    'update:modelValue'
+  ],
+  template: `
+    <div
+      class="q-input-stub"
+      v-bind="$attrs"
+      @click="$emit('click', $event)"
+    >
+      <input
+        :value="modelValue"
+        @input="$emit('update:modelValue', $event.target.value)"
+      />
+      <slot name="append" />
+      <slot name="after" />
+    </div>
+  `
+})
+
+const mountGlobal = {
+  plugins: [elementI18n],
+  stubs: {
+    QBtn: qBtnStub,
+    QIcon: defineComponent({
+      inheritAttrs: true,
+      emits: ['click'],
+      template: '<span v-bind="$attrs" @click="$emit(\'click\', $event)"><slot /></span>'
+    }),
+    QInput: qInputStub,
+    QMenu: qMenuStub,
+    QTooltip: defineComponent({
+      template: '<span><slot /></span>'
+    })
+  }
+}
+
+test('Test that FaLocaleTranslationsInput emits updated locale map when a menu input changes', async () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      modelValue: { 'en-US': 'Character' },
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  await w.find(`[data-test-locator="${testLocator}-translationsButton"]`).trigger('click')
+
+  const enInput = w.find(`[data-test-locator="${testLocator}-translationsInput-en-US"] input`)
+  await enInput.setValue('Hero')
+
+  const emitted = w.emitted('update:modelValue')
+  expect(emitted?.[0]!?.[0]!).toEqual({ 'en-US': 'Hero' })
+})
+
+test('Test that FaLocaleTranslationsInput removes empty locale keys', async () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      modelValue: {
+        'en-US': 'Character',
+        de: 'Held'
+      },
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  await w.find(`[data-test-locator="${testLocator}-translationsButton"]`).trigger('click')
+
+  const deInput = w.find(`[data-test-locator="${testLocator}-translationsInput-de"] input`)
+  await deInput.setValue('')
+
+  const emitted = w.emitted('update:modelValue')
+  expect(emitted?.[0]!?.[0]!).toEqual({ 'en-US': 'Character' })
+})
+
+test('Test that FaLocaleTranslationsInput shows fallback warning when active locale is missing', () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'de',
+      modelValue: {
+        'en-US': 'Races'
+      },
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  const warningIcon = w.find(`[data-test-locator="${testLocator}-fallbackWarning"]`)
+  expect(warningIcon.exists()).toBe(true)
+  expect(warningIcon.attributes('data-test-fallback-language-code')).toBe('en-US')
+})
+
+test('Test that FaLocaleTranslationsInput resolves display value for current language', () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'de',
+      modelValue: {
+        de: 'Charakter',
+        'en-US': 'Character'
+      },
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  const fieldInput = w.find(`[data-test-locator="${testLocator}"] input`)
+  expect((fieldInput.element as HTMLInputElement).value).toBe('Charakter')
+})
+
+test('Test that FaLocaleTranslationsInput opens translations menu when readonly field is clicked', async () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      modelValue: { 'en-US': 'Character' },
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  await w.find(`[data-test-locator="${testLocator}"]`).trigger('click')
+  expect(w.find(`[data-test-locator="${testLocator}-translationsMenu"]`).exists()).toBe(true)
+})
+
+test('Test that FaLocaleTranslationsInput menuPanel presentation renders locale rows without summary field', () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      modelValue: { 'en-US': 'Character' },
+      presentation: 'menuPanel',
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  expect(w.find(`[data-test-locator="${testLocator}-translationsMenu"]`).exists()).toBe(false)
+  expect(w.find(`[data-test-locator="${testLocator}-translationsInput-en-US"]`).exists()).toBe(true)
+  expect(w.find(`[data-test-locator="${testLocator}-translationsButton"]`).exists()).toBe(false)
+})
+
+test('Test that FaLocaleTranslationsInput exposes focusPreferredLanguageInput for menuPanel', () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      modelValue: { 'en-US': 'Character' },
+      presentation: 'menuPanel',
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  expect(typeof (w.vm as { focusPreferredLanguageInput?: () => void }).focusPreferredLanguageInput).toBe('function')
+})
+
+test('Test that FaLocaleTranslationsInput singularPlural mode emits paired maps', async () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      modelValue: {
+        plural: { 'en-US': 'Characters' },
+        singular: { 'en-US': 'Character' }
+      },
+      presentation: 'menuPanel',
+      testLocator,
+      translationForms: 'singularPlural'
+    },
+    global: mountGlobal
+  })
+
+  expect(w.find(`[data-test-locator="${testLocator}-singularColumnHeader"]`).exists()).toBe(true)
+  expect(w.find(`[data-test-locator="${testLocator}-pluralColumnHeader"]`).exists()).toBe(true)
+
+  const pluralInput = w.find(`[data-test-locator="${testLocator}-translationsPluralInput-en-US"] input`)
+  await pluralInput.setValue('Creatures')
+
+  const emitted = w.emitted('update:modelValue')
+  expect(emitted?.at(-1)?.[0]!).toEqual({
+    plural: { 'en-US': 'Creatures' },
+    singular: { 'en-US': 'Character' }
+  })
+})
+
+test('Test that resolveFaLocaleTranslationsMenuAnchorElement prefers q-field host', () => {
+  const field = document.createElement('div')
+  field.className = 'q-field'
+  const trigger = document.createElement('button')
+  field.appendChild(trigger)
+  document.body.appendChild(field)
+
+  expect(resolveFaLocaleTranslationsMenuAnchorElement(trigger)).toBe(field)
+
+  document.body.removeChild(field)
+})
+
+test('Test that resolveFaLocaleTranslationsMenuAnchorElement falls back to trigger element', () => {
+  const trigger = document.createElement('button')
+  expect(resolveFaLocaleTranslationsMenuAnchorElement(trigger)).toBe(trigger)
+})
+
+/**
+ * FaLocaleTranslationsInput
+ * Syncs translations menu open state through the summary field binding.
+ */
+test('Test that FaLocaleTranslationsInput syncs translations menu open state from the summary field', async () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      modelValue: { 'en-US': 'Character' },
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  await w.find(`[data-test-locator="${testLocator}-translationsButton"]`).trigger('click')
+  expect(w.find(`[data-test-locator="${testLocator}-translationsMenu"]`).exists()).toBe(true)
+
+  await w.find('.q-menu-stub-close').trigger('click')
+  expect(w.find(`[data-test-locator="${testLocator}-translationsMenu"]`).exists()).toBe(false)
+})
+
+/**
+ * FaLocaleTranslationsInput
+ * Renders menu-panel validation error copy when error props are set.
+ */
+test('Test that FaLocaleTranslationsInput renders menu panel error message', () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      error: true,
+      errorMessage: 'Translation required',
+      modelValue: { 'en-US': '' },
+      presentation: 'menuPanel',
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  const errorNode = w.find(`[data-test-locator="${testLocator}-menuPanelError"]`)
+  expect(errorNode.exists()).toBe(true)
+  expect(errorNode.text()).toBe('Translation required')
+})
+
+/**
+ * FaLocaleTranslationsInput
+ * Applies singular-plural root class in field presentation mode.
+ */
+test('Test that FaLocaleTranslationsInput applies singular-plural root class in field mode', () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      modelValue: {
+        plural: { 'en-US': 'Characters' },
+        singular: { 'en-US': 'Character' }
+      },
+      testLocator,
+      translationForms: 'singularPlural'
+    },
+    global: mountGlobal
+  })
+
+  expect(w.find('.faLocaleTranslationsInput__root--singularPlural').exists()).toBe(true)
+})
+
+/**
+ * FaLocaleTranslationsInput
+ * Opens translations menu through exposed openTranslationsMenu API.
+ */
+test('Test that FaLocaleTranslationsInput opens menu through exposed openTranslationsMenu', async () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      modelValue: { 'en-US': 'Character' },
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  const exposed = w.vm as { openTranslationsMenu?: () => void }
+  exposed.openTranslationsMenu?.()
+
+  await w.vm.$nextTick()
+  expect(w.find(`[data-test-locator="${testLocator}-translationsMenu"]`).exists()).toBe(true)
+})
+
+/**
+ * FaLocaleTranslationsInput
+ * Skips menu-panel error copy when error message is blank.
+ */
+test('Test that FaLocaleTranslationsInput hides menu panel error when message is empty', () => {
+  const w = mount(FaLocaleTranslationsInput, {
+    props: {
+      currentLanguageCode: 'en-US',
+      error: true,
+      errorMessage: '',
+      modelValue: { 'en-US': '' },
+      presentation: 'menuPanel',
+      testLocator
+    },
+    global: mountGlobal
+  })
+
+  expect(w.find(`[data-test-locator="${testLocator}-menuPanelError"]`).exists()).toBe(false)
+})

@@ -1,0 +1,179 @@
+@use './variables' as *;
+
+.faLocaleTranslationsInput__menu.q-menu {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  max-height: $faLocaleTranslationsInput-menu-maxHeight;
+  max-width: $faLocaleTranslationsInput-menu-maxWidth;
+  min-width: $faLocaleTranslationsInput-menu-minWidth;
+  overflow: hidden;
+  z-index: $faLocaleTranslationsInput-menu-zIndex !important;
+}
+
+.faLocaleTranslationsInput__menu--locked.q-menu {
+  max-height: var(--fa-locale-translations-menu-max-height) !important;
+  max-width: var(--fa-locale-translations-menu-width) !important;
+  min-width: var(--fa-locale-translations-menu-width) !important;
+  width: var(--fa-locale-translations-menu-width) !important;
+}
+
+.faLocaleTranslationsInput__menu--singularPlural.q-menu {
+  max-width: $faLocaleTranslationsInput-menu-singularPluralMaxWidth;
+  min-width: $faLocaleTranslationsInput-menu-singularPluralMinWidth;
+}
+
+.faLocaleTranslationsInput__menuBody {
+  background-color: $faLocaleTranslationsInput-menu-backgroundColor;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  max-height: $faLocaleTranslationsInput-menu-maxHeight;
+  min-height: 0;
+  overflow: hidden;
+  /* Left inset only — scrollbar docks to the menu’s right edge (all themes). */
+  padding: 0 0 0 $faLocaleTranslationsInput-menu-body-padding-x;
+  width: 100%;
+}
+
+.faLocaleTranslationsInput__menu--locked.q-menu .faLocaleTranslationsInput__menuBody {
+  max-height: 100%;
+}
+
+.faLocaleTranslationsInput__menuBody--pinnedAside {
+  align-items: stretch;
+  flex: 1 1 auto;
+  flex-direction: row;
+  gap: $faLocaleTranslationsInput-pinnedAside-gap;
+  max-height: 100%;
+  max-width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.faLocaleTranslationsInput__menuBody--singularPlural {
+  flex: 1 1 auto;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.faLocaleTranslationsInput__singularPluralPanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  max-height: 100%;
+  min-height: 0;
+  min-width: 100%;
+  overflow: hidden;
+  width: 100%;
+}
+
+.faLocaleTranslationsInput__menuBody--pinnedAside .faLocaleTranslationsInput__singularPluralPanel {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.faLocaleTranslationsInput__pinnedAside {
+  align-self: flex-start;
+  display: flex;
+  flex: 0 0 $faLocaleTranslationsInput-pinnedAside-width;
+  flex-direction: column;
+  max-width: $faLocaleTranslationsInput-pinnedAside-width;
+  min-width: 0;
+  width: $faLocaleTranslationsInput-pinnedAside-width;
+}
+
+.faLocaleTranslationsInput__pinnedAsideHeaderSpacer {
+  flex-shrink: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.faLocaleTranslationsInput__pinnedAsideInput {
+  flex-shrink: 0;
+  width: 100%;
+
+  // Global .q-field__append is pointer-events: none; help tooltip must hover.
+  .q-field__append {
+    pointer-events: auto;
+  }
+}
+
+.faLocaleTranslationsInput__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden auto;
+  /* Gap before thumb so locale fields do not sit flush under the scrollbar. */
+  padding-inline-end: $faLocaleTranslationsInput-scroll-scrollbarGap;
+}
+
+/* Fantasy field dropdown: darker panel only (edge padding is shared). */
+body.fa-appTheme--fantasy .faLocaleTranslationsInput__menu.q-menu .faLocaleTranslationsInput__menuBody {
+  background-color: $faLocaleTranslationsInput-menu-backgroundColor-fantasy;
+}
+
+.faLocaleTranslationsInput__menuBody--pinnedAside .faLocaleTranslationsInput__scroll {
+  max-height: 100%;
+}
+
+.faLocaleTranslationsInput__menuBody:not(.faLocaleTranslationsInput__menuBody--pinnedAside) .faLocaleTranslationsInput__scroll {
+  width: 100%;
+}
+
+.faLocaleTranslationsInput__rows {
+  display: flex;
+  flex-direction: column;
+  gap: $faLocaleTranslationsInput-menuRow-gap;
+  padding-bottom: $faLocaleTranslationsInput-rows-padding-y;
+}
+
+/* No column headers above: breathe under shell’s zero top padding. */
+.faLocaleTranslationsInput__menuBody:not(.faLocaleTranslationsInput__menuBody--singularPlural) .faLocaleTranslationsInput__rows {
+  padding-top: $faLocaleTranslationsInput-rows-padding-y;
+}
+
+/* Align pinned aside with first locale row when rows gain top padding. */
+.faLocaleTranslationsInput__menuBody--pinnedAside:not(.faLocaleTranslationsInput__menuBody--singularPlural) .faLocaleTranslationsInput__pinnedAsideInput {
+  margin-top: $faLocaleTranslationsInput-rows-padding-y;
+}
+
+.faLocaleTranslationsInput__row {
+  width: 100%;
+}
+
+.faLocaleTranslationsInput__row--singularPlural {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: $faLocaleTranslationsInput-singularPlural-row-gap;
+}
+
+.faLocaleTranslationsInput__columnHeaders {
+  flex-shrink: 0;
+  gap: $faLocaleTranslationsInput-columnHeaders-gap;
+  margin-bottom: 0;
+  padding: $faLocaleTranslationsInput-rows-padding-y 0;
+}
+
+.faLocaleTranslationsInput__formHeader {
+  color: $faLocaleTranslationsInput-formHeader-color;
+  font-size: $faLocaleTranslationsInput-formHeader-fontSize;
+  font-weight: $faLocaleTranslationsInput-formHeader-fontWeight;
+  letter-spacing: $faLocaleTranslationsInput-formHeader-letterSpacing;
+  text-transform: uppercase;
+}
+
+.faLocaleTranslationsInput__scroll--singularPluralRows {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden auto;
+  width: 100%;
+}
+
+.faLocaleTranslationsInput__menuInput {
+  min-width: 0;
+  width: 100%;
+}

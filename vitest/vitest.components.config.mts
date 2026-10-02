@@ -1,0 +1,106 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+import vue from '@vitejs/plugin-vue'
+import type { UserConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
+
+import {
+  vitestCoverageBaseExclude,
+  vitestCoverageSkipFull,
+  vitestCoverageStrictThresholdsPerFile
+} from './vitest.coverage.shared'
+import { vitestTerminalReporters } from './vitest.reporters.shared'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const repoRoot = path.resolve(__dirname, '..')
+const componentsCoverageDir = path.resolve(repoRoot, 'test-results/coverage-components')
+
+/**
+ * Vite's published SassPreprocessorOptions omit the sass compiler 'api' field; vite and sass-embedded still read it at runtime.
+ */
+type T_vitestComponentsScssOpts = NonNullable<
+  NonNullable<NonNullable<UserConfig['css']>['preprocessorOptions']>['scss']
+>
+
+/**
+ * Vue SFC unit tests — happy-dom + SFC transforms: components, layouts, and pages.
+ * **.ts** and **.vue** under those trees: 95% statements, 80% branches, 100% functions, 95% lines per file (**coverage.thresholds** glob + **perFile: true**).
+ * **`coverage.watermarks`** use a **60%** lower band so weak per-file totals show orange or red in reports.
+ */
+export default defineConfig({
+  plugins: [vue()],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'legacy'
+      } as T_vitestComponentsScssOpts
+    }
+  },
+  resolve: {
+    alias: {
+      '#q-app/wrappers': path.resolve(
+        repoRoot,
+        'node_modules/@quasar/app-vite/exports/wrappers/wrappers.js'
+      ),
+      app: repoRoot,
+      src: path.resolve(repoRoot, 'src'),
+      components: path.resolve(repoRoot, 'src/components'),
+      'src-electron': path.resolve(repoRoot, 'src-electron')
+    },
+    conditions: ['import', 'module', 'browser', 'default']
+  },
+  assetsInclude: ['**/*.md'],
+  test: {
+    name: 'unit-components',
+    environment: 'happy-dom',
+    setupFiles: [path.resolve(__dirname, 'vitest.setup.ts')],
+    include: [
+      'src/components/**/*.vitest.test.ts',
+      'src/layouts/**/*.vitest.test.ts',
+      'src/pages/**/*.vitest.test.ts'
+    ],
+    reporters: [...vitestTerminalReporters],
+    outputFile: 'test-results/vitest-report/test-results-vitest-components.json',
+    clearMocks: true,
+    pool: 'threads',
+    globalSetup: [path.resolve(__dirname, 'vitest.coverageTmpSetup.mts')],
+    coverage: {
+      provider: 'v8',
+      clean: false,
+      processingConcurrency: 1,
+      reportsDirectory: componentsCoverageDir,
+      skipFull: vitestCoverageSkipFull,
+      include: [
+        'src/components/**/*.vue',
+        'src/components/**/*.ts',
+        'src/layouts/**/*.vue',
+        'src/pages/**/*.vue'
+      ],
+      exclude: [
+        ...vitestCoverageBaseExclude,
+        'src/components/**/_tests/**',
+        'src/layouts/**/_tests/**',
+        'src/pages/**/_tests/**',
+        '**/*.stories.ts',
+        // Storybook-only catalogues (see AGENTS.md foundation section); strict gates apply to product UI only.
+        'src/components/foundation/**'
+      ],
+      watermarks: {
+        statements: [60, 100],
+        branches: [60, 100],
+        functions: [60, 100],
+        lines: [60, 100]
+      },
+      thresholds: {
+        perFile: true,
+        'src/components/**/*.ts': { ...vitestCoverageStrictThresholdsPerFile },
+        'src/components/**/*.vue': { ...vitestCoverageStrictThresholdsPerFile },
+        'src/layouts/**/*.ts': { ...vitestCoverageStrictThresholdsPerFile },
+        'src/layouts/**/*.vue': { ...vitestCoverageStrictThresholdsPerFile },
+        'src/pages/**/*.ts': { ...vitestCoverageStrictThresholdsPerFile },
+        'src/pages/**/*.vue': { ...vitestCoverageStrictThresholdsPerFile }
+      }
+    }
+  }
+})

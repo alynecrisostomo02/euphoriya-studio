@@ -1,0 +1,95 @@
+---
+description: Vitest file layout, documentation, and test style for Fantasia Archive
+globs: "**/*.vitest.test.ts"
+alwaysApply: false
+---
+
+# Vitest tests (`*.vitest.test.ts`)
+
+## Running and reports
+
+- Fast unit pass (no coverage): **`yarn test:unit`** — [Vitest multi-project root](vitest.config.mts) ([testing-terminal-isolation.mdc](testing-terminal-isolation.mdc)): **`unit-electron`**, **`unit-src-renderer`**, **`unit-helpers`**, **`unit-i18n`**, **`unit-components`**. Root **`root`** = repository; each project **`extends`** file under **`vitest/`** — globs resolve from repo root.
+- **Dev edits (agents):** connected **`yarn vitest run <spec paths>`** only — [dev-scoped-verify.mdc](dev-scoped-verify.mdc), [fantasia-dev-scoped-verify](../skills/fantasia-dev-scoped-verify/SKILL.md). **Commit / final cleanup / CI:** full **`yarn testbatch:verify`** below.
+- Coverage terminal reporting: **`vitestTerminalReporters`** in [vitest.reporters.shared.ts](../../vitest/vitest.reporters.shared.ts) — **`agent`** first (omits noisy per-pass lines; failures + summary print), then **`json`** → **`test-results/vitest-report/test-results-vitest-*.json`** (per **`outputFile`** in each **`vitest/*.config.mts`**).
+- **Full quality gate** / coverage: **`yarn testbatch:verify`** ends **`yarn test:coverage:verify`** — v8 coverage order: **`yarn test:coverage:electron`** (95% all four **`src-electron`**, [vitest.electron.config.mts](vitest/vitest.electron.config.mts)), **`yarn test:coverage:helpers`** (95% all four **`helpers/**/*.ts`** **`unit-helpers`** instruments — **`helpers/playwrightHelpers_*`** excluded per [vitest.helpers.config.mts](vitest/vitest.helpers.config.mts); project may run zero tests until helper packages ship), **`yarn test:coverage:i18n`** (95% scoped **`i18n/`** per [vitest.i18n.config.mts](vitest/vitest.i18n.config.mts)), **`yarn test:coverage:src`** = [vitest.src-renderer.config.mts](vitest/vitest.src-renderer.config.mts) (95% **`src/`** boot, scripts, stores) then [vitest.components.config.mts](vitest/vitest.components.config.mts) (95% **`src/components/**/*.ts`**, **`src/layouts/**/*.ts`**, **`src/pages/**/*.ts`**, and matching **`.vue`** — **each file** via **`perFile: true`**; **`src/components/foundation/**`** excluded from **`include`**). **Vitest coverage tiers (CI)** below = same rules numbered. Same chain as **`yarn test:unit:coverage`**.
+- Debug single project: **`--config vitest/vitest.<slice>.config.mts`** or **`yarn test:coverage:electron`**, **`helpers`**, **`i18n`**, **`src`**. Bare **`vitest run --coverage`** without **`--config`** mixes workspace projects — prefer explicit scripts for coverage gates.
+- JSON reports: **`test-results/vitest-report/test-results-vitest-electron.json`**, **`...-src-renderer.json`**, **`...-helpers.json`**, **`...-i18n.json`**, **`...-components.json`**.
+
+## Vitest coverage tiers (CI)
+
+Canonical summary; numbers + **`include`** enforced in **`vitest/*.config.mts`**. Also **README.md** (Quality gates), **AGENTS.md** (Testing).
+
+1. **`src-electron`** — 95% statements, branches, functions, lines ([vitest.electron.config.mts](vitest/vitest.electron.config.mts)).
+2. **`helpers/**/*.ts`** **`unit-helpers`** **`coverage`** **`include`** matches (**`helpers/playwrightHelpers_*`** excluded — Playwright harness; correctness **`yarn test:components`** / **`yarn test:e2e`** after build) — 95% all four when instrumented set non-empty ([vitest.helpers.config.mts](vitest/vitest.helpers.config.mts)). Workspace tooling under **`vitest/`** not under **`helpers/`**.
+3. Repo-root **i18n/** entry **.ts** in [vitest.i18n.config.mts](vitest/vitest.i18n.config.mts) (registry **index.ts**, per-locale **index.ts**, **externalFileLoader.ts**, **specialCharactersFixer.ts**) — 95% all four. Pure **L_*.ts** via indexes, not separately gated.
+4. **`src`** renderer **`.ts`** **`unit-src-renderer`** — 95% all four ([vitest.src-renderer.config.mts](vitest/vitest.src-renderer.config.mts)).
+5. **`src/components/**/*.ts`**, **`src/layouts/**/*.ts`**, **`src/pages/**/*.ts`**, and matching **`.vue`** under those trees **`unit-components`** — each file **95%** statements/lines, **80%** branches, **100%** functions (**`perFile: true`** on threshold globs; [vitest.components.config.mts](vitest/vitest.components.config.mts)).
+6. **`src/components/foundation/**`** omitted from **`unit-components`** coverage **`include`**.
+
+**Workspace layout:** [vitest.config.mts](vitest.config.mts) **`root`** = repository; each project **`extends`** one file under **`vitest/`** — globs e.g. **`src-electron/**`** from repo root.
+
+**Vitest 5:** **`clearMocks`** defaults **true**. **`unit-components`** already **true**; other unit projects set **`clearMocks: false`** so import-time mock call counts survive. Coverage **`include`** path with no glob wildcard = directory, not file — i18n entries use **`**/i18n/...`**. Glob threshold objects must set **`perFile: true`** themselves (no inherit). Ignore **`.vitest/`**.
+
+## Placement and discovery
+
+- **Connected suites:** Change production module → **search** other **`*.vitest.test.ts`** importing/mocking it or asserting same **`i18n`** keys/domain ids → **`yarn vitest run`** every implicated path — not only suite beside edited file. Pair Playwright per [fantasia-testing](../skills/fantasia-testing/SKILL.md) **Connected tests for any feature change**.
+- Files match `**/*vitest.@(spec|test).?(c|m)[jt]s?(x)` — repo uses **`*.vitest.test.ts`**.
+- Co-locate under **`_tests/`** next to code: [i18n/_tests](i18n/_tests), [src/scripts/_utilities/_tests](src/scripts/_utilities/_tests), [src/stores/_tests](src/stores/_tests), [src-electron/contentBridgeAPIs/_tests](src-electron/contentBridgeAPIs/_tests), [src-electron/mainScripts/_tests](src-electron/mainScripts/_tests) or **`src-electron/mainScripts/<area>/_tests/`**, future **`helpers/<nonPlaywrightPackage>/_tests/`** (**`unit-helpers`** excludes **`helpers/playwrightHelpers_*`**), [src/components/elements/FantasiaMascotImage/_tests](src/components/elements/FantasiaMascotImage/_tests), [src/layouts/_tests](src/layouts/_tests), [src/pages/_tests](src/pages/_tests), [src/components/dialogs/DialogAppSettings/scripts/_tests](src/components/dialogs/DialogAppSettings/scripts/_tests).
+- New **non-Playwright** **`helpers/<name>/`** or new **`.ts`** in such package → add/extend **`*.vitest.test.ts`** same change when non-trivial branching/I/O/public API (same as **`src-electron`**, **`src/scripts`**). **No** **`*.vitest.test.ts`** under **`helpers/playwrightHelpers_*`**.
+- **`src/`**, **`src-electron/`**, Vue SFCs under **`src/components/`**, **`src/layouts/`**, **`src/pages/`** = Vitest surfaces when mounting appropriate; full UI flows in Playwright.
+- **`src/components/**`**, **`src/layouts/**`**, **`src/pages/**`**: **1:1 baseline** — every feature `.vue` has **`_tests/<ComponentOrLayoutOrPageName>.vitest.test.ts`**. Add/rename/remove SFC → update matching Vitest same change. **Extracted `scripts/*.ts`**: focused **`scripts/_tests/*.vitest.test.ts`** when testable logic (stores, transforms, toggles) — not every one-line wrapper. Merge **`scripts/*.ts`** → merge/retire redundant **`scripts/_tests/*.vitest.test.ts`** ([code-size-decomposition.mdc](code-size-decomposition.mdc) **Module count**).
+- **Test file names vs SUT:** **`_tests/<SameBaseNameAsProduction>.vitest.test.ts`** next to single **`*.ts`** or **`.vue`**. Pinia **`index.ts`**: **`_tests/index.vitest.test.ts`**. Several Vitest files per module (different concerns): dotted suffix on production basename (e.g. **`dialogManagement.open.vitest.test.ts`**, **`faKeybindsGlobalDispatch.getFaKeybindKeydownContext.vitest.test.ts`**). Cross-module integration: umbrella name (e.g. **`faKeybinds.integration.vitest.test.ts`**) + short file-top comment listing modules exercised.
+
+## Vue and renderer test boundaries
+
+- Vitest for deterministic renderer logic in `src/` (helpers, stores/composables, serializable transforms, simple component-facing logic in TS).
+- SFC behavior without fragile DOM → focused unit tests on extracted logic path.
+- **`unit-components`** must enforce **95%** on colocated **`scripts/*.ts`** + **`.vue`** branch hard from **`mount`** alone (debounced **`v-model`**, Pinia routing predicates, **`typeof document`** guards, equality gates in **`watch`**) → extract small pure helper or **`vi.mock`-friendly resolver** in feature **`scripts/*.ts`**, cover from **`scripts/_tests/*.vitest.test.ts`**, SFC wiring only. Still extend **`_tests/<Feature>.vitest.test.ts`** mounts when integrated behavior user-visible (menus, dialogs, floating windows).
+- Full interaction/visual/integration → Playwright (`*.playwright.test.ts` / `*.playwright.spec.ts`).
+- **1:1 mapping** = every feature **`.vue`** has **`_tests/<Name>.vitest.test.ts`**; mounts must exercise SFC script/template handlers so **each** **`.vue`** meets the same per-file thresholds as colocated **`.ts`** ([vitest.components.config.mts](vitest/vitest.components.config.mts)).
+- **`_data/`** production feeds only (menus, button lists, locale-backed blobs app ships). **No Vitest fixtures** there.
+- **All Vitest fixture data** inside same `*.vitest.test.ts`: inline **`const`** / object literals at module scope or above test. **No** sibling `_tests/*.ts` data-only files. **No** `_tests/_data/`.
+- **No automated tests** aimed **only** at **`_data/`** (`src/components/**/_data/**`). Cover production `_data` indirectly through components/scripts importing it.
+- Mounted DOM in component Vitest: same **`data-test-locator`** / `data-test-*` as production + Playwright (e.g. `w.get('[data-test-locator="…"]')`); **no** bare `data-test`.
+
+## Imports
+
+- From `vitest`: only needed — `test`, `expect`, `vi`, `expectTypeOf` ([tweaks.vitest.test.ts](src-electron/mainScripts/nativeShell/_tests/tweaks.vitest.test.ts), [fixAppName.vitest.test.ts](src-electron/mainScripts/appIdentity/_tests/fixAppName.vitest.test.ts)).
+- **SUT**: relative import from parent, e.g. `import { appDetailsAPI } from '../appDetailsAPI'`.
+- **JSON**: `import packageJSON from '../../../package.json' assert { type: 'json' }` when comparing package metadata ([fixAppName.vitest.test.ts](src-electron/mainScripts/appIdentity/_tests/fixAppName.vitest.test.ts)).
+- **Node / app paths**: e.g. `import os from 'os'` when test mirrors runtime.
+
+## Documenting each test block
+
+JSDoc immediately above `test` / `test.skip` ([eslint-typescript.mdc](eslint-typescript.mdc): no Markdown emphasis; single quotes not grave accents). No mid-sentence breaks across ` * ` lines; full lines or ` * - ` bullets ([AGENTS.md](../../AGENTS.md) code comments).
+
+1. **First line**: function, API export, or concern name (e.g. `determineAppName`, `checkIfExternal`, `startApp`).
+2. **Following lines**: scenario, expected behavior, skip reason — complete line or bullet, not wrapped continuation mid-clause.
+
+Examples: [faExternalLinksManagementAPI.vitest.test.ts](src-electron/contentBridgeAPIs/_tests/faExternalLinksManagementAPI.vitest.test.ts); skipped Electron-only [appManagement.vitest.test.ts](src-electron/mainScripts/_tests/appManagement.vitest.test.ts).
+
+## `test` titles
+
+- Single **sentence-style** string: `Test ...` / `Test if ...` / `Test that ...` / `Test for ...` — match existing files.
+
+## Runnable tests
+
+- `expect(...)`, `expect(...).toBeTypeOf('string')`, `toContain`, etc. ([appDetailsAPI.vitest.test.ts](src-electron/contentBridgeAPIs/_tests/appDetailsAPI.vitest.test.ts), [extraEnvVariables.vitest.test.ts](src-electron/contentBridgeAPIs/_tests/extraEnvVariables.vitest.test.ts)).
+- `vi.stubEnv` for env-dependent behavior ([fixAppName.vitest.test.ts](../../src-electron/mainScripts/appIdentity/_tests/fixAppName.vitest.test.ts)). **Vitest 3+**: **`DEV`**, **`PROD`**, **`SSR`** → **boolean** (e.g. `vi.stubEnv('DEV', true)`); other keys **`string | undefined`**.
+- **`src-electron`** imports typecheck under **`tsc`**: prefer **`app/...`** alias ([eslint-typescript.mdc](eslint-typescript.mdc)).
+- `vi.mock(...)` when mocking modules.
+- `expectTypeOf` for type-level consistency ([tweaks.vitest.test.ts](src-electron/mainScripts/nativeShell/_tests/tweaks.vitest.test.ts)).
+- No `any` in tests/fixtures; concrete fixture types, generic helpers, or `unknown` + narrowing.
+
+## Skipped tests (`test.skip`)
+
+- Untestable in Vitest → `test.skip` + same JSDoc + clear title.
+
+## File-level notes
+
+- Optional multi-line block comment at file top for scope (e.g. "Nothing else to test here") — [extraEnvVariables.vitest.test.ts](src-electron/contentBridgeAPIs/_tests/extraEnvVariables.vitest.test.ts).
+
+## Do not
+
+- No `describe()` unless rest of suite adopts — **current suites: flat `test` / `test.skip` only**.
+- Do not rename `*.vitest.test.ts` — Vitest discovery depends on it.

@@ -1,0 +1,377 @@
+export default {
+  title: 'Fantasia Archive Ρυθμίσεις',
+  saveButton: 'Αποθήκευση ρυθμίσεων',
+  closeButton: 'Κλείσιμο χωρίς αποθήκευση',
+  settingsSearchPlaceholder: 'Αναζήτηση στις ρυθμίσεις...',
+  settingsSearchClearAriaLabel: 'Καθαρισμός αναζήτησης ρυθμίσεων',
+  searchNoResultsTitle: 'Καμία αντιστοίχιση αναζήτησης',
+  searchNoResultsDescription: 'Η Fantasia δυστυχώς δεν βρήκε καμία ρύθμιση που ψάχνατε. Ίσως δοκιμάσετε έναν διαφορετικό όρο αναζήτησης;',
+  appOptionsCategories: {
+    accessibility: {
+      title: 'Προσιτότητα',
+      tags: 'a11y, αναγνωσιμότητα, ορατότητα, βοηθητικό',
+      accessibility: {
+        subtitle: 'Προσιτότητα',
+        tags: 'a11y, αναγνωσιμότητα, ορατότητα, βοηθητικό',
+      }
+    },
+    developerSettings: {
+      title: 'Ρυθμίσεις προγραμματιστή',
+      tags: 'προγραμματιστής, εντοπισμός σφαλμάτων, διαγνωστικά, εσωτερική',
+      documentBody: {
+        subtitle: 'Σώμα εγγράφου',
+        tags: 'αναγνωριστικό εγγράφου, μεταδεδομένα εντοπισμού σφαλμάτων, εσωτερικά πεδία',
+      }
+    },
+    documentViewEdit: {
+      title: 'Σελίδα: Προβολή/επεξεργασία εγγράφου',
+      tags: 'σελίδα εγγράφου, λειτουργία προβολής, λειτουργία επεξεργασίας, πρόγραμμα ανάγνωσης',
+      documentBody: {
+        subtitle: 'Σώμα εγγράφου',
+        tags: 'περιοχή περιεχομένου, πεδία, ανάγνωση, περιοχή επεξεργασίας',
+      },
+    },
+    hierarchicalTree: {
+      title: 'Ιεραρχικό δέντρο',
+      tags: 'πλαϊνή γραμμή, περίγραμμα, πλοηγός, δέντρο έργου',
+      iconSettings: {
+        subtitle: 'Ρυθμίσεις εικονιδίων',
+        tags: 'εικονίδια δράσης, κουμπιά δέντρων, εικονίδια σειρών',
+      },
+      informationDisplaySettings: {
+        subtitle: 'Ρυθμίσεις εμφάνισης πληροφοριών',
+        tags: 'μετρήσεις, αριθμοί, ευρετήριο παραγγελιών, εμφάνιση μεταδεδομένων',
+      },
+      tagSettings: {
+        subtitle: 'Ρυθμίσεις ετικέτας',
+        tags: 'ετικέτες, εμφάνιση ετικετών, ομαδοποίηση ετικετών',
+      },
+      treeBehavior: {
+        subtitle: 'Συμπεριφορά δέντρων',
+        tags: 'επέκταση, κατάρρευση, επέκταση όλων, αλληλεπίδραση',
+      },
+    },
+
+    popupsFloatingWindows: {
+      title: 'Αναδυόμενα παράθυρα και αιωρούμενα παράθυρα',
+      tags: 'διαλόγους, επικαλύψεις, τρόποι λειτουργίας, παράθυρα',
+      floatingWindows: {
+        subtitle: 'Πλωτά παράθυρα',
+        tags: 'αποσπώ, δευτερεύον παράθυρο, πολλαπλό παράθυρο',
+      },
+      quickSearchDialog: {
+        subtitle: 'Quick-search/Quick-add dialog',
+        tags: 'quick search, quick add, keyboard search, finder, popup close'
+      }
+    },
+    visualAccessibility: {
+      title: 'Οπτικά και λειτουργικότητα σε όλη την εφαρμογή',
+      tags: 'εμφάνιση, διεπαφή, καθολική, UI, εμφάνιση και αίσθηση',
+      applicationExtras: {
+        subtitle: 'Έξτρα εφαρμογής',
+        tags: 'μασκότ, βελούδινο, φαντασία, έξτρα',
+      },
+      appControlBar: {
+        subtitle: 'Γραμμή ελέγχου εφαρμογής',
+        tags: 'γραμμή εργαλείων, επάνω γραμμή, κεφαλίδα, chrome εγγράφων',
+      },
+      tabBehavior: {
+        subtitle: 'Συμπεριφορά καρτελών',
+        tags: 'εναλλαγή καρτελών, λωρίδα καρτελών, συμπεριφορά αιώρησης',
+      },
+      visualsAppwideFunctionality: {
+        subtitle: 'Οπτικά και λειτουργικότητα σε όλη την εφαρμογή',
+        tags: 'θέμα, χρώμιο, διάταξη, γενικές επιλογές',
+      }
+    },
+    projectOverview: {
+      title: 'Σελίδα: Επισκόπηση έργου',
+      tags: 'αρχική έργου, πίνακας, επισκόπηση, χώρος εργασίας',
+      projectOverviewBehavior: {
+        subtitle: 'Συμπεριφορά επισκόπησης έργου',
+        tags: 'συμβουλές, κόλπα, γνωρίζατε, κάρτα επισκόπησης, auto open, last document',
+      }
+    },
+    welcomeScreen: {
+      title: 'Οθόνη καλωσορίσματος',
+      tags: 'splash, start screen, welcome, first launch, home',
+      welcomeScreenBehavior: {
+        subtitle: 'Συμπεριφορά οθόνης καλωσορίσματος',
+        tags: 'συμβουλές εκκίνησης, κοινωνικοί σύνδεσμοι, ενσωμάτωση, splash',
+      }
+    }
+  },
+  appOptions: {
+    aggressiveRelationshipFilter: {
+      title: 'Επιθετική επιλογή σχέσεων',
+      description: 'Ενεργοποιεί τη λειτουργία επιθετικής αυτόματης πρότασης για όλες τις αναζητήσεις σχέσεων στην εφαρμογή στη λειτουργία επεξεργασίας εγγράφων. Χωρίς να είναι ενεργοποιημένο, μετά το φιλτράρισμα, το πρώτο στοιχείο στη λίστα δεν επιλέγεται αυτόματα. Η ενεργοποίηση προσθέτει αυτήν τη λειτουργία—επιτρέποντας την πολύ πιο βολική επιλογή των υπαρχόντων εγγράφων, ενώ θυσιάζει λίγη ευκολία κατά τη δημιουργία νέων εν κινήσει.',
+      tags: 'αυτόματη πρόταση, αυτόματη συμπλήρωση, πρώτη αντιστοίχιση, λίστα φίλτρων, επιλογή υπάρχοντος, αναζήτηση σχέσης',
+    },
+    allowQuickPopupSameKeyClose: {
+      title: 'Κλείστε γρήγορα αναδυόμενα παράθυρα με το ίδιο πλήκτρο',
+      description: 'Επιτρέπει το κλείσιμο των αναδυόμενων παραθύρων γρήγορης αναζήτησης και γρήγορης προσθήκης με τον ίδιο συνδυασμό πλήκτρων που χρησιμοποιήθηκε για το άνοιγμά τους.',
+      tags: 'εναλλαγή συντόμευσης, ίδιο πλήκτρο πρόσβασης, γρήγορη προσθήκη, παράβλεψη αναδυόμενου παραθύρου',
+    },
+    allowWiderScrollbars: {
+      title: 'Ευρύτερες γραμμές κύλισης',
+      description: 'Αυτή η ρύθμιση κάνει τις γραμμές κύλισης του FA ευρύτερες και επομένως επιτρέπει τη μη αυτόματη κύλιση με κλικ απευθείας σε αυτές για συσκευές που δεν υποστηρίζουν τυπική κύλιση (για παράδειγμα ποντίκια χωρίς τροχό κύλισης).',
+      tags: 'Πλάτος γραμμής κύλισης, κύλιση κλικ, ποντίκι χωρίς τροχό, trackball, αφή',
+    },
+    autoOpenLastDocument: {
+      title: 'Auto-open last document',
+      description: 'When opening a project, automatically open the last active document tab instead of showing the Project overview first.',
+      tags: 'auto open, last document, project open, restore tab, skip overview, workspace home, resume session'
+    },
+
+    disableCategoryCount: {
+      title: 'Απόκρυψη αριθμού κατηγοριών',
+      description: 'Απόκρυψη αριθμών κατηγορίας στο ιεραρχικό δέντρο',
+      tags: 'απλοποιημένη καταμέτρηση, μεμονωμένος αριθμός, λιγότερη ακαταστασία',
+    },
+    compactTags: {
+      title: 'Συμπαγείς ετικέτες',
+      description: 'Καθορίζει εάν οι ετικέτες εμφανίζονται ως μεμονωμένες κατηγορίες ή ως μία κατηγορία με κάθε ετικέτα ως υποκατηγορία.',
+      tags: 'ομαδοποίηση ετικετών, φάκελος μεμονωμένης ετικέτας, ένθετες ετικέτες, ιεραρχία ετικετών',
+    },
+    appTheme: {
+      title: 'App theme',
+      description: 'Choose a visual theme for the app to use.',
+      tags: 'dark, light, theme, theming, color, colors',
+      values: {
+        lightThemeFlat: 'Flat theme, Light',
+        darkThemeFlat: 'Flat theme, Dark',
+        lightThemeFantasy: 'Fantasy theme, Light',
+        darkThemeFantasy: 'Fantasy theme, Dark'
+      }
+    },
+    disableCloseAfterSelectQuickSearch: {
+      title: 'Σταματήστε το κλείσιμο μετά την επιλογή',
+      description: 'Κανονικά η γρήγορη αναζήτηση κλείνει αφού επιλεγεί ένα στοιχείο από αυτήν. Η ενεργοποίηση αυτής της λειτουργίας αποτρέπει αυτήν τη συμπεριφορά, επιτρέποντάς σας να ανοίγετε πολλά αποτελέσματα αναζήτησης το ένα μετά το άλλο.',
+      tags: 'κρατήστε ανοιχτό, πολλαπλά αποτελέσματα, παρτίδα ανοιχτή, η γρήγορη αναζήτηση παραμένει ανοιχτή',
+    },
+    disableAppControlBar: {
+      title: 'Απενεργοποιήστε τη γραμμή ελέγχου εφαρμογής',
+      description: 'Εάν θέλετε να μεγιστοποιήσετε τον χώρο εργασίας σας στο έγγραφο, μπορείτε να απενεργοποιήσετε την επάνω γραμμή κουμπιών με αυτήν τη ρύθμιση. Τα απαραίτητα κουμπιά ελέγχου θα μετακινηθούν στο επάνω μέρος του κύριου σώματος του εγγράφου, ενώ η υπόλοιπη λειτουργικότητα θα είναι προσβάσιμη μέσω πλήκτρων ή μέσω του μενού της εφαρμογής επάνω αριστερά.',
+      tags: 'Απόκρυψη γραμμής εργαλείων, μεγιστοποίηση χώρου, πλήρες πλάτος, κεφαλίδα εγγράφου',
+    },
+    disableAppControlBarContentButtons: {
+      title: 'Disable app control bar content buttons',
+      description: 'Toggles the project contents (document search, document creation, etc.) on the app control bar on or off.',
+      tags: 'quick search, quick add, document create, content tools, control bar buttons'
+    },
+    disableAppControlBarFunctionButtons: {
+      title: 'Disable app control bar function buttons',
+      description: 'Toggles the app functional buttons (noteboards, hierarchical tree toggling, etc.) on the app control bar on or off.',
+      tags: 'noteboard, tree toggle, sidebar hide, function tools, control bar buttons'
+    },
+    disableAppControlBarGuides: {
+      title: 'Απενεργοποιήστε τους οδηγούς γραμμής ελέγχου εφαρμογής',
+      description: 'Ενεργοποιεί ή απενεργοποιεί τους φιλικούς οδηγούς για αρχάριους στη γραμμή ελέγχου εφαρμογής.',
+      tags: 'συμβουλές για αρχάριους, πανό για εκπαιδευτικά προγράμματα, σημάδια προπονητή, βοήθεια γραμμής ελέγχου',
+    },
+    disableDocumentCounts: {
+      title: 'Απόκρυψη πλήθους εγγράφων',
+      description: 'Απόκρυψη αριθμών εγγράφων στο ιεραρχικό δέντρο',
+      tags: 'σύνολα εκτός, χωρίς μετρήσεις, στατιστικά στοιχεία απόκρυψη',
+    },
+    disableDocumentToolTips: {
+      title: 'Απενεργοποιήστε τις συμβουλές εργαλείων εγγράφων',
+      description: 'Εάν δεν σας αρέσουν οι συμβουλές εργαλείων προβολής εγγράφων, μπορείτε να τις απενεργοποιήσετε καθολικά εδώ.',
+      tags: 'κείμενο αιώρησης, βοήθεια πεδίου, popover, υποδείξεις προβολής εγγράφου',
+    },
+    disableSpellCheck: {
+      title: 'Απενεργοποιήστε τον ορθογραφικό έλεγχο',
+      description: 'Απενεργοποιεί τον ορθογραφικό, τον γραμματικό και τον έλεγχο λέξεων στη λειτουργία επεξεργασίας εγγράφων.',
+      tags: 'ορθογραφία, γραμματική, διόρθωση, κόκκινη υπογράμμιση, γραφή, λεξικό'
+    },
+
+    disableStartUpdateCheckMessage: {
+      title: 'Disable start update check message',
+      description: 'Disables the app version check message at the start of the app. You will still be able to trigger it manually from the menu should you want to check for updates.',
+      tags: 'update, version check, startup, github releases, notify, toast, check for updates'
+    },
+    doubleDashDocCount: {
+      title: 'Προφέρεται διαιρέτης αρίθμησης',
+      description: 'Αυτή η ρύθμιση προσθέτει έναν άλλο χαρακτήρα \\\\| μεταξύ της κατηγορίας και του αριθμού εγγράφων στο ιεραρχικό δέντρο.',
+      tags: 'σωλήνας, οριοθέτης, διαχωριστής, μορφή μέτρησης, μετρήσεις δέντρων',
+    },
+
+    extraTreePadding: {
+      title: 'Add extra tree padding',
+      description: 'Toggling this on adds extra padding on the left to the tree. This can be useful for example when using tags with long order numbers.',
+      tags: 'padding, indent, left margin, order numbers, tags, hierarchical tree'
+    },
+    forceSublevelCollapseInTree: {
+      title: 'Force sublevel collapse in the tree',
+      description: 'Forces sublevels of the closed node in the hierarchical tree to close as well when a parent node is closed. Normally, they remember the pre-close state and will reopen as they were when closed.',
+      tags: 'force collapse, close children, parent node, nested tree, remember expand'
+    },
+    hideAdvSearchCheatsheetButton: {
+      title: 'Κουμπί βοήθειας απόκρυψης σχέσεων',
+      description: 'Αποκρύπτει το κουμπί βοήθειας για το σύνθετο φύλλο αναζήτησης στα πεδία τύπου σχέσης.',
+      tags: 'πεδίο σχέσης, cheatsheet, εικονίδιο βοήθειας, εργαλείο επιλογής συνδέσμων, σύνθετη αναζήτηση',
+    },
+    hideDeadCrossThrough: {
+      title: 'Απόκρυψη διαγραφής',
+      description: 'Αυτή η ρύθμιση κρύβει το εφέ διαγραφής σε νεκρά, χαμένα ή κατεστραμμένα έγγραφα, προκειμένου να αυξηθεί η ορατότητα.',
+      tags: 'διαγραφή, νεκρός, καταστράφηκε, εξαφανίστηκε, κατάσταση εγγράφου, διαγραμμένο',
+    },
+    hideDocumentTitles: {
+      title: 'Απόκρυψη τίτλων εγγράφων',
+      description: 'Αποκρύπτει τους τίτλους μεγάλων ενοτήτων στην προβολή εγγράφου. Λάβετε υπόψη ότι αυτό μπορεί να οδηγήσει σε σχετικά άγριες αλλαγές διάταξης, οι οποίες ενδέχεται να κάνουν το έγγραφο να φαίνεται απείθαρχο σε ορισμένες περιπτώσεις.',
+      tags: 'επικεφαλίδες ενοτήτων, ομάδες πεδίων, ετικέτες δομών εγγράφων',
+    },
+    hideEmptyFields: {
+      title: 'Απόκρυψη κενών πεδίων',
+      description: 'Αποκρύπτει πεδία χωρίς συμπληρωμένη τιμή, σε λειτουργία προβολής (χωρίς επεξεργασία). Λάβετε υπόψη ότι αυτό μπορεί να οδηγήσει σε σχετικά άγριες αλλαγές διάταξης, οι οποίες ενδέχεται να κάνουν το έγγραφο να φαίνεται απείθαρχο σε ορισμένες περιπτώσεις.',
+      tags: 'κενά πεδία, προβολή μόνο για ανάγνωση, συμπαγές έγγραφο, αλλαγή διάταξης',
+    },
+    hideHierarchyTree: {
+      title: 'Hide hierarchical tree',
+      description: 'Controls whether the hierarchical tree is shown.',
+      tags: 'sidebar off, navigator hidden, tree panel, outline hide'
+    },
+    hidePlushes: {
+      title: 'Απόκρυψη μασκότ Fantasia',
+      description: 'Κρύβει την εκπληκτικά αξιολάτρευτη και φοβερή Fantasia, τον μικροσκοπικό απόκρυφο δράκο. Πώς θα μπορούσες! :(',
+      tags: 'δράκος, μασκότ, βελούδινο, χαρακτήρας, διακόσμηση, πασχαλινό αυγό',
+    },
+    hideTooltipsProject: {
+      title: 'Απόκρυψη συμβουλών για την επισκόπηση έργου',
+      description: 'Αποκρύπτει την κάρτα πληροφοριών για συμβουλές και κόλπα επισκόπησης έργου.',
+      tags: 'σπίτι του έργου, κάρτα ταμπλό, συμβουλές επισκόπησης',
+    },
+    hideTooltipsStart: {
+      title: 'Απόκρυψη αναδυόμενων συμβουλών στην οθόνη έναρξης',
+      description: 'Αποκρύπτει το αναδυόμενο παράθυρο με τις συμβουλές και τα κόλπα της οθόνης έναρξης.',
+      tags: 'πρώτη εκκίνηση, ενσωμάτωση, splash, συμβουλές εκκίνησης, κόλπα',
+    },
+    hideTreeIconAddUnder: {
+      title: 'Απόκρυψη του εικονιδίου "Προσθήκη κάτω".',
+      description: 'Αυτή η επιλογή κρύβει το εικονίδιο "Προσθήκη νέου εγγράφου κάτω από τον επιλεγμένο γονέα".',
+      tags: 'προσθήκη παιδιού, νέο κάτω, συν κάτω, δημιουργία παρακάτω',
+    },
+    hideTreeIconEdit: {
+      title: 'Απόκρυψη του εικονιδίου "Επεξεργασία".',
+      description: 'Αυτή η επιλογή αποκρύπτει το εικονίδιο Επεξεργασίας σειράς.',
+      tags: 'εικονίδιο μολυβιού, σειρά επεξεργασίας, δέντρο γρήγορης επεξεργασίας',
+    },
+    hideTreeIconView: {
+      title: 'Απόκρυψη του εικονιδίου "Άνοιγμα".',
+      description: 'Αυτή η επιλογή αποκρύπτει το εικονίδιο Άνοιγμα γραμμής.',
+      tags: 'εικονίδιο ανοίγματος, μετάβαση στο έγγραφο, κουμπί ανοίγματος σειράς',
+    },
+    hideTreeLines: {
+      title: 'Hide tree lines',
+      description: 'Hides the structural help-lines in the hierarchy tree.',
+      tags: 'lines, helplines, structure, tree, hierarchical, hierarchical tree'
+    },
+    hideTreeOrderNumbers: {
+      title: 'Απόκρυψη αριθμών παραγγελίας',
+      description: 'Αποκρύπτει τους προσαρμοσμένους αριθμούς παραγγελίας στα αριστερά των ονομάτων.',
+      tags: 'ευρετήριο ακολουθίας, χειροκίνητη παραγγελία, πρόθεμα κατάταξης, αριστερό λούκι',
+    },
+    hideRecentProjectTooltip: {
+      title: 'Απόκρυψη επεξήγησης εργαλείου "Αναζήτηση πιο πρόσφατων έργων".',
+      description: 'Αποκρύπτει την επεξήγηση εργαλείου στο πλαίσιο περιήγησης-πιο πρόσφατων έργων δίπλα στη Συνέχιση τελευταίου έργου στην οθόνη καλωσορίσματος.',
+      tags: 'έργο, φόρτωση, φόρτωση, πιο πρόσφατο, πρόσφατο, εισαγωγή, έναρξη, καλωσόρισμα, επεξήγηση εργαλείου, αναδυόμενο παράθυρο, συμβουλές εργαλείων, αναδυόμενο παράθυρο',
+    },
+    hideTabCloseButton: {
+      title: 'Hide tab close button',
+      description: 'Determines whether the tab close buttons in the opened document list will be shown or not. Please note that this will make the tabs closeable only via middle click or right click and then clicking on the menu.',
+      tags: 'tab close, close button, X button, hide close, middle click, context menu, tab strip'
+    },
+    hideWelcomeScreenSocials: {
+      title: 'Απόκρυψη κοινωνικών συνδέσμων οθόνης καλωσορίσματος',
+      description: 'Αποκρύπτει όλους τους συνδέσμους κοινωνικής δικτύωσης στην οθόνη καλωσορίσματος.',
+      tags: 'διχόνοια, twitter, σύνδεσμοι κοινότητας, μέσα κοινωνικής δικτύωσης, καλώς ορίσατε',
+    },
+    skipWelcomeScreen: {
+      title: 'Παράλειψη οθόνης καλωσορίσματος',
+      description: 'Παραλείπει την οθόνη καλωσορίσματος και επιχειρεί να φορτώσει το πιο πρόσφατο έργο απευθείας κατά την εκκίνηση της εφαρμογής.',
+      tags: 'έργο, φόρτωση, φόρτωση, πιο πρόσφατο, πρόσφατο, εισαγωγή, έναρξη, καλωσόρισμα',
+    },
+    invertCategoryPosition: {
+      title: 'Αντιστροφή θέσης κατηγορίας',
+      description: 'Αλλάζει τις θέσεις της κατηγορίας και των αριθμών εγγράφων.',
+      tags: 'swap αριθμοί, σειρά καταμέτρησης, κατηγορία έναντι μέτρησης εγγράφων',
+    },
+    limitEditorHeight: {
+      title: 'Περιορίστε το ύψος του επεξεργαστή κειμένου',
+      description: 'Καθορίζει εάν το πρόγραμμα επεξεργασίας κειμένου έχει περιορισμένο ύψος όταν δεν βρίσκεται σε λειτουργία πλήρους οθόνης.',
+      tags: 'ύψος περιοχής κειμένου, μεγάλο κείμενο, επέκταση επεξεργασίας, πρόγραμμα επεξεργασίας κύλισης',
+    },
+    logFullActivityPayload: {
+      title: 'Καταγραφή πλήρους φορτίου δραστηριότητας',
+      description: 'Εάν αυτό είναι ενεργοποιημένο, η δραστηριότητα θα καταγράφει πλήρη ωφέλιμα φορτία σε όλες τις περιπτώσεις (κανονικά καταγράφει μόνο σε καταστάσεις χωρίς σφάλματα και χωρίς προειδοποίηση). Αυτό μπορεί να είναι χρήσιμο όταν εκτελείτε βαθιά διόρθωση σφαλμάτων που απαιτεί ακριβή καταγραφή των αποτελεσμάτων.',
+      tags: 'αποσφαλμάτωση, αντιμετώπιση προβλημάτων, DevTools, φορτίο, δραστηριότητα, καταγραφή',
+    },
+    noProjectName: {
+      title: 'Απόκρυψη ονόματος έργου στο δέντρο',
+      description: 'Καθορίζει εάν το όνομα του έργου εμφανίζεται καθόλου στο ιεραρχικό δέντρο.',
+      tags: 'ετικέτα ρίζας, δέντρο τίτλου έργου, απόκρυψη κεφαλίδας',
+    },
+    noTags: {
+      title: 'Απόκρυψη ετικετών στο δέντρο',
+      description: 'Καθορίζει εάν οι ετικέτες εμφανίζονται καθόλου στο ιεραρχικό δέντρο.',
+      tags: 'ετικέτες απενεργοποιημένες, λωρίδες ετικετών, ετικέτες δέντρων, απόκρυψη ετικετών',
+    },
+    preventAutoScroll: {
+      title: 'Αποτρέψτε την αυτόματη κύλιση',
+      description: 'Καθορίζει εάν τα έγγραφα ανακαλούν τις θέσεις κύλισης και πραγματοποιούν αυτόματη κύλιση κατά την εναλλαγή μεταξύ τους.',
+      tags: 'θέση κύλισης, θυμηθείτε κύλιση, μετάβαση στην κορυφή, διακόπτης καρτελών',
+    },
+    preventFilledAppNoteBoardPopup: {
+      title: 'Prevent filled app noteboard from showing',
+      description: 'When enabled, the app noteboard will not open automatically at app start when it still contains notes from previous FA sessions.',
+      tags: 'app noteboard, sticky notes, startup, auto open, reminders'
+    },
+    preventFilledProjectNoteBoardPopup: {
+      title: 'Prevent filled project noteboard from showing',
+      description: 'When enabled, the project noteboard will not open automatically when a project loads if it still contains notes from previous project sessions.',
+      tags: 'project noteboard, sticky notes, project open, auto open, reminders'
+    },
+
+    preventPreviewsDocuments: {
+      title: 'Αποτροπή προεπισκοπήσεων εγγράφων',
+      description: 'Ελέγχει εάν οι γρήγορες προεπισκοπήσεις κατά την τοποθέτηση του δείκτη εμφανίζονται στην προβολή εγγράφου και στα πεδία σχέσεων.',
+      tags: 'κάρτα αιώρησης, peek, αναδυόμενο παράθυρο σχέσης, ενσωματωμένη προεπισκόπηση',
+    },
+    preventPreviewsPopups: {
+      title: 'Αποτροπή προεπισκοπήσεων εγγράφων σε παράθυρα διαλόγου',
+      description: 'Ελέγχει εάν εμφανίζονται οι γρήγορες προεπισκοπήσεις κατά την τοποθέτηση του δείκτη κατά την επιλογή εγγράφων στα παράθυρα διαλόγου (για παράδειγμα, το πρόγραμμα επιλογής υπάρχοντος εγγράφου).',
+      tags: 'παράθυρο διαλόγου υπάρχοντος εγγράφου, ένδειξη επιλογής, επιλογή εγγράφου, προεπισκόπηση τρόπου λειτουργίας',
+    },
+    preventPreviewsTabs: {
+      title: 'Αποτρέψτε τις προεπισκοπήσεις εγγράφων στις καρτέλες',
+      description: 'Ελέγχει εάν οι γρήγορες προεπισκοπήσεις κατά την τοποθέτηση του ποντικιού εμφανίζονται σε καρτέλες εγγράφων στη γραμμή καρτελών.',
+      tags: 'αιώρηση καρτέλας, προεπισκόπηση λωρίδας καρτέλας, ματιά στη γραμμή τίτλου',
+    },
+    preventPreviewsTree: {
+      title: 'Αποτροπή προεπισκοπήσεων εγγράφων κατά την τοποθέτηση του δείκτη',
+      description: 'Ελέγχει εάν οι γρήγορες προεπισκοπήσεις κατά την τοποθέτηση του δείκτη εμφανίζονται στο ιεραρχικό δέντρο. Όταν οι προεπισκοπήσεις του δείκτη παραμένουν ενεργοποιημένες, μπορεί να έχουν σημαντικό αντίκτυπο στην απόδοση της εφαρμογής.',
+      tags: 'αιώρηση δέντρου, καθυστέρηση, αργή, fps, απόδοση, προεπισκόπηση πλαϊνής γραμμής',
+      note: 'Μπορεί να έχει σημαντικό αντίκτυπο στην απόδοση της εφαρμογής!',
+    },
+    showDocumentID: {
+      title: 'Εμφάνιση αναγνωριστικών εγγράφων',
+      description: 'Εάν αυτό είναι ενεργοποιημένο, το σώμα του εγγράφου θα εμφανίσει επίσης την τιμή αναγνωριστικού εσωτερικού εγγράφου.',
+      tags: 'εντοπισμός σφαλμάτων, εσωτερικό αναγνωριστικό, αναγνωριστικό, εργαλεία προγραμματισμού, αντιμετώπιση προβλημάτων',
+    },
+    showTabBarScrollButtons: {
+      title: 'Show tab bar scroll buttons',
+      description: 'Determines whether the top tab list scroll buttons should show. Please note that without them, the user is able to scroll on the bar only using the mousewheel.',
+      tags: 'tab scroll, scroll arrows, chevron, overflow, mousewheel, tab strip'
+    },
+    tagsAtTop: {
+      title: 'Κορυφαίες ετικέτες στο δέντρο',
+      description: 'Εμφανίζει ετικέτες στην κορυφή του ιεραρχικού δέντρου.',
+      tags: 'σειρά ετικετών, ετικέτες πρώτα, παραπάνω κατηγορίες',
+    },
+    textShadow: {
+      title: 'Σκιά κειμένου',
+      description: 'Αυτή η ρύθμιση εναλλάσσει τις σκιές κειμένου στο ιεραρχικό δέντρο, τα αναδυόμενα παράθυρα αναζήτησης σχέσεων και τις καρτέλες, επιτρέποντας μια πιο εμφανή εμφάνιση του κειμένου στο φόντο.',
+      tags: 'αντίθεση, αναγνωσιμότητα, σκιά, περίγραμμα, αναγνωσιμότητα, σαφήνεια κειμένου',
+    }
+  }
+}

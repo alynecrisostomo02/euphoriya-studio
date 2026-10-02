@@ -1,0 +1,81 @@
+@use '../quasar.variables.scss' as *;
+@use 'quasar/src/css/variables.sass' as quasarPalette;
+
+* {
+  letter-spacing: $globals-letterSpacing;
+
+  &::before,
+  &::after {
+    backface-visibility: hidden !important;
+  }
+}
+
+html,
+body {
+  overflow: hidden !important;
+}
+
+body {
+  &.body--light {
+
+    /* WebKit/Blink Browsers */
+    ::selection {
+      background: $selectBackgroundColor-lightMode;
+      color: $selectTextColor-lightMode;
+    }
+
+    /* Gecko Browsers */
+    ::-moz-selection {
+      background: $selectBackgroundColor-lightMode;
+      color: $selectTextColor-lightMode;
+    }
+  }
+
+  &.body--dark {
+
+    /* WebKit/Blink Browsers */
+    ::selection {
+      background: $selectBackgroundColor-darkMode;
+      color: $selectTextColor-darkMode;
+    }
+
+    /* Gecko Browsers */
+    ::-moz-selection {
+      background: $selectBackgroundColor-darkMode;
+      color: $selectTextColor-darkMode;
+    }
+  }
+}
+
+a {
+  color: $aLinkColor;
+}
+
+p {
+  margin: $globals-paragraph-margin;
+}
+
+textarea {
+  color: $globals-contentFields-textColor;
+  font-size: $globals-contentFields-fontSize;
+  line-height: $globals-contentFields-lineHeight;
+  padding-bottom: $globals-contentFields-paddingBottom;
+  padding-top: $globals-contentFields-paddingTop;
+}
+
+li {
+  padding-bottom: $globals-listItem-paddingBottom;
+}
+
+code {
+  &.code-token {
+    background-color: $globals-codeToken-backgroundColor;
+    border-radius: $globals-codeToken-borderRadius;
+    color: $globals-codeToken-textColor;
+    font-family: $globals-codeToken-fontFamily;
+    font-size: $globals-codeToken-fontSize;
+    line-height: $globals-codeToken-lineHeight;
+    padding: $globals-codeToken-padding;
+    vertical-align: baseline;
+  }
+}

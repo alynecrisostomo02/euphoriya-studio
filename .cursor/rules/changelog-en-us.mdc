@@ -1,0 +1,19 @@
+---
+description: Keep en-US changeLog.md strictly aligned with package.json version without any automatic version bumping
+alwaysApply: true
+---
+
+# Changelog discipline
+
+- **When to edit**: Tie changelog to **same commit** (or same pre-push batch) as substantive product/UX/test/docs work. Finish **`i18n/*/documents/changeLog.md`** **before** `git commit` and **`git push`** when shipping batch immediately. Avoid **changelog-only** commit after feature already committed/pushed — needless history noise. **Changelog-only** path rare (wrong section, typo); see [testing-terminal-isolation.mdc](testing-terminal-isolation.mdc).
+- Before changelog edit tied to new product/docs/test work: confirm workflow — [testing-terminal-isolation.mdc](testing-terminal-isolation.mdc) — dev scoped gate during edits; full **`yarn testbatch:verify`** before commit when product/test sources changed ([eslint-typescript.mdc](eslint-typescript.mdc)); Storybook for affected **`src/components/**`** (**`yarn storybook:run`** / **`yarn storybook:build`**; layout/page previews no Docs/autodocs); then changelog. **Only** adjust **`i18n/*/documents/changeLog.md`** in exceptional follow-up after full verify → may **skip** **`yarn testbatch:verify`** per changelog-only rule; if **uncertain**, run full gate.
+- After substantive product/user-visible changes: update [changeLog.md](i18n/en-US/documents/changeLog.md) using [package.json](package.json) `version` as only version source ([fantasia-changelog-en-us skill](../skills/fantasia-changelog-en-us/SKILL.md)).
+- Before editing: re-read [package.json](package.json) live `version`; no cached values.
+- Preparing updates: inspect `.cursor/plans/` for plans matching current `package.json.version` for release-context notes.
+- **NEVER, EVER, UNDER ANY CIRCUMSTANCES** auto-bump, infer, or mutate version in `package.json` or changelog headings.
+- **Always** append/edit under section matching current `package.json.version`, unless user explicitly asks manual version change.
+- **Do not** turn in-app changelog into internal QA/CI/Git log: **omit** bullets whose only substance is maintainers re-ran `yarn testbatch:verify`, `yarn testbatch:ensure:nochange`, `yarn testbatch:ensure:change`, `yarn lint:eslint`, `yarn lint:typescript`, `yarn lint:stylelint`, `yarn test:unit`, production `yarn quasar:build:electron`, Playwright component/E2E, Storybook smoke/visual, or other verification (“all tests passed”, “pipeline green”). **Omit** bullets about commits, pushes, splitting batches, or editing `changeLog.md`. Changelog = **what changed** for users/shipped product, not **how** validated/merged.
+- **Omit** empty `###` categories (`New features`, `Known issues`, `Bugfixes & Optimizations`, etc.) — no placeholder “none” bullets.
+- **`changeLog.md` is vue-i18n message**: avoid literal **`{`…`}`** in Markdown — parsed as interpolation placeholders; can throw **message compilation** errors in-app (incl. **`Invalid token in placeholder`** when inner text looks like code, e.g. **`{ force: true }`**). Applies to shell glob brace expansion (**`*.{vue,css}`**), **JS/TS object literals**, quoted API snippets with raw braces. Describe globs without brace expansion; rephrase code without **`{...}`**; see [fantasia-changelog-en-us skill](../skills/fantasia-changelog-en-us/SKILL.md).
+- **Bold UI references** in **`changeLog.md`** mirror shipped **`en-US`** strings (**headline-style** menu rows, dialogs, **Keybind Settings** commands, floating titles — **sentence-style** only for longer narrative); preserve acronyms/product tokens per [en-us-ui-copy-capitalization.mdc](en-us-ui-copy-capitalization.mdc).
+- **Translated changelogs**: **never** edit **`i18n/<locale>/documents/changeLog.md`** (any non-**`en-US`** locale) unless user **explicitly** asks to mirror. Default = **`en-US`** only. Translations or other i18n work do **not** trigger changelog mirror.

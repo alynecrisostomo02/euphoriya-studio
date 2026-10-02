@@ -1,0 +1,56 @@
+import type Database from 'better-sqlite3'
+
+import {
+  mapFaProjectWorldTemplateGroupRow,
+  mapFaProjectWorldTemplatePlacementForProjectSettingsRow
+} from '../faProjectContentRowMap_manager'
+import {
+  FA_PROJECT_TABLE_DOCUMENT_TEMPLATES,
+  FA_PROJECT_TABLE_WORLD_TEMPLATE_GROUPS,
+  FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS
+} from '../functions/faProjectDbSchemaDdl'
+import type { I_faProjectWorldTemplateLayoutForProjectSettings } from 'app/types/I_faProjectWorldTemplateLayoutDomain'
+import type {
+  I_faSqlWorldTemplateGroupRow,
+  I_faSqlWorldTemplatePlacementJoinRow
+} from 'app/types/I_faProjectContentRowMap'
+import { listFaProjectPlacementCategoryDocumentCounts } from './faProjectPlacementCategoryDocumentCountsWiring'
+
+export function listFaProjectWorldTemplateLayoutForProjectSettings (
+  db: Database,
+  worldId: string
+): I_faProjectWorldTemplateLayoutForProjectSettings {
+  const groupRows = db
+    .prepare(
+      'SELECT id, world_id, display_name, display_name_translations_json, root_sort_order, ' +
+        'created_at_ms, updated_at_ms ' +
+        `FROM ${FA_PROJECT_TABLE_WORLD_TEMPLATE_GROUPS} WHERE world_id = ? ` +
+        'ORDER BY root_sort_order ASC, created_at_ms ASC, id ASC'
+    )
+    .all(worldId) as I_faSqlWorldTemplateGroupRow[]
+
+  const placementRows = db
+    .prepare(
+      'SELECT p.id, p.world_id, p.document_template_id, p.group_id, p.root_sort_order, ' +
+        'p.group_sort_order, p.nickname, p.nickname_translations_json, p.nickname_singular_translations_json, p.created_at_ms, ' +
+        'p.updated_at_ms, t.display_name, t.world_appendix, t.icon ' +
+        `FROM ${FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS} p ` +
+        `INNER JOIN ${FA_PROJECT_TABLE_DOCUMENT_TEMPLATES} t ON t.id = p.document_template_id ` +
+        'WHERE p.world_id = ? ' +
+        'ORDER BY COALESCE(p.root_sort_order, p.group_sort_order) ASC, p.created_at_ms ASC, p.id ASC'
+    )
+    .all(worldId) as I_faSqlWorldTemplatePlacementJoinRow[]
+
+  const placementCounts = listFaProjectPlacementCategoryDocumentCounts(db, worldId)
+
+  return {
+    groups: groupRows.map(mapFaProjectWorldTemplateGroupRow),
+    placements: placementRows.map((row) => {
+      const counts = placementCounts.get(row.id)
+      return mapFaProjectWorldTemplatePlacementForProjectSettingsRow(row, {
+        categoryCountInWorld: counts?.categoryCount ?? 0,
+        documentCountInWorld: counts?.documentCount ?? 0
+      })
+    })
+  }
+}

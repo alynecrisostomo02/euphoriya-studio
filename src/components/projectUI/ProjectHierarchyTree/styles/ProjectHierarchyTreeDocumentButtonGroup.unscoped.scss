@@ -1,0 +1,56 @@
+@use './variables' as *;
+@use '../../../../css/globals/faColorGlyph.mixin.scss' as colorGlyph;
+
+.projectHierarchyTreeDocumentButtonGroup {
+  align-self: center;
+  display: flex;
+  flex-grow: 0;
+  flex-shrink: 0;
+  height: fit-content;
+  margin-left: $projectHierarchyTree-documentButtonGroup-marginLeft;
+  padding-left: $projectHierarchyTree-documentButtonGroup-paddingLeft;
+  z-index: 1;
+}
+
+.projectHierarchyTreeDocumentButtonGroup__button {
+  margin-left: $projectHierarchyTree-documentButton-marginLeft;
+
+  &.q-btn--round {
+    height: $projectHierarchyTree-documentButton-size;
+    min-height: $projectHierarchyTree-documentButton-size;
+    min-width: $projectHierarchyTree-documentButton-size;
+    width: $projectHierarchyTree-documentButton-size;
+  }
+}
+
+.projectHierarchyTreeDocumentButtonGroup__button--open {
+  .q-icon {
+    --fa-color-glyph-base: #{$projectHierarchyTree-documentButton-openEditIcon-color};
+
+    color: var(--fa-color-glyph-base);
+    font-size: $projectHierarchyTree-documentButton-openIcon-fontSize;
+  }
+}
+
+.projectHierarchyTreeDocumentButtonGroup__button--edit {
+  .q-icon {
+    --fa-color-glyph-base: #{$projectHierarchyTree-documentButton-openEditIcon-color};
+
+    color: var(--fa-color-glyph-base);
+    font-size: $projectHierarchyTree-documentButton-editIcon-fontSize;
+  }
+}
+
+.projectHierarchyTreeDocumentButtonGroup__button--addUnder {
+  .q-icon {
+    --fa-color-glyph-base: #{$projectHierarchyTree-documentButton-addUnderIcon-color};
+
+    color: var(--fa-color-glyph-base);
+    font-size: $projectHierarchyTree-documentButton-addUnderIcon-fontSize;
+  }
+}
+
+/* QBtn icon prop cannot take fa-color-glyph class; shade via mixin under fantasy. */
+body.fa-appTheme--fantasy .projectHierarchyTreeDocumentButtonGroup__button .q-icon {
+  @include colorGlyph.fa-color-glyph-shading;
+}

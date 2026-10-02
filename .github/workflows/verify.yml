@@ -1,0 +1,41 @@
+# PR/push: quality gate only (lint, types, stylelint, Vitest coverage: 100% src-electron + helpers;
+# src .ts thresholds per vitest/ — Vue SFCs watermarks only). Storybook VRT (`yarn test:storybook:visual*`) runs locally or via
+# `yarn testbatch:ensure:nochange` — not in CI.
+name: Verify
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.22'
+          cache: yarn
+          cache-dependency-path: |
+            yarn.lock
+            .storybook-workspace/yarn.lock
+
+      - name: Install Yarn 1.x
+        run: npm install -g yarn@1.22.19
+
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install Storybook workspace dependencies (ESLint scopes .storybook-workspace)
+        run: yarn --cwd .storybook-workspace install --frozen-lockfile
+
+      - name: Quality gate
+        run: yarn testbatch:verify

@@ -1,0 +1,59 @@
+---
+description: Context menu and dropdown row dividers — group separator vs separatorAlt
+globs: "src/components/**/*.vue"
+alwaysApply: false
+---
+
+# Context menu dividers
+
+Project-wide pattern for **`q-menu`** / **`q-btn-dropdown`** panels with **`q-list`** + **`q-item`** action rows.
+
+Canonical renderer: **`AppControlSingleMenu`**. Playbook: [fantasia-context-menu-dividers skill](../skills/fantasia-context-menu-dividers/SKILL.md).
+
+## Two divider tiers
+
+| Tier | When | Style |
+| --- | --- | --- |
+| **Group separator** | Logical section break (browse → actions, close → destructive, duplicate → delete, expand block → add-new) | **`$appControlMenus-separatorColor`** (**`primary-bright`**), height **`$appControlSingleMenu-separator-height`** (0.5px), full opacity |
+| **separatorAlt** | Between consecutive items in same group with no group separator above | **`$appControlMenus-separatorAltColor`** (**`text-menu-separator`**), same height, **`opacity: 0.2`** |
+
+**Never** stack group separator + separatorAlt on the same boundary.
+
+## Placement rule
+
+Before each item row at index **≥ 1**:
+
+- Previous row was **group separator** → **no** separatorAlt
+- Previous row was another **item** → **yes** separatorAlt
+- First row → **no** divider
+
+Data-driven menus: **`contextMenuShouldShowSeparatorAltBeforeItem`** in **`AppControlMenus/scripts/functions/contextMenuShouldShowSeparatorAltBeforeItem.ts`**.
+
+Hand-built **`v-for`**: **`v-if="contextMenuShouldShowSeparatorAltBeforeIndex(index)"`** (or **`index > 0`** when no inline group separators in loop).
+
+## SCSS
+
+**`@use`** mixin from **`AppControlMenus/styles/_contextMenuSeparators.mixin.scss`**:
+
+- **`@include fa-context-menu-separator-group`** on **`*__separator`**
+- **`@include fa-context-menu-separator-alt`** on **`*__separatorAlt`**
+
+Feature BEM block keeps local class names; tokens stay shared.
+
+## Themed exceptions
+
+- **Light** menus (e.g. **`GlobalLanguageSelector`**) — same alt rule; alt color from feature **`styles/_variables.scss`** (often **`text-menu-separator`** + **`opacity: 0.2`**).
+- **Splash** resume dropdown — same alt rule; splash-specific alt token in feature SCSS.
+- **Destructive sub-boundary** (e.g. force-close → delete) may use explicit **`primary-bright`** class when product calls for emphasis — not separatorAlt.
+
+## Not in scope
+
+**`q-color`**, icon grid pickers, locale translation field panels, confirm-only **`q-menu`** shells without action **`q-item`** rows.
+
+**In scope (option lists):** **`FaSelectInput`** option rows use **separatorAlt** between consecutive options ([fa-select-input.mdc](fa-select-input.mdc)).
+
+## Related
+
+- [vue-quasar.mdc](vue-quasar.mdc) — **`AppControlSingleMenu`** / **`_data/`** menus
+- [vue-bem-scss.mdc](vue-bem-scss.mdc), [component-styles-folder.mdc](component-styles-folder.mdc)
+- [fa-select-input.mdc](fa-select-input.mdc) — select dropdown option separators

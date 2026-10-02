@@ -1,0 +1,46 @@
+---
+description: List and table drag-and-drop — vue-draggable-plus, q-draggable-table, he-tree exceptions
+globs: "**/*.vue,src/scripts/**/*.ts"
+alwaysApply: false
+---
+
+# Drag-and-drop for lists and tables
+
+## Default — flat and simple lists
+
+Renderer **drag-and-drop reorder** in lists (**`QList`** / **`QItem`**, vertical settings rows, chip lists, non-tree non-**`QTable`** collections) → **[`vue-draggable-plus`](https://vue-draggable-plus.pages.dev/en/)** (`package.json`).
+
+- **`VueDraggable`** + **`v-model`** on backing array, or **`useDraggable`** / **`v-draggable`** when list root not plain wrapper (e.g. Quasar list bodies).
+- Dedicated **drag handle** (grip on **`QItemSection`**) via Sortable **`handle`** when rows also navigate/open menus on click.
+- Persist new order via existing Pinia + IPC after drop; map indices to domain fields (e.g. **`sort_order`** on worlds).
+- **Vertical tab strips** (e.g. **Project Settings** world/document-template tabs): **`vue-draggable-plus`** + **`faDragDrop_manager`** (**`buildFaVerticalDraggableTabsRootStyle`**, sortable options, document drag cursor wiring) + **`faVerticalDraggableTabs`** SCSS; reusable **`FaVerticalDraggableTabList`**. TabList hosts: layout props (**`tabListWidthPx`**, **`tabPadding`**, **`tabTextAlign`**, **`tabJustifyContent`**, **`tabLabelTextTransform`**, **`tabLabelFontSize`**, **`dense`**) — **`types/I_faVerticalDraggableTabs.ts`**, [fantasia-drag-drop skill](../skills/fantasia-drag-drop/SKILL.md) **Vertical draggable tab strips**.
+- **Horizontal open document tabs** (**`ProjectAppControlBarOpenedTabs`**): same **`vue-draggable-plus`** + shared Sortable forceFallback / document-drag-cursor helpers; **`direction: 'horizontal'`**; close-btn **`filter`**; **`draggable="false"`** on **`q-route-tab`** (blocks native `<a>` drag). Quasar **`.q-tabs__content`** is **`overflow: hidden`** → custom edge auto-scroll (**`projectAppControlBarTabsDragEdgeScroll*`**), not Sortable AutoScroll. Wheel scroll: **`projectAppControlBarTabsWheelScroll*`**. Persist via **`S_FaOpenedDocuments.reorderDocumentTabs`**.
+
+**Do not** add SortableJS, **`vuedraggable`**, **`vue-draggable-next`**, or ad hoc HTML5 **`draggable`** for list reorder unless maintainer documents narrow exception in review.
+
+## Exception 1 — hierarchical trees (`@he-tree/vue`)
+
+**Nested expand/collapse tree** → **`@he-tree/vue`** (`BaseTree` / **`Draggable`**) built-in DnD. **No** **`vue-draggable-plus`** on tree nodes.
+
+See [fa-he-tree.mdc](fa-he-tree.mdc), [fantasia-he-tree skill](../skills/fantasia-he-tree/SKILL.md).
+
+## Exception 2 — **`QTable`** row reorder
+
+**`QTable`** row reorder → **`quasar-ui-q-draggable-table`** (**`v-draggable-table`**). Boot: **`src/boot/q-draggable-table.ts`**.
+
+- Directive **`options.mode`**: **`'row'`** for row reorder (default column mode = column drag).
+- **`onDrop(from, to)`** splices backing **`rows`**; library reports indexes only — does not mutate Vue state.
+- **Row mode incompatible with `virtual-scroll`** on same table; non-virtual table or other UX for very large row sets.
+- Column reorder: same directive **`mode: 'column'`** when product need arises.
+
+**Do not** use **`vue-draggable-plus`** on **`QTable`** body rows.
+
+## Out of scope (custom pointer sessions)
+
+**Spatial** drag (movable floating windows, free-position panels) → feature **`src/scripts/`** pointer sessions (e.g. **`faFloatingWindowTitleDragPointerSession`**) — not list libraries above.
+
+## Related
+
+- [fantasia-drag-drop skill](../skills/fantasia-drag-drop/SKILL.md)
+- [AGENTS.md](../../AGENTS.md) Trees / DnD
+- [vue-quasar.mdc](vue-quasar.mdc)

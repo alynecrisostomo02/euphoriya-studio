@@ -1,0 +1,636 @@
+import { beforeEach, expect, test, vi } from 'vitest'
+
+import { FA_PROJECT_MANAGEMENT_IPC } from 'app/src-electron/electron-ipc-bridge'
+import type { I_faRecentProjectMruHeadResolve } from 'app/types/I_faRecentProjectsDomain'
+
+const {
+  runCreateMock,
+  runOpenMock,
+  ipcMainHandleMock,
+  appOnMock,
+  assertMainWindowSenderMock,
+  closeActiveMock,
+  getRecentSnapshotMock,
+  resolveRecentMruHeadMock,
+  recordRecentProjectEntryMock,
+  readProjectNoteboardRootMock,
+  upsertProjectNoteboardKvMock,
+  readProjectSettingsRootMock,
+  upsertProjectSettingsKvMock,
+  readProjectStylingRootMock,
+  upsertProjectStylingKvMock,
+  readProjectSidebarRootMock,
+  upsertProjectSidebarKvMock,
+  readMirroredActiveProjectFilePathSyncMock,
+  getFaProjectActiveDbMock,
+  runWithForIpcMock
+} = vi.hoisted(() => {
+  return {
+    appOnMock: vi.fn(),
+    assertMainWindowSenderMock: vi.fn(() => true),
+    closeActiveMock: vi.fn(),
+    getFaProjectActiveDbMock: vi.fn(),
+    getRecentSnapshotMock: vi.fn((): Array<{ filePath: string, name: string }> => []),
+    readMirroredActiveProjectFilePathSyncMock: vi.fn((): string | null => null),
+    recordRecentProjectEntryMock: vi.fn(),
+    resolveRecentMruHeadMock: vi.fn((): I_faRecentProjectMruHeadResolve => {
+      return { outcome: 'empty' }
+    }),
+    ipcMainHandleMock: vi.fn(),
+    readProjectNoteboardRootMock: vi.fn(),
+    readProjectSettingsRootMock: vi.fn(),
+    readProjectStylingRootMock: vi.fn(),
+    readProjectSidebarRootMock: vi.fn(),
+    runCreateMock: vi.fn(async () => ({ outcome: 'canceled' as const })),
+    runOpenMock: vi.fn(async () => ({ outcome: 'canceled' as const })),
+    runWithForIpcMock: vi.fn(),
+    upsertProjectNoteboardKvMock: vi.fn(),
+    upsertProjectSettingsKvMock: vi.fn(),
+    upsertProjectStylingKvMock: vi.fn(),
+    upsertProjectSidebarKvMock: vi.fn()
+  }
+})
+
+vi.mock('electron', () => {
+  return {
+    app: {
+      getPath: vi.fn(() => '/fake-user-data'),
+      on: appOnMock
+    },
+    ipcMain: {
+      handle: ipcMainHandleMock
+    }
+  }
+})
+
+vi.mock('app/src-electron/mainScripts/projectManagement/faProjectCreateRunWiring', () => {
+  return {
+    runFaProjectCreateFromIpc: runCreateMock
+  }
+})
+
+vi.mock('app/src-electron/mainScripts/projectManagement/faProjectOpenRunWiring', () => {
+  return {
+    runFaProjectOpenFromIpc: runOpenMock
+  }
+})
+
+vi.mock('app/src-electron/mainScripts/ipcManagement/assertMainWindowSenderWiring', () => {
+  return {
+    assertMainWindowSender: assertMainWindowSenderMock
+  }
+})
+
+vi.mock('app/src-electron/mainScripts/projectManagement/faProjectDatabaseEnsureConnectedWiring', () => {
+  return {
+    readMirroredActiveProjectFilePathSync: readMirroredActiveProjectFilePathSyncMock,
+    runWithFaProjectDatabaseForIpcAsync: async (
+      event: unknown,
+      work: (db: unknown) => unknown
+    ) => {
+      return await runWithForIpcMock(event, work)
+    }
+  }
+})
+
+vi.mock('app/src-electron/mainScripts/projectManagement/faProjectActiveDatabaseWiring', () => {
+  return {
+    closeFaProjectActiveDatabase: closeActiveMock,
+    getFaProjectActiveDatabase: () => getFaProjectActiveDbMock()
+  }
+})
+
+vi.mock('app/src-electron/mainScripts/projectManagement/faRecentProjectListRuntimeWiring', () => {
+  return {
+    getRecentProjectsSnapshot: getRecentSnapshotMock,
+    recordRecentProjectEntry: recordRecentProjectEntryMock,
+    resolveRecentProjectMruHeadForOpen: resolveRecentMruHeadMock
+  }
+})
+
+vi.mock(
+  'app/src-electron/mainScripts/projectManagement/faProjectNoteboardPersistWiring',
+  () => {
+    return {
+      readFaProjectNoteboardRoot: readProjectNoteboardRootMock,
+      upsertFaProjectNoteboardKv: upsertProjectNoteboardKvMock
+    }
+  }
+)
+
+vi.mock(
+  'app/src-electron/mainScripts/projectManagement/faProjectStylingPersistWiring',
+  () => {
+    return {
+      readFaProjectStylingRoot: readProjectStylingRootMock,
+      upsertFaProjectStylingKv: upsertProjectStylingKvMock
+    }
+  }
+)
+
+vi.mock(
+  'app/src-electron/mainScripts/projectManagement/faProjectSidebarPersistWiring',
+  () => {
+    return {
+      readFaProjectSidebarRoot: readProjectSidebarRootMock,
+      upsertFaProjectSidebarKv: upsertProjectSidebarKvMock
+    }
+  }
+)
+
+vi.mock(
+  'app/src-electron/mainScripts/projectManagement/faProjectSettingsPersistWiring',
+  () => {
+    return {
+      readFaProjectSettingsRoot: readProjectSettingsRootMock,
+      upsertFaProjectSettingsKv: upsertProjectSettingsKvMock
+    }
+  }
+)
+
+beforeEach(async () => {
+  vi.resetModules()
+  ipcMainHandleMock.mockReset()
+  appOnMock.mockReset()
+  assertMainWindowSenderMock.mockReset()
+  assertMainWindowSenderMock.mockReturnValue(true)
+  closeActiveMock.mockReset()
+  runCreateMock.mockReset()
+  runOpenMock.mockReset()
+  runCreateMock.mockResolvedValue({ outcome: 'canceled' })
+  runOpenMock.mockResolvedValue({ outcome: 'canceled' })
+  getRecentSnapshotMock.mockReset()
+  getRecentSnapshotMock.mockReturnValue([])
+  resolveRecentMruHeadMock.mockReset()
+  resolveRecentMruHeadMock.mockReturnValue({ outcome: 'empty' })
+  readProjectNoteboardRootMock.mockReset()
+  upsertProjectNoteboardKvMock.mockReset()
+  readProjectStylingRootMock.mockReset()
+  upsertProjectStylingKvMock.mockReset()
+  readProjectSettingsRootMock.mockReset()
+  upsertProjectSettingsKvMock.mockReset()
+  recordRecentProjectEntryMock.mockReset()
+  readMirroredActiveProjectFilePathSyncMock.mockReset()
+  readMirroredActiveProjectFilePathSyncMock.mockReturnValue(null)
+  getFaProjectActiveDbMock.mockReset()
+  getFaProjectActiveDbMock.mockReturnValue(null)
+  runWithForIpcMock.mockReset()
+  runWithForIpcMock.mockImplementation(async (_event: unknown, work: (db: unknown) => unknown) => {
+    const db = getFaProjectActiveDbMock()
+    if (db === null) {
+      return { ok: false }
+    }
+    return {
+      ok: true,
+      value: work(db)
+    }
+  })
+})
+
+function handlerFor (channel: string): (...args: unknown[]) => unknown {
+  const call = ipcMainHandleMock.mock.calls.find((c) => c[0]! === channel)
+  expect(call).toBeDefined()
+  return call?.[1]! as (...args: unknown[]) => unknown
+}
+
+test('registerFaProjectManagementIpc registers project-noteboard and project-styling IPC handlers with create, recent, open, and before-quit hook once', async () => {
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.createProjectAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.getRecentProjectsAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.resolveRecentProjectMruHeadForOpenAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.getProjectNoteboardAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.setProjectNoteboardPatchAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.getProjectSettingsAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.setProjectSettingsPatchAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.getProjectSidebarAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.setProjectSidebarPatchAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.getProjectDialogUiPrefAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.setProjectDialogUiPrefAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.getProjectStylingAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.setProjectStylingPatchAsync,
+    expect.any(Function)
+  )
+  expect(ipcMainHandleMock).toHaveBeenCalledWith(
+    FA_PROJECT_MANAGEMENT_IPC.openProjectAsync,
+    expect.any(Function)
+  )
+  expect(appOnMock).toHaveBeenCalledWith('before-quit', expect.any(Function))
+
+  const afterFirstHandle = ipcMainHandleMock.mock.calls.length
+  const afterFirstOn = appOnMock.mock.calls.length
+  registerFaProjectManagementIpc()
+  expect(ipcMainHandleMock.mock.calls.length).toBe(afterFirstHandle)
+  expect(appOnMock.mock.calls.length).toBe(afterFirstOn)
+})
+
+test('resolveRecentProjectMruHeadForOpenAsync handler returns MRU head resolve', async () => {
+  resolveRecentMruHeadMock.mockReturnValueOnce({
+    entry: {
+      filePath: 'D:\\head.faproject',
+      name: 'Head'
+    },
+    outcome: 'ready'
+  })
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.resolveRecentProjectMruHeadForOpenAsync)
+  expect(h(undefined as never, undefined as never)).toEqual({
+    entry: {
+      filePath: 'D:\\head.faproject',
+      name: 'Head'
+    },
+    outcome: 'ready'
+  })
+  expect(resolveRecentMruHeadMock).toHaveBeenCalledOnce()
+})
+
+test('getRecentProjectsAsync handler returns snapshot rows', async () => {
+  getRecentSnapshotMock.mockReturnValueOnce([
+    {
+      filePath: 'D:\\m.faproject',
+      name: 'Mine'
+    }
+  ])
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.getRecentProjectsAsync)
+  expect(h(undefined as never, undefined as never)).toEqual([
+    {
+      filePath: 'D:\\m.faproject',
+      name: 'Mine'
+    }
+  ])
+  expect(getRecentSnapshotMock).toHaveBeenCalledOnce()
+})
+
+test('createProjectAsync handler delegates to runFaProjectCreateFromIpc', async () => {
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.createProjectAsync)
+  await expect(h({}, { projectName: 'Alpha' })).resolves.toEqual({ outcome: 'canceled' })
+  expect(runCreateMock).toHaveBeenCalledOnce()
+})
+
+test('createProjectAsync handler returns canceled for non-main-window sender', async () => {
+  assertMainWindowSenderMock.mockReturnValue(false)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.createProjectAsync)
+  await expect(h({}, { projectName: 'Alpha' })).resolves.toEqual({ outcome: 'canceled' })
+  expect(runCreateMock).not.toHaveBeenCalled()
+})
+
+test('openProjectAsync handler delegates to runFaProjectOpenFromIpc', async () => {
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.openProjectAsync)
+  await expect(h({}, {})).resolves.toEqual({ outcome: 'canceled' })
+  expect(runOpenMock).toHaveBeenCalledOnce()
+})
+
+test('openProjectAsync handler returns canceled for non-main-window sender', async () => {
+  assertMainWindowSenderMock.mockReturnValue(false)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.openProjectAsync)
+  await expect(h({}, {})).resolves.toEqual({ outcome: 'canceled' })
+  expect(runOpenMock).not.toHaveBeenCalled()
+})
+
+test('getProjectNoteboardAsync returns default snapshot when active database handle is absent', async () => {
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.getProjectNoteboardAsync)
+  expect(readProjectNoteboardRootMock).not.toHaveBeenCalled()
+  await expect(h({} as never, undefined as never)).resolves.toEqual({
+    frame: null,
+    schemaVersion: 1,
+    text: ''
+  })
+})
+
+test('getProjectNoteboardAsync clones persisted root payload', async () => {
+  const fakeDb = { dummy: true } as unknown
+  getFaProjectActiveDbMock.mockReturnValue(fakeDb)
+  readProjectNoteboardRootMock.mockImplementation(() => {
+    return {
+      frame: {
+        height: 400,
+        width: 500,
+        x: 11,
+        y: 22
+      },
+      schemaVersion: 1,
+      text: 'alpha'
+    }
+  })
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.getProjectNoteboardAsync)
+  const snap = (await h({} as never, undefined as never)) as { frame: { x: number } }
+  snap.frame.x = -1
+  const second = (await h({} as never, undefined as never)) as { frame: { x: number } }
+  expect(second.frame.x).toBe(11)
+  expect(readProjectNoteboardRootMock).toHaveBeenCalledTimes(2)
+})
+
+test('setProjectNoteboardPatchAsync upserts KV rows against the active SQLite handle', async () => {
+  const fakeDb = { tag: 'db' } as unknown
+  getFaProjectActiveDbMock.mockReturnValue(fakeDb)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.setProjectNoteboardPatchAsync)
+  const ok = (await h(undefined as never, {
+    text: 'next'
+  })) as boolean
+  expect(ok).toBe(true)
+  expect(upsertProjectNoteboardKvMock).toHaveBeenCalledWith(fakeDb, { text: 'next' })
+})
+
+test('setProjectNoteboardPatchAsync returns false without an active project database', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.setProjectNoteboardPatchAsync)
+  const ok = (await h(undefined as never, {
+    text: 'x'
+  })) as boolean
+  expect(ok).toBe(false)
+  expect(upsertProjectNoteboardKvMock).not.toHaveBeenCalled()
+  expect(warn).toHaveBeenCalledWith(
+    expect.stringMatching(/setProjectNoteboard skipped/)
+  )
+  warn.mockRestore()
+})
+
+test('getProjectStylingAsync returns default snapshot when active database handle is absent', async () => {
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.getProjectStylingAsync)
+  expect(readProjectStylingRootMock).not.toHaveBeenCalled()
+  await expect(h({} as never, undefined as never)).resolves.toEqual({
+    css: '',
+    frame: null,
+    schemaVersion: 1
+  })
+})
+
+test('getProjectStylingAsync clones persisted root payload', async () => {
+  const fakeDb = { dummy: true } as unknown
+  getFaProjectActiveDbMock.mockReturnValue(fakeDb)
+  readProjectStylingRootMock.mockImplementation(() => {
+    return {
+      css: 'a{}',
+      frame: {
+        height: 400,
+        width: 500,
+        x: 11,
+        y: 22
+      },
+      schemaVersion: 1
+    }
+  })
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.getProjectStylingAsync)
+  const snap = (await h({} as never, undefined as never)) as { frame: { x: number } }
+  snap.frame.x = -1
+  const second = (await h({} as never, undefined as never)) as { frame: { x: number } }
+  expect(second.frame.x).toBe(11)
+  expect(readProjectStylingRootMock).toHaveBeenCalledTimes(2)
+})
+
+test('setProjectStylingPatchAsync upserts KV rows against the active SQLite handle', async () => {
+  const fakeDb = { tag: 'db' } as unknown
+  getFaProjectActiveDbMock.mockReturnValue(fakeDb)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.setProjectStylingPatchAsync)
+  const ok = (await h(undefined as never, {
+    css: 'next'
+  })) as boolean
+  expect(ok).toBe(true)
+  expect(upsertProjectStylingKvMock).toHaveBeenCalledWith(fakeDb, { css: 'next' })
+})
+
+test('setProjectStylingPatchAsync returns false without an active project database', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.setProjectStylingPatchAsync)
+  const ok = (await h(undefined as never, {
+    css: 'x'
+  })) as boolean
+  expect(ok).toBe(false)
+  expect(upsertProjectStylingKvMock).not.toHaveBeenCalled()
+  expect(warn).toHaveBeenCalledWith(
+    expect.stringMatching(/setProjectStyling skipped/)
+  )
+  warn.mockRestore()
+})
+
+test('getProjectSettingsAsync returns default snapshot when active database handle is absent', async () => {
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.getProjectSettingsAsync)
+  expect(readProjectSettingsRootMock).not.toHaveBeenCalled()
+  await expect(h({} as never, undefined as never)).resolves.toEqual({
+    projectName: '',
+    schemaVersion: 1
+  })
+})
+
+test('getProjectSettingsAsync clones persisted root payload', async () => {
+  const fakeDb = { dummy: true } as unknown
+  getFaProjectActiveDbMock.mockReturnValue(fakeDb)
+  readProjectSettingsRootMock.mockImplementation(() => {
+    return {
+      projectName: 'Alpha',
+      schemaVersion: 1
+    }
+  })
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.getProjectSettingsAsync)
+  const snap = (await h({} as never, undefined as never)) as { projectName: string }
+  snap.projectName = 'mutated'
+  const second = (await h({} as never, undefined as never)) as { projectName: string }
+  expect(second.projectName).toBe('Alpha')
+  expect(readProjectSettingsRootMock).toHaveBeenCalledTimes(2)
+})
+
+test('setProjectSettingsPatchAsync upserts KV rows and records MRU when path mirror exists', async () => {
+  const fakeDb = { tag: 'db' } as unknown
+  getFaProjectActiveDbMock.mockReturnValue(fakeDb)
+  readMirroredActiveProjectFilePathSyncMock.mockReturnValue('D:\\alpha.faproject')
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.setProjectSettingsPatchAsync)
+  const ok = (await h(undefined as never, {
+    projectName: '  Renamed  '
+  })) as boolean
+  expect(ok).toBe(true)
+  expect(upsertProjectSettingsKvMock).toHaveBeenCalledWith(fakeDb, { projectName: 'Renamed' })
+  expect(recordRecentProjectEntryMock).toHaveBeenCalledWith({
+    filePath: 'D:\\alpha.faproject',
+    name: 'Renamed'
+  })
+})
+
+test('setProjectSettingsPatchAsync upserts without MRU when the path mirror is absent', async () => {
+  const fakeDb = { tag: 'db' } as unknown
+  getFaProjectActiveDbMock.mockReturnValue(fakeDb)
+  readMirroredActiveProjectFilePathSyncMock.mockReturnValue(null)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.setProjectSettingsPatchAsync)
+  const ok = (await h(undefined as never, {
+    projectName: 'Renamed only'
+  })) as boolean
+  expect(ok).toBe(true)
+  expect(upsertProjectSettingsKvMock).toHaveBeenCalledWith(fakeDb, { projectName: 'Renamed only' })
+  expect(recordRecentProjectEntryMock).not.toHaveBeenCalled()
+})
+
+test('setProjectSettingsPatchAsync accepts an empty patch without MRU updates', async () => {
+  const fakeDb = { tag: 'db' } as unknown
+  getFaProjectActiveDbMock.mockReturnValue(fakeDb)
+  readMirroredActiveProjectFilePathSyncMock.mockReturnValue('D:\\alpha.faproject')
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.setProjectSettingsPatchAsync)
+  const ok = (await h(undefined as never, {})) as boolean
+  expect(ok).toBe(true)
+  expect(upsertProjectSettingsKvMock).toHaveBeenCalledWith(fakeDb, {})
+  expect(recordRecentProjectEntryMock).not.toHaveBeenCalled()
+})
+
+test('setProjectSettingsPatchAsync returns false without an active project database', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.setProjectSettingsPatchAsync)
+  const ok = (await h(undefined as never, {
+    projectName: 'x'
+  })) as boolean
+  expect(ok).toBe(false)
+  expect(upsertProjectSettingsKvMock).not.toHaveBeenCalled()
+  expect(recordRecentProjectEntryMock).not.toHaveBeenCalled()
+  expect(warn).toHaveBeenCalledWith(
+    expect.stringMatching(/setProjectSettings skipped/)
+  )
+  warn.mockRestore()
+})
+
+test('registerFaProjectManagementIpc before-quit hook closes active project database', async () => {
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const quitCall = appOnMock.mock.calls.find((c) => c[0]! === 'before-quit')
+  expect(quitCall).toBeDefined()
+  const onQuit = quitCall?.[1]! as () => void
+  onQuit()
+  expect(closeActiveMock).toHaveBeenCalledOnce()
+})
+
+test('getProjectSidebarAsync returns default snapshot when active database handle is absent', async () => {
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.getProjectSidebarAsync)
+  expect(readProjectSidebarRootMock).not.toHaveBeenCalled()
+  await expect(h({} as never, undefined as never)).resolves.toEqual({
+    schemaVersion: 1,
+    widthPx: 375
+  })
+})
+
+test('setProjectSidebarPatchAsync upserts sidebar_width against the active SQLite handle', async () => {
+  const fakeDb = { tag: 'db' } as unknown
+  getFaProjectActiveDbMock.mockReturnValue(fakeDb)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.setProjectSidebarPatchAsync)
+  await expect(h({} as never, { widthPx: 480 })).resolves.toBe(true)
+  expect(upsertProjectSidebarKvMock).toHaveBeenCalledWith(fakeDb, { widthPx: 480 })
+})
+
+test('stageE2eNextProjectCreatePathAsync handler stages pending create path when TEST_ENV is e2e', async () => {
+  vi.stubEnv('TEST_ENV', 'e2e')
+  const {
+    readFaE2ePendingProjectCreatePath,
+    writeFaE2ePendingProjectCreatePath
+  } = await import('../../projectManagement/functions/faProjectManagementE2ePathOverride')
+  writeFaE2ePendingProjectCreatePath(null)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.stageE2eNextProjectCreatePathAsync)
+  expect(h(undefined as never, 'D:\\stage.faproject')).toBe(true)
+  expect(readFaE2ePendingProjectCreatePath()).toBe('D:\\stage.faproject')
+})
+
+test('stageE2eNextProjectCreatePathAsync returns false when path payload is invalid', async () => {
+  vi.stubEnv('TEST_ENV', 'e2e')
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.stageE2eNextProjectCreatePathAsync)
+  expect(h(undefined as never, '   ')).toBe(false)
+})
+
+test('stageE2eNextProjectOpenPathAsync handler stages pending open path when TEST_ENV is e2e', async () => {
+  vi.stubEnv('TEST_ENV', 'e2e')
+  const {
+    readFaE2ePendingProjectOpenPath,
+    writeFaE2ePendingProjectOpenPath
+  } = await import('../../projectManagement/functions/faProjectManagementE2ePathOverride')
+  writeFaE2ePendingProjectOpenPath(null)
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.stageE2eNextProjectOpenPathAsync)
+  expect(h(undefined as never, 'D:\\open.faproject')).toBe(true)
+  expect(readFaE2ePendingProjectOpenPath()).toBe('D:\\open.faproject')
+})
+
+test('stageE2eNextProjectOpenPathAsync returns false outside e2e', async () => {
+  vi.stubEnv('TEST_ENV', 'components')
+  const { registerFaProjectManagementIpc } = await import('../registerFaProjectManagementIpc')
+  registerFaProjectManagementIpc()
+  const h = handlerFor(FA_PROJECT_MANAGEMENT_IPC.stageE2eNextProjectOpenPathAsync)
+  expect(h(undefined as never, 'D:\\open.faproject')).toBe(false)
+})

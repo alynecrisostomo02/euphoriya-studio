@@ -1,0 +1,391 @@
+import { beforeEach, expect, test, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+
+import { FA_USER_SETTINGS_DEFAULTS } from 'app/src-electron/mainScripts/userSettings/faUserSettingsDefaults'
+import type * as S_FaUserSettingsStore from '../S_FaUserSettings'
+
+const {
+  applyLocaleMock,
+  applyAppThemeMock,
+  applyHideDeadCrossThroughMock,
+  notifyCreateMock,
+  tMock,
+  getSettingsMock,
+  setSettingsMock
+} = vi.hoisted(() => {
+  return {
+    applyLocaleMock: vi.fn(),
+    applyAppThemeMock: vi.fn(),
+    applyHideDeadCrossThroughMock: vi.fn(),
+    notifyCreateMock: vi.fn(),
+    tMock: vi.fn((key: string) => key),
+    getSettingsMock: vi.fn(async () => ({ ...FA_USER_SETTINGS_DEFAULTS })),
+    setSettingsMock: vi.fn(async () => {})
+  }
+})
+
+vi.mock('quasar', () => {
+  return {
+    Notify: { create: notifyCreateMock }
+  }
+})
+
+vi.mock('app/src/scripts/appInternals/faAppThemeApplyWiring', () => {
+  return {
+    applyFaAppThemeToDocument: applyAppThemeMock
+  }
+})
+
+vi.mock('app/src/scripts/appInternals/faHideDeadCrossThroughApplyWiring', () => {
+  return {
+    applyFaHideDeadCrossThroughToDocument: applyHideDeadCrossThroughMock
+  }
+})
+
+vi.mock('app/src/scripts/appInternals/faAppInternalsLocale_manager', () => {
+  return {
+    applyFaI18nLocaleFromLanguageCode: applyLocaleMock,
+    applyFaUserSettingsLanguageSelection: vi.fn(async () => undefined)
+  }
+})
+
+vi.mock('app/i18n/externalFileLoader', () => {
+  return {
+    i18n: { global: { t: tMock } }
+  }
+})
+
+let store: ReturnType<typeof S_FaUserSettingsStore.S_FaUserSettings>
+
+beforeEach(async () => {
+  setActivePinia(createPinia())
+  vi.resetModules()
+  applyLocaleMock.mockReset()
+  applyAppThemeMock.mockReset()
+  applyHideDeadCrossThroughMock.mockReset()
+  notifyCreateMock.mockReset()
+  tMock.mockReset()
+  tMock.mockImplementation((key: string) => key)
+  getSettingsMock.mockReset()
+  getSettingsMock.mockResolvedValue({ ...FA_USER_SETTINGS_DEFAULTS })
+  setSettingsMock.mockReset()
+
+  Object.defineProperty(globalThis, 'window', {
+    value: {
+      faContentBridgeAPIs: {
+        faUserSettings: {
+          getSettings: getSettingsMock,
+          setSettings: setSettingsMock
+        }
+      }
+    },
+    configurable: true,
+    writable: true
+  })
+
+  const stores = await import('../S_FaUserSettings')
+  store = stores.S_FaUserSettings()
+})
+
+/**
+ * S_FaUserSettings / refreshSettings
+ * Populates 'settings' from the bridge every time it is called.
+ */
+test('Test that refreshSettings populates settings from the IPC bridge', async () => {
+  const snapshot = {
+    ...FA_USER_SETTINGS_DEFAULTS,
+    appTheme: 'darkThemeFantasy' as const
+  }
+  getSettingsMock.mockResolvedValueOnce(snapshot)
+
+  expect(store.settings).toBeNull()
+  await store.refreshSettings()
+
+  expect(getSettingsMock).toHaveBeenCalledOnce()
+  expect(store.settings).toEqual(snapshot)
+  expect(applyLocaleMock).toHaveBeenCalledWith('en-US')
+  expect(applyAppThemeMock).toHaveBeenCalledWith('darkThemeFantasy')
+  expect(applyHideDeadCrossThroughMock).toHaveBeenCalledWith(false)
+})
+
+/**
+ * S_FaUserSettings / refreshSettings
+ * Each refresh replaces settings with the latest bridge payload.
+ */
+test('Test that refreshSettings replaces settings on each call', async () => {
+  const firstSnapshot = {
+    ...FA_USER_SETTINGS_DEFAULTS,
+    appTheme: 'darkThemeFantasy' as const
+  }
+  const secondSnapshot = {
+    ...FA_USER_SETTINGS_DEFAULTS,
+    appTheme: 'lightThemeFlat' as const
+  }
+  getSettingsMock.mockResolvedValueOnce(firstSnapshot).mockResolvedValueOnce(secondSnapshot)
+
+  await store.refreshSettings()
+  expect(store.settings).toEqual(firstSnapshot)
+  await store.refreshSettings()
+  expect(store.settings).toEqual(secondSnapshot)
+  expect(getSettingsMock).toHaveBeenCalledTimes(2)
+  expect(applyLocaleMock).toHaveBeenCalledWith('en-US')
+})
+
+/**
+ * S_FaUserSettings / refreshSettings
+ * Syncs vue-i18n to persisted language (import and other code paths use refresh without updateSettings).
+ */
+test('Test that refreshSettings applies i18n for a supported persisted languageCode', async () => {
+  getSettingsMock.mockResolvedValueOnce({
+    ...FA_USER_SETTINGS_DEFAULTS,
+    languageCode: 'fr'
+  })
+  await store.refreshSettings()
+  expect(applyLocaleMock).toHaveBeenCalledWith('fr')
+})
+
+test('Test that refreshSettings does not apply i18n when persisted languageCode is not supported', async () => {
+  applyLocaleMock.mockClear()
+  getSettingsMock.mockResolvedValueOnce({
+    ...FA_USER_SETTINGS_DEFAULTS,
+    languageCode: 'xx-XX'
+  } as unknown as typeof FA_USER_SETTINGS_DEFAULTS)
+  await store.refreshSettings()
+  expect(applyLocaleMock).not.toHaveBeenCalled()
+})
+
+/**
+ * S_FaUserSettings / updateSettings
+ * On a successful save the retrieved settings match the update object, positive notify fires.
+ */
+test('Test that updateSettings shows positive notify when saved values match the update object', async () => {
+  const updateObject = { appTheme: 'darkThemeFantasy' as const }
+  getSettingsMock.mockResolvedValueOnce({
+    ...FA_USER_SETTINGS_DEFAULTS,
+    appTheme: 'darkThemeFantasy' as const
+  })
+
+  await store.updateSettings(updateObject)
+
+  expect(setSettingsMock).toHaveBeenCalledWith(updateObject)
+  expect(store.settings?.appTheme).toBe('darkThemeFantasy')
+  expect(notifyCreateMock).toHaveBeenCalledOnce()
+  expect(notifyCreateMock).toHaveBeenCalledWith({
+    group: false,
+    type: 'positive',
+    message: 'globalFunctionality.faUserSettings.saveSuccess'
+  })
+})
+
+/**
+ * S_FaUserSettings / updateSettings
+ * When languageCode saves successfully, i18n switches before the positive notify so the toast string resolves in the new locale.
+ */
+test('Test that updateSettings applies i18n locale before positive notify when languageCode saves successfully', async () => {
+  const callOrder: string[] = []
+  applyLocaleMock.mockImplementation(() => {
+    callOrder.push('locale')
+  })
+  notifyCreateMock.mockImplementation(() => {
+    callOrder.push('notify')
+  })
+
+  const updateObject = { languageCode: 'fr' as const }
+  getSettingsMock.mockResolvedValueOnce({
+    ...FA_USER_SETTINGS_DEFAULTS,
+    languageCode: 'fr'
+  })
+
+  await store.updateSettings(updateObject)
+
+  expect(applyLocaleMock).toHaveBeenCalledWith('fr')
+  expect(callOrder).toEqual(['locale', 'notify'])
+})
+
+/**
+ * S_FaUserSettings / updateSettings
+ * When languageCode is patched but the bridge returns a different code, skip locale switch and surface a thrown error.
+ */
+test('Test that updateSettings does not apply i18n locale when languageCode patch mismatches', async () => {
+  const updateObject = { languageCode: 'fr' as const }
+  getSettingsMock.mockResolvedValueOnce({
+    ...FA_USER_SETTINGS_DEFAULTS,
+    languageCode: 'de'
+  })
+
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  await expect(store.updateSettings(updateObject)).rejects.toThrow()
+  consoleErrorSpy.mockRestore()
+
+  expect(applyLocaleMock).not.toHaveBeenCalled()
+})
+
+/**
+ * S_FaUserSettings / updateSettings
+ * When retrieved settings do not match the update object, throw without emitting a notify (action manager owns the toast).
+ */
+test('Test that updateSettings throws without emitting notify when saved values do not match the update object', async () => {
+  const updateObject = { appTheme: 'darkThemeFantasy' as const }
+  getSettingsMock.mockResolvedValueOnce({
+    ...FA_USER_SETTINGS_DEFAULTS,
+    appTheme: 'lightThemeFlat' as const
+  })
+
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  await expect(store.updateSettings(updateObject)).rejects.toThrow()
+
+  expect(notifyCreateMock).not.toHaveBeenCalled()
+  expect(consoleErrorSpy).toHaveBeenCalledOnce()
+  expect(consoleErrorSpy.mock.calls[0]![0]!).toContain('globalFunctionality.faUserSettings.saveMismatchLog')
+  consoleErrorSpy.mockRestore()
+})
+
+/**
+ * S_FaUserSettings / updateSettings
+ * 'settings' is always updated to the retrieved value regardless of update success.
+ */
+test('Test that updateSettings always replaces settings with the retrieved value from the bridge', async () => {
+  const retrievedSettings = {
+    ...FA_USER_SETTINGS_DEFAULTS,
+    appTheme: 'lightThemeFlat' as const
+  }
+  getSettingsMock.mockResolvedValueOnce(retrievedSettings)
+
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  await expect(store.updateSettings({ appTheme: 'darkThemeFantasy' as const })).rejects.toThrow()
+  consoleErrorSpy.mockRestore()
+
+  expect(store.settings).toEqual(retrievedSettings)
+})
+
+/**
+ * S_FaUserSettings / updateSettings
+ * Empty patch uses vacuous key equality so a positive notify still fires after set and get.
+ */
+test('Test that updateSettings with an empty object shows positive notify and still calls the bridge', async () => {
+  getSettingsMock.mockResolvedValueOnce({ ...FA_USER_SETTINGS_DEFAULTS })
+
+  await store.updateSettings({})
+
+  expect(setSettingsMock).toHaveBeenCalledWith({})
+  expect(notifyCreateMock).toHaveBeenCalledOnce()
+  expect(notifyCreateMock).toHaveBeenCalledWith({
+    group: false,
+    type: 'positive',
+    message: 'globalFunctionality.faUserSettings.saveSuccess'
+  })
+  expect(store.settings).toEqual({ ...FA_USER_SETTINGS_DEFAULTS })
+})
+
+/**
+ * S_FaUserSettings / patchSettingsSilently
+ * Persists without emitting the positive settings saved notify.
+ */
+test('Test that patchSettingsSilently persists without emitting notify', async () => {
+  const updateObject = { hideHierarchyTree: true }
+  getSettingsMock.mockResolvedValueOnce({
+    ...FA_USER_SETTINGS_DEFAULTS,
+    hideHierarchyTree: true
+  })
+
+  await store.patchSettingsSilently(updateObject)
+
+  expect(setSettingsMock).toHaveBeenCalledWith(updateObject)
+  expect(notifyCreateMock).not.toHaveBeenCalled()
+  expect(store.settings?.hideHierarchyTree).toBe(true)
+})
+
+/**
+ * S_FaUserSettings / updateSettings
+ * Mismatch on any updated key triggers a thrown error without any local notify.
+ */
+test('Test that updateSettings throws without emitting notify when one of several keys mismatches', async () => {
+  const updateObject = {
+    appTheme: 'darkThemeFantasy' as const,
+    compactTags: true
+  }
+  getSettingsMock.mockResolvedValueOnce({
+    ...FA_USER_SETTINGS_DEFAULTS,
+    appTheme: 'darkThemeFantasy' as const,
+    compactTags: false
+  })
+
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  await expect(store.updateSettings(updateObject)).rejects.toThrow()
+  consoleErrorSpy.mockRestore()
+
+  expect(setSettingsMock).toHaveBeenCalledWith(updateObject)
+  expect(notifyCreateMock).not.toHaveBeenCalled()
+})
+
+/**
+ * S_FaUserSettings / updateSettings
+ * When setSettings rejects, throw, log, skip getSettings, leave settings unchanged. Action manager owns the toast.
+ */
+test('Test that updateSettings throws without emitting notify when setSettings rejects', async () => {
+  setSettingsMock.mockRejectedValueOnce(new Error('ipc failed'))
+
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  await expect(store.updateSettings({ appTheme: 'darkThemeFantasy' as const })).rejects.toThrow()
+
+  expect(setSettingsMock).toHaveBeenCalledOnce()
+  expect(getSettingsMock).not.toHaveBeenCalled()
+  expect(store.settings).toBeNull()
+  expect(notifyCreateMock).not.toHaveBeenCalled()
+  expect(consoleErrorSpy).toHaveBeenCalledOnce()
+  expect(consoleErrorSpy.mock.calls[0]![0]!).toContain('[S_FaUserSettings] setSettings failed')
+  consoleErrorSpy.mockRestore()
+})
+
+/**
+ * S_FaUserSettings / updateSettings
+ * When setSettings throws a non-Error value, wraps it in an Error before re-throwing.
+ */
+test('Test that updateSettings wraps non-Error rejections in an Error before throwing', async () => {
+  setSettingsMock.mockRejectedValueOnce('plain string boom')
+
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  await expect(store.updateSettings({ appTheme: 'darkThemeFantasy' as const })).rejects.toThrow('plain string boom')
+  consoleErrorSpy.mockRestore()
+})
+
+/**
+ * S_FaUserSettings / app settings dialog preview
+ * Preview helpers stage unsaved App Settings values for the dialog UI.
+ */
+test('Test that setAppSettingsDialogPreview and clearAppSettingsDialogPreview update preview state', () => {
+  expect(store.appSettingsDialogPreview).toBeNull()
+  store.setAppSettingsDialogPreview({ appTheme: 'darkThemeFantasy' as const })
+  expect(store.appSettingsDialogPreview).toEqual({ appTheme: 'darkThemeFantasy' as const })
+  expect(applyAppThemeMock).toHaveBeenCalledWith('darkThemeFantasy')
+  expect(applyHideDeadCrossThroughMock).toHaveBeenCalledWith(false)
+  store.clearAppSettingsDialogPreview()
+  expect(store.appSettingsDialogPreview).toBeNull()
+  expect(applyAppThemeMock).toHaveBeenLastCalledWith('darkThemeFantasy')
+  expect(applyHideDeadCrossThroughMock).toHaveBeenLastCalledWith(false)
+})
+
+/**
+ * S_FaUserSettings / app settings dialog preview
+ * Preview patches merge so live theme preview survives other preview keys.
+ */
+test('Test that setAppSettingsDialogPreview merges patches and applies light theme preview', () => {
+  store.setAppSettingsDialogPreview({ hideTooltipsProject: true })
+  store.setAppSettingsDialogPreview({ appTheme: 'lightThemeFlat' as const })
+  expect(store.appSettingsDialogPreview).toEqual({
+    hideTooltipsProject: true,
+    appTheme: 'lightThemeFlat'
+  })
+  expect(applyAppThemeMock).toHaveBeenLastCalledWith('lightThemeFlat')
+})
+
+/**
+ * S_FaUserSettings / app settings dialog preview
+ * hideDeadCrossThrough preview toggles the body-class applicator.
+ */
+test('Test that setAppSettingsDialogPreview applies hideDeadCrossThrough preview', () => {
+  store.setAppSettingsDialogPreview({ hideDeadCrossThrough: true })
+  expect(applyHideDeadCrossThroughMock).toHaveBeenLastCalledWith(true)
+  store.clearAppSettingsDialogPreview()
+  expect(applyHideDeadCrossThroughMock).toHaveBeenLastCalledWith(false)
+})

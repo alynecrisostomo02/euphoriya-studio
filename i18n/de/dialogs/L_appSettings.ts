@@ -1,0 +1,377 @@
+export default {
+  title: 'Fantasia Archive-Einstellungen',
+  saveButton: 'Einstellungen speichern',
+  closeButton: 'Schließen ohne zu speichern',
+  settingsSearchPlaceholder: 'Durchsuchen Sie die Einstellungen...',
+  settingsSearchClearAriaLabel: 'Einstellungssuche löschen',
+  searchNoResultsTitle: 'Kein Suchtreffer',
+  searchNoResultsDescription: 'Fantasia hat leider keine Einstellungen gefunden, nach denen Sie gesucht haben. Versuchen Sie es vielleicht mit einem anderen Suchbegriff?',
+  appOptionsCategories: {
+    accessibility: {
+      title: 'Zugänglichkeit',
+      tags: 'a11y, Lesbarkeit, Sichtbarkeit, unterstützend',
+      accessibility: {
+        subtitle: 'Zugänglichkeit',
+        tags: 'a11y, Lesbarkeit, Sichtbarkeit, unterstützend',
+      }
+    },
+    developerSettings: {
+      title: 'Entwicklereinstellungen',
+      tags: 'Entwickler, Debug, Diagnose, intern',
+      documentBody: {
+        subtitle: 'Dokumentkörper',
+        tags: 'Dokument-ID, Debug-Metadaten, interne Felder',
+      }
+    },
+    documentViewEdit: {
+      title: 'Seite: Dokumentansicht/Bearbeitung',
+      tags: 'Dokumentseite, Ansichtsmodus, Bearbeitungsmodus, Reader',
+      documentBody: {
+        subtitle: 'Dokumentkörper',
+        tags: 'Inhaltsbereich, Felder, Lesen, Editorbereich',
+      },
+    },
+    hierarchicalTree: {
+      title: 'Hierarchischer Baum',
+      tags: 'Seitenleiste, Gliederung, Navigator, Projektbaum',
+      iconSettings: {
+        subtitle: 'Symboleinstellungen',
+        tags: 'Aktionssymbole, Baumschaltflächen, Zeilensymbole',
+      },
+      informationDisplaySettings: {
+        subtitle: 'Einstellungen für die Informationsanzeige',
+        tags: 'Zählungen, Zahlen, Bestellindex, Metadatenanzeige',
+      },
+      tagSettings: {
+        subtitle: 'Tag-Einstellungen',
+        tags: 'Beschriftungen, Tag-Anzeige, Tag-Gruppierung',
+      },
+      treeBehavior: {
+        subtitle: 'Baumverhalten',
+        tags: 'erweitern, reduzieren, alles erweitern, Interaktion',
+      },
+    },
+
+    popupsFloatingWindows: {
+      title: 'Popups und schwebende Fenster',
+      tags: 'Dialoge, Überlagerungen, Modalitäten, Fenster',
+      floatingWindows: {
+        subtitle: 'Schwebende Fenster',
+        tags: 'Abtrennen, Zweitfenster, Mehrfachfenster',
+      },
+      quickSearchDialog: {
+        subtitle: 'Quick-search/Quick-add dialog',
+        tags: 'quick search, quick add, keyboard search, finder, popup close'
+      }
+    },
+    visualAccessibility: {
+      title: 'Visuals und App-weite Funktionalität',
+      tags: 'Erscheinungsbild, Benutzeroberfläche, global, Benutzeroberfläche, Erscheinungsbild',
+      applicationExtras: {
+        subtitle: 'Anwendungsextras',
+        tags: 'Maskottchen, Plüsch, Fantasia, Extras',
+      },
+      appControlBar: {
+        subtitle: 'App-Kontrollleiste',
+        tags: 'Symbolleiste, obere Leiste, Kopfzeile, Dokumentchrom',
+      },
+      tabBehavior: {
+        subtitle: 'Tab-Verhalten',
+        tags: 'Tabs wechseln, Tabstrip, Hover-Verhalten',
+      },
+      visualsAppwideFunctionality: {
+        subtitle: 'Visuals und App-weite Funktionalität',
+        tags: 'Thema, Chrom, Layout, allgemeine Optionen',
+      }
+    },
+    projectOverview: {
+      title: 'Seite: Projektübersicht',
+      tags: 'Projektstart, Dashboard, Übersicht, Arbeitsbereich',
+      projectOverviewBehavior: {
+        subtitle: 'Verhalten der Projektübersicht',
+        tags: 'Tipps, Tricks, Wussten Sie schon, Übersichtskarte, auto open, last document',
+      }
+    },
+    welcomeScreen: {
+      title: 'Willkommensbildschirm',
+      tags: 'Splash, Startbildschirm, Willkommen, erster Start, Startseite',
+      welcomeScreenBehavior: {
+        subtitle: 'Verhalten des Begrüßungsbildschirms',
+        tags: 'Startup-Tipps, soziale Links, Onboarding, Splash',
+      }
+    }
+  },
+  appOptions: {
+    aggressiveRelationshipFilter: {
+      title: 'Auswahl aggressiver Beziehungen',
+      description: 'Aktiviert den aggressiven Autosuggest-Modus für alle Beziehungssuchen in der gesamten App im Dokumentbearbeitungsmodus. Wenn diese Option nicht aktiviert ist, wird nach dem Filtern das erste Element in der Liste nicht automatisch ausgewählt. Wenn Sie diese Option aktivieren, wird diese Funktionalität hinzugefügt – was eine viel bequemere Auswahl vorhandener Dokumente ermöglicht, während beim Erstellen neuer Dokumente im Handumdrehen ein wenig Komfort eingebüßt wird.',
+      tags: 'Autosuggest, Autovervollständigung, erste Übereinstimmung, Filterliste, Vorhandenes auswählen, Beziehungssuche',
+    },
+    allowQuickPopupSameKeyClose: {
+      title: 'Schließen Sie schnelle Popups mit derselben Taste',
+      description: 'Ermöglicht das Schließen der Schnellsuch- und Schnellhinzufügen-Popups mit derselben Tastenkombination, mit der sie geöffnet wurden.',
+      tags: 'Verknüpfung umschalten, gleicher Hotkey, Popup schnell hinzufügen, schließen',
+    },
+    allowWiderScrollbars: {
+      title: 'Breitere Bildlaufleisten',
+      description: 'Diese Einstellung macht die Bildlaufleisten von FA breiter und ermöglicht daher manuelles Klicken und Scrollen direkt auf ihnen für Geräte, die das Standard-Scrollen nicht unterstützen (z. B. Mäuse ohne Scrollrad).',
+      tags: 'Breite der Bildlaufleiste, Scrollen durch Klicken, Maus ohne Rad, Trackball, Touch',
+    },
+    autoOpenLastDocument: {
+      title: 'Auto-open last document',
+      description: 'When opening a project, automatically open the last active document tab instead of showing the Project overview first.',
+      tags: 'auto open, last document, project open, restore tab, skip overview, workspace home, resume session'
+    },
+
+    disableCategoryCount: {
+      title: 'Anzahl der Kategorien ausblenden',
+      description: 'Kategorienummern in der hierarchischen Struktur ausblenden',
+      tags: 'vereinfachte Zählung, einzelne Zahl, weniger Unordnung',
+    },
+    compactTags: {
+      title: 'Kompakte Tags',
+      description: 'Legt fest, ob Tags als einzelne Kategorien oder als eine Kategorie mit jedem Tag als Unterkategorie angezeigt werden.',
+      tags: 'Tag-Gruppierung, einzelner Tag-Ordner, verschachtelte Tags, Tag-Hierarchie',
+    },
+    appTheme: {
+      title: 'App theme',
+      description: 'Choose a visual theme for the app to use.',
+      tags: 'dark, light, theme, theming, color, colors',
+      values: {
+        lightThemeFlat: 'Flat theme, Light',
+        darkThemeFlat: 'Flat theme, Dark',
+        lightThemeFantasy: 'Fantasy theme, Light',
+        darkThemeFantasy: 'Fantasy theme, Dark'
+      }
+    },
+    disableCloseAfterSelectQuickSearch: {
+      title: 'Stoppen Sie das Schließen nach der Auswahl',
+      description: 'Normalerweise wird die Schnellsuche geschlossen, nachdem ein Element ausgewählt wurde. Wenn Sie diese Funktion aktivieren, wird dieses Verhalten verhindert, sodass Sie mehrere Suchergebnisse nacheinander öffnen können.',
+      tags: 'Offen halten, mehrere Ergebnisse, Batch offen, Schnellsuche bleibt geöffnet',
+    },
+    disableAppControlBar: {
+      title: 'App-Kontrollleiste deaktivieren',
+      description: 'Wenn Sie Ihren Arbeitsbereich im Dokument maximieren möchten, können Sie mit dieser Einstellung die obere Schaltflächenleiste deaktivieren. Die erforderlichen Steuerschaltflächen werden an den oberen Rand des Hauptdokumentkörpers verschoben, während der Rest der Funktionalität über Tastenkombinationen oder über das App-Menü oben links zugänglich ist.',
+      tags: 'Symbolleiste ausblenden, Platz maximieren, volle Breite, Dokumentkopfzeile',
+    },
+    disableAppControlBarContentButtons: {
+      title: 'Disable app control bar content buttons',
+      description: 'Toggles the project contents (document search, document creation, etc.) on the app control bar on or off.',
+      tags: 'quick search, quick add, document create, content tools, control bar buttons'
+    },
+    disableAppControlBarFunctionButtons: {
+      title: 'Disable app control bar function buttons',
+      description: 'Toggles the app functional buttons (noteboards, hierarchical tree toggling, etc.) on the app control bar on or off.',
+      tags: 'noteboard, tree toggle, sidebar hide, function tools, control bar buttons'
+    },
+    disableAppControlBarGuides: {
+      title: 'App-Kontrollleisten-Hilfen deaktivieren',
+      description: 'Schaltet die anfängerfreundlichen Hilfslinien in der App-Kontrollleiste ein oder aus.',
+      tags: 'Anfängerhinweise, Tutorial-Banner, Trainernoten, Hilfe zur Steuerleiste',
+    },
+    disableDocumentCounts: {
+      title: 'Dokumentanzahl ausblenden',
+      description: 'Dokumentnummern in der hierarchischen Struktur ausblenden',
+      tags: 'Summen aus, keine Zählungen, Statistiken ausgeblendet',
+    },
+    disableDocumentToolTips: {
+      title: 'Dokument-Tooltips deaktivieren',
+      description: 'Wenn Ihnen die Tooltips in der Dokumentansicht nicht gefallen, können Sie sie hier global deaktivieren.',
+      tags: 'Hovertext, Feldhilfe, Popover, Hinweise zur Dokumentansicht',
+    },
+    disableSpellCheck: {
+      title: 'Rechtschreibprüfung deaktivieren',
+      description: 'Deaktiviert die Rechtschreib-, Grammatik- und Wortprüfung im Dokumentbearbeitungsmodus.',
+      tags: 'Rechtschreibung, Grammatik, Korrekturlesen, rote Unterstreichung, Schreiben, Wörterbuch'
+    },
+
+    disableStartUpdateCheckMessage: {
+      title: 'Disable start update check message',
+      description: 'Disables the app version check message at the start of the app. You will still be able to trigger it manually from the menu should you want to check for updates.',
+      tags: 'update, version check, startup, github releases, notify, toast, check for updates'
+    },
+    doubleDashDocCount: {
+      title: 'Ausgesprochener Zählteiler',
+      description: 'Diese Einstellung fügt ein weiteres Zeichen \\\\| zwischen der Kategorie und der Dokumentanzahl in der hierarchischen Struktur hinzu.',
+      tags: 'Pipe, Trennzeichen, Trennzeichen, Zählformat, Baumzählungen',
+    },
+
+    extraTreePadding: {
+      title: 'Add extra tree padding',
+      description: 'Toggling this on adds extra padding on the left to the tree. This can be useful for example when using tags with long order numbers.',
+      tags: 'padding, indent, left margin, order numbers, tags, hierarchical tree'
+    },
+    forceSublevelCollapseInTree: {
+      title: 'Force sublevel collapse in the tree',
+      description: 'Forces sublevels of the closed node in the hierarchical tree to close as well when a parent node is closed. Normally, they remember the pre-close state and will reopen as they were when closed.',
+      tags: 'force collapse, close children, parent node, nested tree, remember expand'
+    },
+    hideAdvSearchCheatsheetButton: {
+      title: 'Hilfeschaltfläche „Beziehungen ausblenden“.',
+      description: 'Versteckt die Spickzettel-Hilfeschaltfläche für die erweiterte Suche in Beziehungstypfeldern.',
+      tags: 'Beziehungsfeld, Cheatsheet, Hilfesymbol, Linkauswahl, erweiterte Suche',
+    },
+    hideDeadCrossThrough: {
+      title: 'Durchgestrichen ausblenden',
+      description: 'Diese Einstellung verbirgt den Durchstreichungseffekt bei toten, verschwundenen oder zerstörten Dokumenten, um die Sichtbarkeit zu erhöhen.',
+      tags: 'durchgestrichen, verstorben, zerstört, verschwunden, Dokumentenstatus, durchgestrichen',
+    },
+    hideDocumentTitles: {
+      title: 'Dokumenttitel ausblenden',
+      description: 'Blendet die großen Abschnittstitel in der Dokumentansicht aus. Bitte beachten Sie, dass dies zu relativ wilden Layoutverschiebungen führen kann, die das Dokument in manchen Fällen unruhig wirken lassen.',
+      tags: 'Abschnittsüberschriften, Feldgruppen, Dokumentstrukturbezeichnungen',
+    },
+    hideEmptyFields: {
+      title: 'Leere Felder ausblenden',
+      description: 'Versteckt Felder ohne ausgefüllten Wert im Ansichtsmodus (ohne Bearbeitung). Bitte beachten Sie, dass dies zu relativ wilden Layoutverschiebungen führen kann, die das Dokument in manchen Fällen unruhig wirken lassen.',
+      tags: 'leere Felder, schreibgeschützte Ansicht, kompaktes Dokument, Layoutverschiebung',
+    },
+    hideHierarchyTree: {
+      title: 'Hide hierarchical tree',
+      description: 'Controls whether the hierarchical tree is shown.',
+      tags: 'sidebar off, navigator hidden, tree panel, outline hide'
+    },
+    hidePlushes: {
+      title: 'Fantasia-Maskottchen verstecken',
+      description: 'Versteckt die unglaublich bezaubernde und fantastische Fantasia, den winzigen arkanen Drachen. Wie konntest du! :(',
+      tags: 'Drache, Maskottchen, Plüsch, Charakter, Dekoration, Osterei',
+    },
+    hideTooltipsProject: {
+      title: 'Tipps zur Projektübersicht ausblenden',
+      description: 'Blendet die Infokarte mit Tipps und Tricks zur Projektübersicht aus.',
+      tags: 'Projekthomepage, Dashboard-Karte, Übersichtshinweise',
+    },
+    hideTooltipsStart: {
+      title: 'Tipps-Popup auf dem Startbildschirm ausblenden',
+      description: 'Blendet das Popup mit Tipps und Tricks auf dem Startbildschirm aus.',
+      tags: 'Erster Start, Onboarding, Splash, Startup-Tipps, Tricks',
+    },
+    hideTreeIconAddUnder: {
+      title: 'Symbol „Hinzufügen unter“ ausblenden',
+      description: 'Diese Option verbirgt das Symbol „Neues Dokument unter dem ausgewählten übergeordneten Dokument hinzufügen“.',
+      tags: 'Untergeordnetes Element hinzufügen, neues unter, plus unter, unten erstellen',
+    },
+    hideTreeIconEdit: {
+      title: 'Symbol „Bearbeiten“ ausblenden',
+      description: 'Diese Option verbirgt das Zeilenbearbeitungssymbol.',
+      tags: 'Bleistiftsymbol, Zeile bearbeiten, Baum schnell bearbeiten',
+    },
+    hideTreeIconView: {
+      title: '„Öffnen“-Symbol ausblenden',
+      description: 'Diese Option blendet das Zeilensymbol „Öffnen“ aus.',
+      tags: 'Öffnen-Symbol, zum Dokument gehen, Schaltfläche zum Öffnen der Zeile',
+    },
+    hideTreeLines: {
+      title: 'Hide tree lines',
+      description: 'Hides the structural help-lines in the hierarchy tree.',
+      tags: 'lines, helplines, structure, tree, hierarchical, hierarchical tree'
+    },
+    hideTreeOrderNumbers: {
+      title: 'Bestellnummern ausblenden',
+      description: 'Blendet die benutzerdefinierten Bestellnummern links neben den Namen aus.',
+      tags: 'Sequenzindex, manuelle Reihenfolge, Rangpräfix, linker Bundsteg',
+    },
+    hideRecentProjectTooltip: {
+      title: 'Tooltip „Neueste Projekte durchsuchen“ ausblenden',
+      description: 'Blendet den Tooltip im Cursor zum Durchsuchen der neuesten Projekte neben „Neuestes Projekt fortsetzen“ auf dem Begrüßungsbildschirm aus.',
+      tags: 'Projekt, laden, wird geladen, neueste, aktuell, Einführung, Start, Willkommen, Tooltip, Pop-up, Tooltips, Pop-up',
+    },
+    hideTabCloseButton: {
+      title: 'Hide tab close button',
+      description: 'Determines whether the tab close buttons in the opened document list will be shown or not. Please note that this will make the tabs closeable only via middle click or right click and then clicking on the menu.',
+      tags: 'tab close, close button, X button, hide close, middle click, context menu, tab strip'
+    },
+    hideWelcomeScreenSocials: {
+      title: 'Soziale Links auf dem Begrüßungsbildschirm ausblenden',
+      description: 'Versteckt alle sozialen Links auf dem Willkommensbildschirm.',
+      tags: 'Discord, Twitter, Community-Links, soziale Medien, willkommen',
+    },
+    skipWelcomeScreen: {
+      title: 'Begrüßungsbildschirm überspringen',
+      description: 'Überspringt den Begrüßungsbildschirm und versucht, das neueste Projekt direkt beim Starten der App zu laden.',
+      tags: 'Projekt, laden, laden, neueste, aktuell, Einführung, Start, willkommen',
+    },
+    invertCategoryPosition: {
+      title: 'Kategorieposition umkehren',
+      description: 'Vertauscht die Positionen der Kategorie- und Dokumentnummern.',
+      tags: 'Nummern austauschen, Zählreihenfolge, Kategorie vs. Dokumentanzahl',
+    },
+    limitEditorHeight: {
+      title: 'Begrenzen Sie die Höhe des Texteditors',
+      description: 'Bestimmt, ob der Texteditor eine begrenzte Höhe hat, wenn er sich nicht im Vollbildmodus befindet.',
+      tags: 'Textbereichshöhe, Langtext, Expand-Editor, Scroll-Editor',
+    },
+    logFullActivityPayload: {
+      title: 'Vollständige Aktivitätsnutzlast protokollieren',
+      description: 'Wenn dies aktiviert ist, protokolliert die Aktivität in allen Situationen die vollständigen Nutzlasten (normalerweise protokolliert sie nur in Situationen, in denen es sich nicht um einen Fehler oder eine Warnung handelt). Dies kann nützlich sein, wenn Sie ein umfassendes Debugging durchführen, das eine präzise Protokollierung der Ergebnisse erfordert.',
+      tags: 'Debug, Fehlersuche, DevTools, Nutzlast, Aktivität, Protokollierung',
+    },
+    noProjectName: {
+      title: 'Projektnamen im Baum ausblenden',
+      description: 'Legt fest, ob der Projektname überhaupt im hierarchischen Baum angezeigt wird.',
+      tags: 'Stammbezeichnung, Projekttitelbaum, Kopfzeile ausblenden',
+    },
+    noTags: {
+      title: 'Tags im Baum ausblenden',
+      description: 'Legt fest, ob Tags überhaupt im hierarchischen Baum angezeigt werden.',
+      tags: 'Etiketten ausschalten, Streifen markieren, Baumetiketten markieren, Etiketten ausblenden',
+    },
+    preventAutoScroll: {
+      title: 'Automatisches Scrollen verhindern',
+      description: 'Legt fest, ob Dokumente ihre Bildlaufpositionen abrufen und automatisch scrollen, wenn zwischen ihnen gewechselt wird.',
+      tags: 'Scrollposition, Scrollen merken, nach oben springen, Tabulatorwechsel',
+    },
+    preventFilledAppNoteBoardPopup: {
+      title: 'Prevent filled app noteboard from showing',
+      description: 'When enabled, the app noteboard will not open automatically at app start when it still contains notes from previous FA sessions.',
+      tags: 'app noteboard, sticky notes, startup, auto open, reminders'
+    },
+    preventFilledProjectNoteBoardPopup: {
+      title: 'Prevent filled project noteboard from showing',
+      description: 'When enabled, the project noteboard will not open automatically when a project loads if it still contains notes from previous project sessions.',
+      tags: 'project noteboard, sticky notes, project open, auto open, reminders'
+    },
+
+    preventPreviewsDocuments: {
+      title: 'Dokumentvorschauen verhindern',
+      description: 'Steuert, ob Schnellvorschauen beim Hover in der Dokumentansicht und in Beziehungsfeldern angezeigt werden.',
+      tags: 'Hover-Karte, Peek, Beziehungs-Popup, Inline-Vorschau',
+    },
+    preventPreviewsPopups: {
+      title: 'Dokumentvorschauen in Dialogen verhindern',
+      description: 'Steuert, ob bei der Auswahl von Dokumenten in Dialogen (z. B. der Auswahl für vorhandene Dokumente) Schnellvorschauen beim Hover angezeigt werden.',
+      tags: 'Vorhandenes Dokumentdialog, Auswahl-Hover, Dokumentauswahl, modale Vorschau',
+    },
+    preventPreviewsTabs: {
+      title: 'Dokumentvorschauen auf Registerkarten verhindern',
+      description: 'Steuert, ob Schnellvorschauen beim Bewegen des Mauszeigers auf Dokumentregisterkarten in der Registerkartenleiste angezeigt werden.',
+      tags: 'Tab-Hover, Tab-Strip-Vorschau, Blick auf die Titelleiste',
+    },
+    preventPreviewsTree: {
+      title: 'Dokumentvorschau beim Hover verhindern',
+      description: 'Steuert, ob Schnellvorschauen beim Hover im hierarchischen Baum angezeigt werden. Wenn die Hover-Vorschau aktiviert bleibt, kann sie einen großen Einfluss auf die App-Leistung haben.',
+      tags: 'Baum-Hover, Verzögerung, langsam, fps, Leistung, Seitenleistenvorschau',
+      note: 'Kann einen großen Einfluss auf die App-Leistung haben!',
+    },
+    showDocumentID: {
+      title: 'Dokument-IDs anzeigen',
+      description: 'Wenn dies aktiviert ist, zeigt der Dokumenttext auch den internen Dokument-ID-Wert an.',
+      tags: 'Debuggen, interne ID, Kennung, Entwicklungstools, Fehlerbehebung',
+    },
+    showTabBarScrollButtons: {
+      title: 'Show tab bar scroll buttons',
+      description: 'Determines whether the top tab list scroll buttons should show. Please note that without them, the user is able to scroll on the bar only using the mousewheel.',
+      tags: 'tab scroll, scroll arrows, chevron, overflow, mousewheel, tab strip'
+    },
+    tagsAtTop: {
+      title: 'Top-Tags im Baum',
+      description: 'Zeigt Tags oben im hierarchischen Baum an.',
+      tags: 'Tag-Reihenfolge, Tags zuerst, oberhalb der Kategorien',
+    },
+    textShadow: {
+      title: 'Textschatten',
+      description: 'Diese Einstellung schaltet Textschatten in der hierarchischen Struktur, in Popups für die Beziehungssuche und in Registerkarten um und ermöglicht so eine auffälligere Darstellung von Text vor dem Hintergrund.',
+      tags: 'Kontrast, Lesbarkeit, Schatten, Umriss, Lesbarkeit, Textklarheit',
+    }
+  }
+}

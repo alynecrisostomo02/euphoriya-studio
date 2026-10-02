@@ -1,0 +1,125 @@
+@use './variables' as *;
+@use '../../AppControlMenus/styles/variables' as appControlMenus;
+@use '../../../../css/globals/faQIconDisplay.mixin.scss' as faQIconDisplay;
+@use '../../../../css/theme/quasar-components/qMenu.variables' as *;
+
+/* Teleported App Control menus.
+ * Must use class= on q-menu — content-class is not a QMenu prop
+ * (inheritAttrs false; attr never becomes CSS class).
+ */
+
+body.fa-appTheme--fantasy .appControlSingleMenu__menu.q-menu {
+  margin-top: $appControlSingleMenu-menu-offsetTop-fantasy !important;
+}
+
+/* Side submenu: darker panel than root (match tree Sort By / tab Browse). */
+.appControlSingleMenu__subMenu.q-menu {
+  background-color: $appControlSingleMenu-subMenu-bgColor;
+
+  .appControlSingleMenu__list {
+    background-color: $appControlSingleMenu-subMenu-bgColor;
+  }
+}
+
+body.fa-appTheme--fantasy .appControlSingleMenu__subMenu.q-menu {
+  margin-left: $appControlSingleMenu-subMenu-offsetLeft-fantasy !important;
+}
+
+/* Content-dot host: teleported menus need unscoped position (scoped can miss portaled rows). */
+.appControlSingleMenu__menu .appControlSingleMenu__item {
+  overflow: visible;
+  position: relative;
+
+  .faCornerContentDot {
+    right: $appControlSingleMenu-contentDot-offsetRight;
+    top: $appControlSingleMenu-contentDot-offsetTop;
+  }
+}
+
+/* Fantasy glyph bases for root + submenu icons (fa-color-glyph utility shades under fantasy). */
+.appControlSingleMenu__menu.q-menu,
+.appControlSingleMenu__subMenu.q-menu {
+  .appControlSingleMenu__icon.q-icon {
+    @include faQIconDisplay.fa-q-icon-display-constrain-glyph-in-box;
+
+    --fa-color-glyph-base: #{appControlMenus.$appControlMenus-color};
+    --fa-q-icon-display-glyph-font-size: #{$appControlSingleMenu-icon-boxSize};
+    --fa-q-icon-display-mdi-fit-scale: 1;
+    --fa-q-icon-display-mdi-font-size: #{$appControlSingleMenu-icon-boxSize};
+
+    align-items: center;
+    box-sizing: border-box;
+    color: var(--fa-color-glyph-base);
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: $appControlSingleMenu-icon-boxSize !important;
+    height: $appControlSingleMenu-icon-boxSize !important;
+    justify-content: center;
+    line-height: 1;
+    max-height: $appControlSingleMenu-icon-boxSize;
+    max-width: $appControlSingleMenu-icon-boxSize;
+    width: $appControlSingleMenu-icon-boxSize !important;
+
+    &:not(.fa-brands, .fa-regular, .fa-solid) {
+      margin-top: 0;
+      transform: none;
+    }
+
+    &.fa-brands::before,
+    &.fa-regular::before {
+      margin-top: 0;
+    }
+
+    &.fa-solid::before {
+      --fa-q-icon-display-glyph-fit-scale: #{$faQIconDisplay-faSolidGlyph-fitScale};
+
+      margin-top: 0;
+    }
+  }
+
+  .appControlSingleMenu__item:not(.text-secondary) {
+    &:hover:not([aria-disabled='true']),
+    &:focus:not([aria-disabled='true']) {
+      .appControlSingleMenu__icon {
+        --fa-color-glyph-base: #{appControlMenus.$appControlMenus-singleHover};
+
+        color: var(--fa-color-glyph-base);
+      }
+    }
+  }
+
+  .appControlSingleMenu__item.text-secondary {
+    .appControlSingleMenu__icon {
+      --fa-color-glyph-base: #{$qMenu-destructiveItem-icon-color};
+
+      color: var(--fa-color-glyph-base);
+    }
+
+    &:hover:not([aria-disabled='true']),
+    &:focus:not([aria-disabled='true']) {
+      .appControlSingleMenu__icon {
+        --fa-color-glyph-base: #{$qMenu-destructiveItem-icon-color};
+
+        color: var(--fa-color-glyph-base);
+      }
+    }
+  }
+
+  .appControlSingleMenu__item--muted:not(.disabled, [disabled], [aria-disabled='true']) {
+    .appControlSingleMenu__icon {
+      --fa-color-glyph-base: #{$appControlSingleMenu-item-muted-color};
+
+      color: var(--fa-color-glyph-base);
+    }
+  }
+
+  .appControlSingleMenu__item.disabled,
+  .appControlSingleMenu__item[disabled],
+  .appControlSingleMenu__item[aria-disabled='true'] {
+    .appControlSingleMenu__icon {
+      --fa-color-glyph-base: #{$qMenu-item-disabled-color-fantasy};
+
+      color: var(--fa-color-glyph-base);
+    }
+  }
+}

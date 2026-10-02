@@ -1,0 +1,35 @@
+---
+description: Conventional commit messages and logical multi-commit workflow when working with Git
+alwaysApply: true
+---
+
+# Git — conventional commits
+
+- **Format**: `type: imperative subject` — lowercase type, **space after colon**, no period on subject; body optional.
+- **Allowed types** (narrowest fit): `feat`, `fix`, `test`, `chore`, `refactor`, `style`, `docs`.
+- **Split commits** by logical concern (feature vs tests vs tooling vs docs vs style-only). No unrelated mix in one commit.
+- **Staged commits** / **approval per commit**: [git-conventional-commits skill](../skills/git-conventional-commits/SKILL.md) — propose each, wait approval, `git add` + `git commit` per chunk.
+- **Before any commit OR changelog edit**, enforce order ([testing-terminal-isolation.mdc](testing-terminal-isolation.mdc) **changelog-only** exception):
+  1. **Full quality gate** in **one** terminal: `yarn testbatch:verify` (must pass; dev scoped gate during edits does **not** substitute). **Skip** only when committing **exclusively** **`i18n/*/documents/changeLog.md`** and **`yarn testbatch:verify`** already passed after latest substantive edits with **no** other pending changes; if **unsure**, run gate. Ordinary edit batches use [dev-scoped-verify.mdc](dev-scoped-verify.mdc) only.
+  2. Storybook coverage/health for changed **`src/components/**`**; add/update `_tests/*.stories.ts` + mocks. Layout/page previews canvas-only without Docs — [storybook-stories.mdc](storybook-stories.mdc). **Skip** on changelog-only when Storybook satisfied for prior work.
+  3. Update `i18n/en-US/documents/changeLog.md` for user-visible changes **before** `git commit` (changelog rules/skill; NEVER auto-bump versions; version from `package.json` only). **Prefer same commit** as substantive change; avoid changelog-only follow-up after push. Mirror other locales’ **`documents/changeLog.md`** **only when user explicitly asks**; default = **`en-US`** only. No bullets about commits, pushes, or editing changelog.
+  4. Commit.
+- Any gate fail (lint, types, stylelint, Vitest coverage) → **stop commit flow**, no `git commit`; inform user with concise summary (paths + key errors).
+
+## Type cheat sheet
+
+| Type | Use for |
+|------|---------|
+| `feat` | New user-facing behavior or capability |
+| `fix` | Bug fixes |
+| `test` | Tests only (Vitest, Playwright, test harness) |
+| `chore` | Tooling, deps, config, housekeeping without product behavior change |
+| `refactor` | Behavior-preserving code structure changes |
+| `style` | Formatting, whitespace, lint autofix — no logic change |
+| `docs` | README, comments meant as documentation, AGENTS/rules/skills text |
+
+## Local enforcement (commitlint + Husky)
+
+- **`commitlint.config.mjs`** mirrors **`type`** list; **`Merge `** / **`Revert `** ignored.
+- **`yarn install`** → **`husky`** via **`prepare`** in **`package.json`**; **`.husky/commit-msg`** → **`yarn lint:commit --edit`** rejects invalid subjects before **`git commit`** locally.
+- Dry-run: **`echo "feat: example" | yarn lint:commit`**. CI (**`.github/workflows/verify.yml`**) does not run commitlint unless workflow step added.

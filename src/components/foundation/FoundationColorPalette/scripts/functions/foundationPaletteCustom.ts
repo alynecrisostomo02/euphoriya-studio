@@ -1,0 +1,72 @@
+import type { I_foundationCustomSwatch } from 'app/types/I_foundationCatalogues'
+
+/**
+ * Mirrors the QUASAR COLORS - GENERAL block in src/css/app.palette.scss.
+ * Keep hex values in sync when editing that block; $info is derived from $primary in SCSS (see app.palette.scss).
+ */
+export const FOUNDATION_CUSTOM_SWATCHES: I_foundationCustomSwatch[] = [
+  {
+    sassVar: '$accent',
+    hex: '#f5f5f5'
+  },
+  {
+    sassVar: '$dark',
+    hex: '#1b333e'
+  },
+  {
+    sassVar: '$dark-lighter',
+    hex: '#194456'
+  },
+  {
+    sassVar: '$dark-middle',
+    hex: '#183e4d'
+  },
+  {
+    sassVar: '$dark-page',
+    hex: '#303742'
+  },
+  {
+    sassVar: '$fantasy-dark',
+    hex: '#152229'
+  },
+  {
+    sassVar: '$fantasy-medium',
+    hex: '#133341'
+  },
+  {
+    sassVar: '$grey',
+    hex: '#d4d0c9'
+  },
+  {
+    hex: '#f7eed9',
+    sassVar: '$info'
+  },
+  {
+    sassVar: '$negative',
+    hex: '#c10015'
+  },
+  {
+    sassVar: '$positive',
+    hex: '#35a14e'
+  },
+  {
+    sassVar: '$primary',
+    hex: '#d7ac47'
+  },
+  {
+    sassVar: '$primary-bright',
+    hex: '#ffd673'
+  },
+  {
+    sassVar: '$secondary',
+    hex: '#f75746'
+  },
+  {
+    sassVar: '$warning',
+    hex: '#f2c037'
+  },
+  {
+    sassVar: '$white',
+    hex: '#ffffff'
+  }
+]

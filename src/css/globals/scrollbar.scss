@@ -1,0 +1,31 @@
+@use '../quasar.variables.scss' as *;
+
+* {
+
+  /* Scrollbar sizing — slim stick; transparent track + pill thumb (all themes). */
+  ::-webkit-scrollbar {
+    height: $globals-scrollbar-height;
+    width: $globals-scrollbar-width;
+  }
+
+  /* Whole scrollbar track */
+  ::-webkit-scrollbar-track {
+    background: $globals-scrollbar-trackBackground;
+  }
+
+  /* Handle button — full pill ends (transparent inset helps Chromium draw caps). */
+  ::-webkit-scrollbar-thumb {
+    background: $globals-scrollbar-thumbBackground;
+    border-radius: $globals-scrollbar-thumb-borderRadius;
+  }
+
+  /* Handle button - Hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: $globals-scrollbar-thumbHoverBackground;
+  }
+}
+
+/* Global utility: add to scrollable containers when content may gain/lose a vertical scrollbar, to avoid horizontal layout shift (see README, AGENTS.md, project-scss.mdc, vue-quasar.mdc, fantasia-quasar-vue skill). */
+.hasScrollbar {
+  scrollbar-gutter: stable;
+}

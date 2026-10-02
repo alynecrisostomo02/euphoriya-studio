@@ -1,0 +1,40 @@
+---
+description: BEM class names and scoped SCSS in Vue single-file components
+globs: "**/*.vue"
+alwaysApply: false
+---
+
+# Vue SFC — BEM and scoped SCSS
+
+**CSS class naming** + **`<style lang="scss">`** only. Not `data-test-*` hooks ([vue-template-test-hooks.mdc](vue-template-test-hooks.mdc)) or `<script setup>` ([vue-quasar.mdc](vue-quasar.mdc)).
+
+## Block and element classes (template)
+
+Follow [GlobalWindowButtons.vue](src/components/globals/GlobalWindowButtons/GlobalWindowButtons.vue), [AppControlMenus.vue](src/components/globals/AppControlMenus/AppControlMenus.vue):
+
+- **Block**: one root class, lowerCamelCase (e.g. `globalWindowButtons`, `appControlMenus`).
+- **Elements**: `blockName__element` (double underscore), e.g. `globalWindowButtons__button`, `appControlMenus__inner`.
+- **Quasar / utilities**: keep existing Quasar props + utility classes (`flat`, `bg-dark`, etc.) on same nodes when codebase combines with BEM.
+
+Use **HTML comments** in template to group sections (buttons, tooltips, regions) like existing components.
+
+## Scoped SCSS
+
+- Prefer `<style lang="scss" scoped>` unless unscoped intentional (match neighbors).
+- Do **not** introduce new raw **colors** or **sized units** (`px`, `rem`, `vh`, etc.) in component SCSS when they belong in shared token set. Add/reuse variables in feature **`styles/_variables.scss`**, [src/css/theme/quasar-components/](src/css/theme/quasar-components/) (for `q-*` global overrides), or [app.palette.scss](src/css/app.palette.scss). Theme **`$` identifiers**: **hyphens** between segments (never underscores in `$` identifiers). Applies to `<style>` only, not template attributes/prop strings unless policy expands.
+- Do **not** use **framework palette** Sass variables (`$primary`, `$grey`, `$white`, `$dark`, `$accent`, …) directly in component SCSS. Add **semantic** token in catalogue — same indirection as raw sizes/hex ([project-scss.mdc](project-scss.mdc) **Palette variables vs semantic color tokens**). Reuse semantic Globals (e.g. `$aLinkColor`) when role matches.
+- Nest element rules under block:
+
+```scss
+.appControlMenus {
+  &__inner {
+    -webkit-app-region: no-drag;
+  }
+}
+```
+
+- Avoid deep nesting; prefer extra element classes over long compound selectors.
+
+## Global / shared styles
+
+Cross-app SCSS under [src/css](src/css) — [project-scss.mdc](project-scss.mdc). Component BEM in SFC **or**, when external sheet required (usually SFC size), feature **`styles/`** — [component-styles-folder.mdc](component-styles-folder.mdc).

@@ -1,0 +1,252 @@
+import type { ElectronApplication, Page } from 'playwright'
+import { expect, test } from '@playwright/test'
+import type { TestInfo } from '@playwright/test'
+import { launchFaPlaywrightE2eAppWindow } from 'app/helpers/playwrightHelpers_e2e/faPlaywrightE2eAppLifecycle'
+import { navigateFaPlaywrightE2eToHomeRoute } from 'app/helpers/playwrightHelpers_e2e/faPlaywrightE2eNavigateHome'
+import { FA_FRONTEND_RENDER_TIMER } from 'app/helpers/playwrightHelpers_universal/faPlaywrightElectronLaunchConstants'
+import { getFaPlaywrightMonacoSelectAllPressString } from 'app/helpers/playwrightHelpers_universal/faPlaywrightKeyboardChords'
+import { dismissStartupTipsNotifyIfPresent } from 'app/helpers/playwrightHelpers_universal/playwrightDismissStartupTipsNotify'
+import { tearDownFaPlaywrightElectronSerialSuite } from 'app/helpers/playwrightHelpers_universal/faPlaywrightSerialSuiteLifecycleTeardown'
+import toolsMenuMessages from 'app/i18n/en-US/components/globals/AppControlMenus/L_tools'
+import noteboardMessages from 'app/i18n/en-US/floatingWindows/L_appNoteboard'
+
+import { FA_QUASAR_DIALOG_STANDARD_TRANSITION_MS } from 'app/src/scripts/floatingWindows/functions/faQuasarDialogStandardTransition'
+
+/**
+ * Extra env settings to trigger E2E testing via Playwright
+ */
+const extraEnvSettings = {
+  TEST_ENV: 'e2e'
+}
+
+/**
+ * Buffer before assertions so the window and menus are ready.
+ */
+const faFrontendRenderTimer: number = FA_FRONTEND_RENDER_TIMER
+
+/**
+ * Menu animation timer for tests to wait for the menu animation to finish
+ */
+const menuAnimationTimer = 600
+
+/**
+ * Floating noteboard chrome can appear shortly after Tools menu dismissal.
+ */
+const noteboardWindowReadyMs = 30_000
+
+/**
+ * Matches production debounced main-process writes for note text plus IPC slack.
+ */
+const noteboardTextPersistSettleMs = 900
+
+/**
+ * Multi-line textarea fixture typed in the first serial group; expect the same string after an app restart before clearing it in the second group.
+ */
+const appNoteboardPersistedRoundTripSample =
+  'E2E app-wide noteboard persisted paragraph one.\n' +
+  'E2E app-wide noteboard persisted paragraph two.\n' +
+  'E2E app-wide noteboard persisted paragraph three.'
+
+/**
+ * Object of string data selectors for the e2e
+ */
+const selectorList = {
+  closeButton: 'windowAppNoteboard-button-close',
+  editor: 'windowAppNoteboard-editor',
+  frame: 'windowAppNoteboard-frame',
+  title: 'windowAppNoteboard-title'
+} as const
+
+async function openAppNoteboardFromToolsMenu (page: Page): Promise<void> {
+  await dismissStartupTipsNotifyIfPresent(page)
+  const frame = page.locator(`[data-test-locator="${selectorList.frame}"]`)
+  // Filled notes auto-open the window on cold start; Tools toggle would close it again.
+  if (await frame.count() > 0) {
+    return
+  }
+  const toolsTrigger = page.getByText(toolsMenuMessages.title, { exact: true })
+  await expect(toolsTrigger).toBeVisible({ timeout: 20_000 })
+  await toolsTrigger.click()
+  await page.waitForTimeout(menuAnimationTimer)
+  const row = page.getByText(toolsMenuMessages.items.appNoteBoard, { exact: true })
+  await expect(row).toBeVisible()
+  await row.click()
+  await page.waitForTimeout(menuAnimationTimer)
+}
+
+async function waitForNoteboardFloatingWindow (page: Page): Promise<void> {
+  const frame = page.locator(`[data-test-locator="${selectorList.frame}"]`)
+  await expect(frame).toHaveCount(1, { timeout: noteboardWindowReadyMs })
+  const title = frame.locator(`[data-test-locator="${selectorList.title}"]`)
+  await expect(title).toHaveCount(1)
+  await expect(title).toHaveText(noteboardMessages.title)
+  await page.waitForTimeout(FA_QUASAR_DIALOG_STANDARD_TRANSITION_MS + 100)
+  const editor = frame.locator(`[data-test-locator="${selectorList.editor}"]`)
+  await expect(editor).toBeVisible()
+}
+
+test.describe.serial('App noteboard E2E — fresh Playwright profile: type notes and Close', () => {
+  let electronApp: ElectronApplication
+  let appWindow: Page
+  let suiteTestInfo: TestInfo
+
+  test.describe.configure({
+    timeout: 120_000
+  })
+
+  test.beforeAll(async ({}, testInfo) => {
+    suiteTestInfo = testInfo
+    const launched = await launchFaPlaywrightE2eAppWindow({
+      buildLaunchEnv (): Record<string, string> {
+        return {
+          TEST_ENV: extraEnvSettings.TEST_ENV
+        }
+      },
+      renderDelayMs: faFrontendRenderTimer,
+      testInfo
+    })
+    electronApp = launched.electronApp
+    appWindow = launched.appWindow
+  })
+
+  test.afterAll(async ({}, afterAllTestInfo) => {
+    await tearDownFaPlaywrightElectronSerialSuite({
+      afterAllTestInfo,
+      electronApp,
+      suiteTestInfo
+    })
+  })
+
+  /**
+   * Types sample notes while the floating window stays open long enough for debounced persistence, then hides the window via Close without clearing the textarea first.
+   * Later serial groups cold-start Electron again on the same isolated profile without resetting userData.
+   */
+  test('Open App noteboard, type sample notes, Close', async () => {
+    await navigateFaPlaywrightE2eToHomeRoute(appWindow)
+
+    await test.step('Open App noteboard from Tools menu', async () => {
+      await openAppNoteboardFromToolsMenu(appWindow)
+      await waitForNoteboardFloatingWindow(appWindow)
+    })
+
+    const frame = appWindow.locator(`[data-test-locator="${selectorList.frame}"]`)
+    const editor = frame.locator(`[data-test-locator="${selectorList.editor}"]`)
+    await editor.click()
+    await editor.fill(appNoteboardPersistedRoundTripSample)
+    await appWindow.waitForTimeout(noteboardTextPersistSettleMs)
+
+    await frame.locator(`[data-test-locator="${selectorList.closeButton}"]`).click()
+    await expect(frame).toHaveCount(0, { timeout: 15_000 })
+  })
+})
+
+test.describe.serial('App noteboard E2E — reuse profile: reopen persisted text, clear notes, Close', () => {
+  let electronApp: ElectronApplication
+  let appWindow: Page
+  let suiteTestInfo: TestInfo
+
+  test.describe.configure({
+    timeout: 120_000
+  })
+
+  test.beforeAll(async ({}, testInfo) => {
+    suiteTestInfo = testInfo
+    const launched = await launchFaPlaywrightE2eAppWindow({
+      buildLaunchEnv (): Record<string, string> {
+        return {
+          TEST_ENV: extraEnvSettings.TEST_ENV
+        }
+      },
+      renderDelayMs: faFrontendRenderTimer,
+      resetUserData: false,
+      testInfo
+    })
+    electronApp = launched.electronApp
+    appWindow = launched.appWindow
+  })
+
+  test.afterAll(async ({}, afterAllTestInfo) => {
+    await tearDownFaPlaywrightElectronSerialSuite({
+      afterAllTestInfo,
+      electronApp,
+      suiteTestInfo
+    })
+  })
+
+  /**
+   * After a cold start on the warmed profile, the textarea still shows the multi-line string from the first serial group.
+   * Clearing the editor and waiting for the debouncer persists an empty string so the next launch expects an empty textarea.
+   */
+  test('Reopen App noteboard and confirm persisted text, clear all notes, Close', async () => {
+    await navigateFaPlaywrightE2eToHomeRoute(appWindow)
+
+    await openAppNoteboardFromToolsMenu(appWindow)
+    await waitForNoteboardFloatingWindow(appWindow)
+
+    const frame = appWindow.locator(`[data-test-locator="${selectorList.frame}"]`)
+    const editor = frame.locator(`[data-test-locator="${selectorList.editor}"]`)
+
+    await expect(editor).toHaveValue(appNoteboardPersistedRoundTripSample)
+
+    await editor.click()
+    await appWindow.keyboard.press(getFaPlaywrightMonacoSelectAllPressString())
+    await appWindow.keyboard.press('Backspace')
+
+    await appWindow.waitForTimeout(noteboardTextPersistSettleMs)
+    await expect(editor).toHaveValue('')
+
+    await frame.locator(`[data-test-locator="${selectorList.closeButton}"]`).click()
+    await expect(frame).toHaveCount(0, { timeout: 15_000 })
+  })
+})
+
+test.describe.serial('App noteboard E2E — reuse profile again: empty editor stays empty after restart', () => {
+  let electronApp: ElectronApplication
+  let appWindow: Page
+  let suiteTestInfo: TestInfo
+
+  test.describe.configure({
+    timeout: 120_000
+  })
+
+  test.beforeAll(async ({}, testInfo) => {
+    suiteTestInfo = testInfo
+    const launched = await launchFaPlaywrightE2eAppWindow({
+      buildLaunchEnv (): Record<string, string> {
+        return {
+          TEST_ENV: extraEnvSettings.TEST_ENV
+        }
+      },
+      renderDelayMs: faFrontendRenderTimer,
+      resetUserData: false,
+      testInfo
+    })
+    electronApp = launched.electronApp
+    appWindow = launched.appWindow
+  })
+
+  test.afterAll(async ({}, afterAllTestInfo) => {
+    await tearDownFaPlaywrightElectronSerialSuite({
+      afterAllTestInfo,
+      electronApp,
+      suiteTestInfo
+    })
+  })
+
+  /**
+   * Third cold start: confirms the cleared textarea from the second serial group is still empty when Tools opens the noteboard again.
+   */
+  test('Reopen App noteboard confirms empty textarea', async () => {
+    await navigateFaPlaywrightE2eToHomeRoute(appWindow)
+
+    await openAppNoteboardFromToolsMenu(appWindow)
+    await waitForNoteboardFloatingWindow(appWindow)
+
+    const editor = appWindow.locator(`[data-test-locator="${selectorList.editor}"]`)
+    await expect(editor).toHaveValue('')
+
+    const frame = appWindow.locator(`[data-test-locator="${selectorList.frame}"]`)
+    await frame.locator(`[data-test-locator="${selectorList.closeButton}"]`).click()
+    await expect(frame).toHaveCount(0, { timeout: 15_000 })
+  })
+})

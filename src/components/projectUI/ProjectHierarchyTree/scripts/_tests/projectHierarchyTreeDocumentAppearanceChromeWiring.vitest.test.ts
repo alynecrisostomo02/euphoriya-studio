@@ -1,0 +1,40 @@
+import { expect, test } from 'vitest'
+
+import { resolveProjectHierarchyTreeDocumentAppearanceChrome } from '../projectHierarchyTreeDisplayChromeWiring'
+
+test('Test that resolveProjectHierarchyTreeDocumentAppearanceChrome returns undefined for non-document nodes', () => {
+  expect(resolveProjectHierarchyTreeDocumentAppearanceChrome({
+    documentBackgroundColor: '#112233',
+    documentTextColor: '#aabbcc',
+    nodeKind: 'world'
+  })).toBeUndefined()
+})
+
+test('Test that resolveProjectHierarchyTreeDocumentAppearanceChrome returns undefined when document colors are empty', () => {
+  expect(resolveProjectHierarchyTreeDocumentAppearanceChrome({
+    documentBackgroundColor: '',
+    documentTextColor: '',
+    nodeKind: 'document'
+  })).toBeUndefined()
+})
+
+test('Test that resolveProjectHierarchyTreeDocumentAppearanceChrome maps text-only document colors', () => {
+  expect(resolveProjectHierarchyTreeDocumentAppearanceChrome({
+    documentBackgroundColor: '',
+    documentTextColor: '#aabbcc',
+    nodeKind: 'document'
+  })).toEqual({
+    color: '#aabbcc'
+  })
+})
+
+test('Test that resolveProjectHierarchyTreeDocumentAppearanceChrome applies minor muted grey without text color', () => {
+  expect(resolveProjectHierarchyTreeDocumentAppearanceChrome({
+    documentBackgroundColor: '',
+    documentTextColor: '',
+    isMinor: true,
+    nodeKind: 'document'
+  })).toEqual({
+    color: 'var(--fa-color-text-muted)'
+  })
+})

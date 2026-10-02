@@ -1,0 +1,65 @@
+---
+description: Hierarchical tree UI — @he-tree/vue only; Quasar QTree is forbidden project-wide
+globs: "**/*.vue,src/scripts/**/*.ts"
+alwaysApply: false
+---
+
+# Hierarchical trees (`@he-tree/vue`)
+
+## When this applies
+
+Renderer **hierarchical tree** (expand/collapse, nested folders, drag-reorder, branch checkboxes, etc.): project worlds, document browsers, template hierarchies, settings trees with nested groups.
+
+## Required library (full replacement)
+
+- **Use [`@he-tree/vue`](https://hetree.phphe.com/)** only (`BaseTree`, `Draggable`, helpers e.g. `walkTreeData`).
+- **Never** Quasar **`QTree`** / **`q-tree`** anywhere — not small trees, prototypes, Storybook product previews. **`@he-tree/vue`** = **only** approved tree implementation.
+- No new **`QTree`**; remove legacy **`QTree`** when touching surface.
+
+## Imports and styles
+
+```ts
+import { BaseTree, Draggable } from '@he-tree/vue'
+import '@he-tree/vue/style/default.css'
+```
+
+- Import default stylesheet **once** per tree surface (feature SFC or wrapper). Override in feature **`styles/`** SCSS with BEM + semantic tokens — do not fork library CSS wholesale.
+- **`Draggable`** when users reorder nodes; **`BaseTree`** read-only or selection-only.
+- **List DnD policy:** tree reorder = he-tree built-in only — **no** **`vue-draggable-plus`** on nodes ([fa-drag-drop-lists.mdc](fa-drag-drop-lists.mdc)).
+
+## Virtualization (performance)
+
+- Enable **`virtualization`** when tree may hold **~50+ visible rows** or deep expand-all paths.
+- Tree or **bounded parent** needs explicit **`height`** or **`max-height`** (fixed px or flex child with constrained scroll). Virtualization fails on unbounded auto-height container.
+- **`overflow: auto`** on **Draggable root** (scroll grows with content), not passive wrapper — see DnD scroll below.
+- Combine with **lazy child loading** from SQLite on expand ([fantasia-sqlite-main](../skills/fantasia-sqlite-main/SKILL.md)).
+
+## DnD + scroll (do not remount on reorder)
+
+Playbook: [fantasia-he-tree](../skills/fantasia-he-tree/SKILL.md) **DnD + scroll preservation**. Reference: **`DialogProjectSettingsWorldTemplateLayoutTree`**.
+
+- **No `:key` on `Draggable`** for sort-only changes — remount resets **`scrollTop`**; use **`treeData` + resync**.
+- **Topology key** for resync: canonical sorted ids + membership — not draft array order or sort fields (**`mapDialogProjectSettingsWorldTemplateLayoutToTreeStructureKey`**).
+- Topology match → label patch in place; mismatch → rebuild **`treeData`**.
+- **No post-drop scroll restore** — fights **`virtualization`**; fix rebuild/remount instead.
+- Expand / drag freeze snapshots: **model `openNodeIds` (and stats)** — not DOM row queries (virtual list mounts viewport only).
+- Append scroll: separate count watch; scroll container = he-tree root (**`resolveDialogProjectSettingsWorldTemplateLayoutTreeScrollContainer`**).
+
+## Project layout
+
+- **Thin Vue SFC** — template slots, `data-test-locator`, i18n **`$t`**, Quasar icons/buttons in **`#default`** node slots.
+- **Feature `scripts/`** — tree data mapping, expand state, filter/search, DnD handlers → Pinia/IPC.
+- Shared walk/flatten/id-index helpers live with the consuming feature until ≥2 features need the same utilities (no dedicated **`src/scripts/faHeTree/`** folder yet).
+- Types: repo-root **`types/`** (`app/types/...`); no colocated `*.types.ts` under **`src/`**. See [types-folder.mdc](types-folder.mdc).
+
+## Styling and Quasar
+
+- Node rows: Quasar **`q-icon`**, **`q-checkbox`**, **`q-btn`**, **`fa-text-*`** / **`fa-icon-*`** in **`#default`** slot.
+- Scroll region: **`hasScrollbar`** when vertical scrollbar may shift layout ([`scrollbar.scss`](../../src/css/globals/scrollbar.scss)).
+- **`data-test-locator`** on tree root + interactive node chrome ([vue-template-test-hooks.mdc](vue-template-test-hooks.mdc)).
+
+## Related
+
+- [fantasia-he-tree skill](../skills/fantasia-he-tree/SKILL.md)
+- [vue-quasar.mdc](vue-quasar.mdc)
+- [AGENTS.md](../../AGENTS.md) Trees / DnD

@@ -1,0 +1,377 @@
+export default {
+  title: 'Fantasia Archive Настройки',
+  saveButton: 'Сохранить настройки',
+  closeButton: 'Закрыть без сохранения',
+  settingsSearchPlaceholder: 'Найдите настройки...',
+  settingsSearchClearAriaLabel: 'Очистить поиск настроек',
+  searchNoResultsTitle: 'Нет совпадений в поиске',
+  searchNoResultsDescription: 'К сожалению, Fantasia не нашла нужных вам настроек. Возможно, попробуйте другой поисковый запрос?',
+  appOptionsCategories: {
+    accessibility: {
+      title: 'Доступность',
+      tags: 'a11y, читаемость, наглядность, вспомогательные функции',
+      accessibility: {
+        subtitle: 'Доступность',
+        tags: 'a11y, читаемость, наглядность, вспомогательные функции',
+      }
+    },
+    developerSettings: {
+      title: 'Настройки разработчика',
+      tags: 'разработчик, отладка, диагностика, внутренняя',
+      documentBody: {
+        subtitle: 'Тело документа',
+        tags: 'идентификатор документа, метаданные отладки, внутренние поля',
+      }
+    },
+    documentViewEdit: {
+      title: 'Страница: Просмотр/редактирование документа',
+      tags: 'страница документа, режим просмотра, режим редактирования, программа чтения',
+      documentBody: {
+        subtitle: 'Тело документа',
+        tags: 'область содержимого, поля, чтение, область редактора',
+      },
+    },
+    hierarchicalTree: {
+      title: 'Иерархическое дерево',
+      tags: 'боковая панель, контур, навигатор, дерево проекта',
+      iconSettings: {
+        subtitle: 'Настройки значков',
+        tags: 'значки действий, кнопки дерева, значки строк',
+      },
+      informationDisplaySettings: {
+        subtitle: 'Настройки отображения информации',
+        tags: 'количество, числа, индекс порядка, отображение метаданных',
+      },
+      tagSettings: {
+        subtitle: 'Настройки тега',
+        tags: 'метки, отображение тегов, группировка тегов',
+      },
+      treeBehavior: {
+        subtitle: 'Поведение дерева',
+        tags: 'расширить, свернуть, расширить все, взаимодействие',
+      },
+    },
+
+    popupsFloatingWindows: {
+      title: 'Всплывающие и плавающие окна',
+      tags: 'диалоги, наложения, модальные окна, окна',
+      floatingWindows: {
+        subtitle: 'Плавающие окна',
+        tags: 'отсоединить, вторичное окно, несколько окон',
+      },
+      quickSearchDialog: {
+        subtitle: 'Quick-search/Quick-add dialog',
+        tags: 'quick search, quick add, keyboard search, finder, popup close'
+      }
+    },
+    visualAccessibility: {
+      title: 'Визуализация и функциональность всего приложения',
+      tags: 'внешний вид, интерфейс, глобальный, пользовательский интерфейс, внешний вид',
+      applicationExtras: {
+        subtitle: 'Дополнительные возможности приложения',
+        tags: 'талисман, плюш, фантазия, дополнительные услуги',
+      },
+      appControlBar: {
+        subtitle: 'Панель управления приложением',
+        tags: 'панель инструментов, верхняя панель, заголовок, документ Chrome',
+      },
+      tabBehavior: {
+        subtitle: 'Поведение вкладок',
+        tags: 'переключение вкладок, полоса вкладок, поведение при наведении',
+      },
+      visualsAppwideFunctionality: {
+        subtitle: 'Визуализация и функциональность всего приложения',
+        tags: 'тема, хром, макет, общие параметры',
+      }
+    },
+    projectOverview: {
+      title: 'Страница: Обзор проекта',
+      tags: 'домашняя страница проекта, панель, обзор, рабочая область',
+      projectOverviewBehavior: {
+        subtitle: 'Поведение обзора проекта',
+        tags: 'советы, хитрости, знали ли вы, карточка обзора, auto open, last document',
+      }
+    },
+    welcomeScreen: {
+      title: 'Экран приветствия',
+      tags: 'заставка, стартовый экран, приветствие, первый запуск, главная страница',
+      welcomeScreenBehavior: {
+        subtitle: 'Поведение экрана приветствия',
+        tags: 'советы по запуску, социальные ссылки, онбординг, всплеск',
+      }
+    }
+  },
+  appOptions: {
+    aggressiveRelationshipFilter: {
+      title: 'Выбор агрессивных отношений',
+      description: 'Включает агрессивный режим автозаполнения для всех поисков отношений в приложении в режиме редактирования документа. Если эта опция не включена, после фильтрации первый элемент в списке не будет выбран автоматически. Включение этого параметра добавляет эту функциональность, позволяя гораздо более удобно выбирать существующие документы, жертвуя при этом некоторым удобством при создании новых на лету.',
+      tags: 'автопредложение, автозаполнение, первое совпадение, список фильтров, выбор существующего, поиск отношений',
+    },
+    allowQuickPopupSameKeyClose: {
+      title: 'Закрытие быстрых всплывающих окон той же клавишей',
+      description: 'Позволяет закрывать всплывающие окна быстрого поиска и быстрого добавления той же комбинацией клавиш, которая использовалась для их открытия.',
+      tags: 'переключить ярлык, та же горячая клавиша, быстрое добавление, закрытие всплывающего окна',
+    },
+    allowWiderScrollbars: {
+      title: 'Более широкие полосы прокрутки',
+      description: 'Этот параметр делает полосы прокрутки FA шире и, следовательно, позволяет вручную прокручивать их непосредственно щелчком мыши для устройств, которые не поддерживают стандартную прокрутку (например, мыши без колеса прокрутки).',
+      tags: 'ширина полосы прокрутки, прокрутка щелчком мыши, мышь без колесика, трекбол, сенсорный экран',
+    },
+    autoOpenLastDocument: {
+      title: 'Auto-open last document',
+      description: 'When opening a project, automatically open the last active document tab instead of showing the Project overview first.',
+      tags: 'auto open, last document, project open, restore tab, skip overview, workspace home, resume session'
+    },
+
+    disableCategoryCount: {
+      title: 'Скрыть количество категорий',
+      description: 'Скрыть номера категорий в иерархическом дереве',
+      tags: 'упрощенный подсчет, одно число, меньше беспорядка',
+    },
+    compactTags: {
+      title: 'Компактные теги',
+      description: 'Определяет, отображаются ли теги как отдельные категории или как одна категория, где каждый тег является подкатегорией.',
+      tags: 'группировка тегов, папка с одним тегом, вложенные теги, иерархия тегов',
+    },
+    appTheme: {
+      title: 'App theme',
+      description: 'Choose a visual theme for the app to use.',
+      tags: 'dark, light, theme, theming, color, colors',
+      values: {
+        lightThemeFlat: 'Flat theme, Light',
+        darkThemeFlat: 'Flat theme, Dark',
+        lightThemeFantasy: 'Fantasy theme, Light',
+        darkThemeFantasy: 'Fantasy theme, Dark'
+      }
+    },
+    disableCloseAfterSelectQuickSearch: {
+      title: 'Перестать закрывать после выбора',
+      description: 'Обычно быстрый поиск закрывается после выбора в нем элемента. Включение этой функции предотвращает такое поведение, позволяя открывать несколько результатов поиска один за другим.',
+      tags: 'оставить открытым, несколько результатов, пакет открыт, быстрый поиск остается открытым',
+    },
+    disableAppControlBar: {
+      title: 'Отключить панель управления приложением',
+      description: 'Если вы хотите максимально увеличить рабочее пространство в документе, вы можете отключить верхнюю панель кнопок с помощью этого параметра. Необходимые кнопки управления будут перенесены в верхнюю часть основного тела документа, а остальная функциональность будет доступна через привязки клавиш или через меню приложения в левом верхнем углу.',
+      tags: 'скрыть панель инструментов, увеличить пространство, полную ширину, заголовок документа',
+    },
+    disableAppControlBarContentButtons: {
+      title: 'Disable app control bar content buttons',
+      description: 'Toggles the project contents (document search, document creation, etc.) on the app control bar on or off.',
+      tags: 'quick search, quick add, document create, content tools, control bar buttons'
+    },
+    disableAppControlBarFunctionButtons: {
+      title: 'Disable app control bar function buttons',
+      description: 'Toggles the app functional buttons (noteboards, hierarchical tree toggling, etc.) on the app control bar on or off.',
+      tags: 'noteboard, tree toggle, sidebar hide, function tools, control bar buttons'
+    },
+    disableAppControlBarGuides: {
+      title: 'Отключить подсказки панели управления приложением',
+      description: 'Включает или выключает удобные для новичков направляющие на панели управления приложением.',
+      tags: 'подсказки для начинающих, обучающие баннеры, отметки тренера, помощь на панели управления',
+    },
+    disableDocumentCounts: {
+      title: 'Скрыть количество документов',
+      description: 'Скрыть номера документов в иерархическом дереве',
+      tags: 'итоги отключены, нет подсчета, статистика скрыта',
+    },
+    disableDocumentToolTips: {
+      title: 'Отключить всплывающие подсказки документов',
+      description: 'Если вам не нравятся всплывающие подсказки при просмотре документов, вы можете отключить их глобально здесь.',
+      tags: 'текст при наведении, справка по полям, всплывающее окно, подсказки по просмотру документа',
+    },
+    disableSpellCheck: {
+      title: 'Отключить проверку орфографии',
+      description: 'Отключает проверку орфографии, грамматики и слов в режиме редактирования документа.',
+      tags: 'орфография, грамматика, корректура, красное подчеркивание, письмо, словарь'
+    },
+
+    disableStartUpdateCheckMessage: {
+      title: 'Disable start update check message',
+      description: 'Disables the app version check message at the start of the app. You will still be able to trigger it manually from the menu should you want to check for updates.',
+      tags: 'update, version check, startup, github releases, notify, toast, check for updates'
+    },
+    doubleDashDocCount: {
+      title: 'Выраженный делитель счета',
+      description: 'Этот параметр добавляет еще один символ \\\\| между категорией и количеством документов в иерархическом дереве.',
+      tags: 'труба, разделитель, разделитель, формат счета, количество деревьев',
+    },
+
+    extraTreePadding: {
+      title: 'Add extra tree padding',
+      description: 'Toggling this on adds extra padding on the left to the tree. This can be useful for example when using tags with long order numbers.',
+      tags: 'padding, indent, left margin, order numbers, tags, hierarchical tree'
+    },
+    forceSublevelCollapseInTree: {
+      title: 'Force sublevel collapse in the tree',
+      description: 'Forces sublevels of the closed node in the hierarchical tree to close as well when a parent node is closed. Normally, they remember the pre-close state and will reopen as they were when closed.',
+      tags: 'force collapse, close children, parent node, nested tree, remember expand'
+    },
+    hideAdvSearchCheatsheetButton: {
+      title: 'Скрыть кнопку помощи по взаимоотношениям',
+      description: 'Скрывает кнопку справки по шпаргалке расширенного поиска в полях типа отношений.',
+      tags: 'поле отношений, шпаргалка, значок справки, средство выбора ссылок, расширенный поиск',
+    },
+    hideDeadCrossThrough: {
+      title: 'Скрыть зачеркивание',
+      description: 'Этот параметр скрывает эффект зачеркивания мертвых, пропавших или уничтоженных документов, чтобы повысить видимость.',
+      tags: 'зачеркнуто, умерший, уничтожен, пропал, статус документа, зачеркнуто',
+    },
+    hideDocumentTitles: {
+      title: 'Скрыть названия документов',
+      description: 'Скрывает большие заголовки разделов в представлении документа. Обратите внимание, что это может привести к довольно резким изменениям макета, из-за чего в некоторых случаях документ может выглядеть неуправляемо.',
+      tags: 'заголовки разделов, группы полей, метки структуры документа',
+    },
+    hideEmptyFields: {
+      title: 'Скрыть пустые поля',
+      description: 'Скрывает поля без заполненных значений в режиме просмотра (без редактирования). Обратите внимание, что это может привести к довольно резким изменениям макета, из-за чего в некоторых случаях документ может выглядеть неуправляемо.',
+      tags: 'пустые поля, режим только для чтения, компактный документ, сдвиг макета',
+    },
+    hideHierarchyTree: {
+      title: 'Hide hierarchical tree',
+      description: 'Controls whether the hierarchical tree is shown.',
+      tags: 'sidebar off, navigator hidden, tree panel, outline hide'
+    },
+    hidePlushes: {
+      title: 'Скрыть талисман Фантазии',
+      description: 'Скрывает удивительно очаровательную и устрашающую Фантазию, крошечного загадочного дракона. Как ты мог! :(',
+      tags: 'Дракон, талисман, плюш, персонаж, украшение, пасхальное яйцо',
+    },
+    hideTooltipsProject: {
+      title: 'Скрыть советы по обзору проекта',
+      description: 'Скрывает информационную карточку с советами и рекомендациями по обзору проекта.',
+      tags: 'домашняя страница проекта, карточка информационной панели, обзорные подсказки',
+    },
+    hideTooltipsStart: {
+      title: 'Скрыть всплывающие подсказки на стартовом экране',
+      description: 'Скрывает всплывающее окно с советами и подсказками на стартовом экране.',
+      tags: 'первый запуск, онбординг, заставка, советы по запуску, подсказки',
+    },
+    hideTreeIconAddUnder: {
+      title: 'Скрыть значок «Добавить в»',
+      description: 'Эта опция скрывает значок «Добавить новый документ под выбранным родительским элементом».',
+      tags: 'добавить дочерний элемент, новый ниже, плюс ниже, создать ниже',
+    },
+    hideTreeIconEdit: {
+      title: 'Скрыть значок «Редактировать»',
+      description: 'Эта опция скрывает значок редактирования строки.',
+      tags: 'значок карандаша, редактирование строки, дерево быстрого редактирования',
+    },
+    hideTreeIconView: {
+      title: 'Скрыть значок «Открыть»',
+      description: 'Эта опция скрывает значок открытия строки.',
+      tags: 'значок открытия, переход к документу, кнопка открытия строки',
+    },
+    hideTreeLines: {
+      title: 'Hide tree lines',
+      description: 'Hides the structural help-lines in the hierarchy tree.',
+      tags: 'lines, helplines, structure, tree, hierarchical, hierarchical tree'
+    },
+    hideTreeOrderNumbers: {
+      title: 'Скрыть номера заказов',
+      description: 'Скрывает номера заказных заказов слева от названий.',
+      tags: 'индекс последовательности, ручной порядок, префикс ранга, левое поле',
+    },
+    hideRecentProjectTooltip: {
+      title: 'Скрыть подсказку «Просмотреть последние проекты»',
+      description: 'Скрывает всплывающую подсказку в области просмотра последних проектов рядом с надписью «Возобновить последний проект» на экране приветствия.',
+      tags: 'проект, загрузка, загрузка, последний, недавний, вступление, начало, добро пожаловать, подсказка, всплывающее окно, подсказки, всплывающее окно',
+    },
+    hideTabCloseButton: {
+      title: 'Hide tab close button',
+      description: 'Determines whether the tab close buttons in the opened document list will be shown or not. Please note that this will make the tabs closeable only via middle click or right click and then clicking on the menu.',
+      tags: 'tab close, close button, X button, hide close, middle click, context menu, tab strip'
+    },
+    hideWelcomeScreenSocials: {
+      title: 'Скрыть ссылки на социальные сети на экране приветствия',
+      description: 'Скрывает все социальные ссылки на экране приветствия.',
+      tags: 'дискорд, Твиттер, ссылки на сообщество, социальные сети, добро пожаловать',
+    },
+    skipWelcomeScreen: {
+      title: 'Пропустить экран приветствия',
+      description: 'Пропускает экран приветствия и пытается загрузить последний проект непосредственно при запуске приложения.',
+      tags: 'проект, загрузка, загрузка, последний, недавний, вступление, начало, добро пожаловать',
+    },
+    invertCategoryPosition: {
+      title: 'Инвертировать положение категории',
+      description: 'Переключает позиции категории и номеров документов.',
+      tags: 'номера местами, порядок подсчета, категория и количество документов',
+    },
+    limitEditorHeight: {
+      title: 'Ограничить высоту текстового редактора',
+      description: 'Определяет, имеет ли текстовый редактор ограниченную высоту, когда он не находится в полноэкранном режиме.',
+      tags: 'высота текстовой области, длинный текст, расширенный редактор, редактор прокрутки',
+    },
+    logFullActivityPayload: {
+      title: 'Журналировать полную полезную нагрузку активности',
+      description: 'Если этот параметр включен, действие будет регистрировать полные полезные данные во всех ситуациях (обычно оно регистрируется только в ситуациях, когда нет ошибок и предупреждений). Это может быть полезно при глубокой отладке, требующей точной регистрации результатов.',
+      tags: 'отладка, устранение неполадок, DevTools, полезная нагрузка, активность, журналирование',
+    },
+    noProjectName: {
+      title: 'Скрыть название проекта в дереве',
+      description: 'Определяет, отображается ли вообще имя проекта в иерархическом дереве.',
+      tags: 'корневая метка, дерево названий проектов, скрытие заголовка',
+    },
+    noTags: {
+      title: 'Скрыть теги в дереве',
+      description: 'Определяет, отображаются ли теги вообще в иерархическом дереве.',
+      tags: 'отключение меток, полоса тегов, древовидные метки, скрытие меток',
+    },
+    preventAutoScroll: {
+      title: 'Запретить автоматическую прокрутку',
+      description: 'Определяет, будут ли документы вызывать свои позиции прокрутки и выполнять ли автоматическую прокрутку при переключении между ними.',
+      tags: 'положение прокрутки, запоминание прокрутки, переход наверх, переключение вкладок',
+    },
+    preventFilledAppNoteBoardPopup: {
+      title: 'Prevent filled app noteboard from showing',
+      description: 'When enabled, the app noteboard will not open automatically at app start when it still contains notes from previous FA sessions.',
+      tags: 'app noteboard, sticky notes, startup, auto open, reminders'
+    },
+    preventFilledProjectNoteBoardPopup: {
+      title: 'Prevent filled project noteboard from showing',
+      description: 'When enabled, the project noteboard will not open automatically when a project loads if it still contains notes from previous project sessions.',
+      tags: 'project noteboard, sticky notes, project open, auto open, reminders'
+    },
+
+    preventPreviewsDocuments: {
+      title: 'Запретить предварительный просмотр документов',
+      description: 'Управляет отображением быстрого предварительного просмотра при наведении курсора мыши в представлении документа и в полях отношений.',
+      tags: 'карточка при наведении, просмотр, всплывающее окно отношений, встроенный предварительный просмотр',
+    },
+    preventPreviewsPopups: {
+      title: 'Запретить предварительный просмотр документов в диалогах',
+      description: 'Управляет отображением быстрого предварительного просмотра при наведении курсора при выборе документов в диалоговых окнах (например, средство выбора существующих документов).',
+      tags: 'Диалог существующего документа, наведение указателя выбора, выбор документа, модальный предварительный просмотр',
+    },
+    preventPreviewsTabs: {
+      title: 'Запретить предварительный просмотр документов на вкладках',
+      description: 'Управляет отображением быстрого предварительного просмотра при наведении на вкладках документа на панели вкладок.',
+      tags: 'наведение на вкладку, предварительный просмотр полосы вкладок, просмотр строки заголовка',
+    },
+    preventPreviewsTree: {
+      title: 'Запретить предварительный просмотр документов при наведении',
+      description: 'Управляет отображением быстрого предварительного просмотра при наведении в иерархическом дереве. Когда предварительный просмотр при наведении остается включенным, он может оказать серьезное влияние на производительность приложения.',
+      tags: 'наведение на дерево, задержка, медленно, частота кадров, производительность, предварительный просмотр на боковой панели',
+      note: 'Может оказать существенное влияние на производительность приложения!',
+    },
+    showDocumentID: {
+      title: 'Показать идентификаторы документов',
+      description: 'Если эта опция включена, в тексте документа также будет отображаться значение внутреннего идентификатора документа.',
+      tags: 'отладка, внутренний идентификатор, идентификатор, инструменты разработки, устранение неполадок',
+    },
+    showTabBarScrollButtons: {
+      title: 'Show tab bar scroll buttons',
+      description: 'Determines whether the top tab list scroll buttons should show. Please note that without them, the user is able to scroll on the bar only using the mousewheel.',
+      tags: 'tab scroll, scroll arrows, chevron, overflow, mousewheel, tab strip'
+    },
+    tagsAtTop: {
+      title: 'Самые популярные теги в дереве',
+      description: 'Показывает теги в верхней части иерархического дерева.',
+      tags: 'порядок тегов, сначала теги, выше категорий',
+    },
+    textShadow: {
+      title: 'Тень текста',
+      description: 'Этот параметр включает тени текста в иерархическом дереве, всплывающих окнах поиска взаимосвязей и вкладках, что позволяет сделать текст более заметным на фоне.',
+      tags: 'контраст, разборчивость, тень, контур, читаемость, четкость текста',
+    }
+  }
+}

@@ -1,0 +1,71 @@
+@use '../../WindowAppStyling/styles/WindowAppStyling.floatingWindowPopTransition.unscoped.scss' as *;
+@use './variables' as *;
+
+.windowProjectNoteboard {
+  box-sizing: border-box;
+
+  .floatingWindowComponent__surface {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  &__titleRow {
+    align-items: center;
+    cursor: grab;
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: center;
+    min-height: $windowProjectNoteboard-titleRow-minHeight;
+    position: relative;
+    user-select: none;
+    width: 100%;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__title {
+    flex: 1 1 auto;
+    margin: $windowProjectNoteboard-title-margin;
+    min-width: 0;
+  }
+
+  &__body {
+    background-color: $windowProjectNoteboard-editorRegion-backgroundColor;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  &__textarea {
+    background-color: transparent;
+    border: medium none;
+    box-sizing: border-box;
+    color: $windowProjectNoteboard-textarea-color;
+    display: block;
+    flex: 1 1 auto;
+    font-family: inherit;
+    letter-spacing: inherit;
+    margin: 0;
+    min-height: 0;
+    outline: none;
+    overflow: auto;
+    padding: $globals-contentFields-paddingTop 0 $globals-contentFields-paddingBottom;
+    resize: none;
+    width: 100%;
+  }
+
+  &__cardActions {
+    flex: 0 0 auto;
+  }
+
+  &__closeBtn {
+    min-width: auto;
+  }
+}

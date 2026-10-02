@@ -1,0 +1,82 @@
+---
+description: >-
+  After last substantive code edit in a turn, run dev scoped verify before any
+  done summary; then yarn quasar:dev:electron 20s compile smoke. Full
+  testbatch:verify only for final cleanup, commits, and explicit user requests.
+alwaysApply: true
+---
+
+# Post-implementation agent gates
+
+## When this fires
+
+**End of code edits** — any turn where agent changed compile-touching sources (`src/`, `src-electron/`, `types/`, `i18n/`, `helpers/` non-Playwright, configs, `.storybook-workspace/`, tests).
+
+| Trigger | Action |
+| --- | --- |
+| Last file edit in turn (or batch) done | Run gates below **before** user-facing “done” / “shipped” / “fixed” summary |
+| Follow-up edit after prior green scoped gate | Prior gate **void** — re-run step 1 on **current** tree |
+| User asks question only, no edits | Skip |
+| Changelog-only / docs-only, no compile sources | Skip |
+| [final-cleanup.mdc](final-cleanup.mdc) / user asks full verify | **Full** **`yarn testbatch:verify`** per [testing-terminal-isolation.mdc](testing-terminal-isolation.mdc) |
+
+**Default hard rule:** **dev scoped gate** ([dev-scoped-verify.mdc](dev-scoped-verify.mdc), [fantasia-dev-scoped-verify](../skills/fantasia-dev-scoped-verify/SKILL.md)) — Shell on current tree after last substantive edit, before done summary. **Not** full **`yarn testbatch:verify`** unless final cleanup, commit, or user explicitly requests full gate.
+
+## Mandatory order (two terminals)
+
+Run **in order**. **Do not** chain in one shell line ([testing-terminal-isolation.mdc](testing-terminal-isolation.mdc)).
+
+### 1. Dev scoped gate
+
+- **Dedicated terminal** — eslint touched paths → **`yarn lint:typescript`** → stylelint touched styles (if any) → **`yarn vitest run`** connected specs only.
+- **Timing:** immediately after last code edit; no more edits between gate and done summary.
+- On failure → fix; re-run failed slices + connected specs on current tree.
+- **Mid-task debug:** narrower slices OK while still editing; **step 1 still required** once edit batch ends.
+
+### 2. Dev Electron compile check
+
+1. **Dedicated terminal** — separate from step 1.
+2. **Already running?** — scan **`terminals/`** for active **`yarn quasar:dev:electron`** / **`quasar dev -m electron`**. If yes: wait **20s** after last edit for HMR + **`vite-plugin-checker`**; read that terminal output. **Do not** spawn second dev (port lock). **Do not kill** the user's dev if they started it before the agent.
+3. **Not running** — start **`yarn quasar:dev:electron`** in background; wait **20s** only. **Do not** block minutes for **App • READY**, full Vite bundle, or Electron window open.
+4. **Read output** — treat as failure if any of these appear within the wait window:
+   - **`[sass] Error`**, **`Undefined variable`**
+   - **`[vite]`** internal server error / failed to compile
+   - TypeScript overlay errors in dev log
+   - **`ELIFECYCLE`**, non-zero exit before intentional stop
+5. **Success** — **20s** elapsed with **no** failure patterns above → pass. No need to wait for full dev ready.
+6. **Agent-spawned dev only** — after success check, **kill** the process/terminal (taskkill / Ctrl+C). Do not leave verification dev hanging.
+7. **On failure** — fix sources; repeat **step 1** then **step 2** until both clean.
+8. **On success** — report done. No further dev interaction.
+
+## Does **not** satisfy step 1
+
+| Substitute | Why insufficient |
+| --- | --- |
+| **`vite-plugin-checker`** in dev alone | Not eslint on touched paths + connected vitest |
+| Single spec with no discovery pass | Miss sibling connected specs |
+| Earlier green scoped gate + new edits | Stale — re-run on current tree |
+| Scoped gate alone before **commit** | Commits need full **`yarn testbatch:verify`** ([git-conventional-commits.mdc](git-conventional-commits.mdc)) |
+
+Full **`yarn testbatch:verify`** required: final cleanup, **`git commit`**, user explicit full-gate request, CI.
+
+## Done summary requirements
+
+Before user-facing completion on substantive work:
+
+1. Step 1 **ran** on current tree (scoped: report steps + vitest paths; or full verify when applicable).
+2. Step 2 **ran** (or report fail).
+3. State pass/fail; do not imply full verify / CI green from scoped gate alone.
+
+## Why errors slip through
+
+| Cause | Detail |
+| --- | --- |
+| **Skipped end-of-edits gate** | Done summary without scoped gate on final tree |
+| **Stale gate** | Green mid-batch; more edits without re-run |
+| **Scoped only before push** | CI runs full **`testbatch:verify`** — run full gate at final cleanup or commit |
+| **Dev checker ≠ gate** | HMR can lag; scoped eslint + vitest still required |
+| **Missed connected specs** | Follow [fantasia-dev-scoped-verify](../skills/fantasia-dev-scoped-verify/SKILL.md) discovery |
+
+## Scope
+
+Step 1 = touched lint + types + connected unit tests (or full verify when triggered). Step 2 = compile smoke only. Neither replaces Playwright, Storybook VRT, or UX verification.

@@ -1,0 +1,1301 @@
+@use '../quasar.variables.scss' as *;
+@use './faColorGlyph.mixin.scss' as colorGlyph;
+@use './faColorGlyph.variables.scss' as glyphVars;
+@use './faDialogCyanRim.mixin.scss' as dialogCyanRim;
+@use './faPaintedDivider.mixin.scss' as paintedDivider;
+@use './faTabEdgeGlow.mixin.scss' as tabEdgeGlow;
+@use './faTooltipParchmentFrame.mixin.scss' as tooltipParchment;
+@use './faNotificationParchmentFrame.mixin.scss' as notificationParchment;
+
+/* Quasar component overrides. Native element selectors first (alphabetical), then class-based rules. */
+
+body.body--dark {
+
+  /* Quasar ships color: #fff on the dark document shell; bind to Fantasia token for Custom app CSS. */
+  color: var(--fa-color-white);
+}
+
+body.desktop .q-focusable:focus > .q-focus-helper {
+
+  /* Wash follows the control's color (primary gold, secondary red, menu hover, etc.). */
+  background: currentcolor;
+  opacity: $qFocusable-focusHelper-opacity !important;
+
+  &::before,
+  &::after {
+
+    /* Fix for color-disrupting overlay elements of buttons/links */
+    opacity: 0 !important;
+  }
+}
+
+body.desktop .q-hoverable:hover > .q-focus-helper,
+body.desktop .q-manual-focusable--focused > .q-focus-helper {
+
+  /* Wash follows the control's color (primary gold, secondary red, menu hover, etc.). */
+  background: currentcolor;
+  opacity: $qFocusable-hoverHelper-opacity !important;
+
+  &::before,
+  &::after {
+
+    /* Fix for color-disrupting overlay elements of buttons/links */
+    opacity: 0 !important;
+  }
+}
+
+.body--dark .q-markdown,
+.body--dark .q-markdown p,
+.body--dark .q-markdown li,
+.body--dark .q-markdown th,
+.body--dark .q-markdown td,
+.body--dark .q-markdown .q-markdown--heading,
+.body--dark .q-markdown .q-markdown--heading-h1,
+.body--dark .q-markdown .q-markdown--heading-h2,
+.body--dark .q-markdown .q-markdown--heading-h3,
+.body--dark .q-markdown .q-markdown--heading-h4,
+.body--dark .q-markdown .q-markdown--heading-h5,
+.body--dark .q-markdown .q-markdown--heading-h6,
+.body--dark .q-markdown .q-markdown--line-numbers-wrapper,
+.body--dark .q-markdown .q-markdown--code {
+
+  /* Force high-contrast markdown text in dark mode over QMarkdown defaults */
+  color: $qMarkdown-color !important;
+  opacity: 1 !important;
+}
+
+.body--dark .q-markdown h2,
+.body--dark .q-markdown .q-markdown--heading-h2 {
+  color: $qMarkdown-h2-color !important;
+}
+
+.disabled,
+[disabled] {
+  opacity: 0.35 !important;
+}
+
+.fullscreen {
+
+  /* Tweak for top bar and other element with z-index between 6000 to 7000 */
+  z-index: $qFullscreen-zIndex;
+}
+
+.q-button {
+  -webkit-user-drag: none;
+
+  * {
+    -webkit-user-drag: none;
+
+    &::after,
+    &::before {
+      -webkit-user-drag: none;
+    }
+  }
+}
+
+.q-btn {
+  font-weight: $qBtn-fontWeight;
+
+  > span {
+    letter-spacing: $qBtn-content-letterSpacing;
+  }
+}
+
+body.fa-appTheme--flat .q-btn {
+  font-weight: $qBtn-fontWeight-flat;
+}
+
+// Quasar ripples stay framework-enabled so live flat↔fantasy switches keep working on
+// already-mounted controls; fantasy only hides the effect (see applyFaAppThemeToDocument).
+body.fa-appTheme--fantasy .q-ripple {
+  display: none !important;
+}
+
+.q-btn--rectangle {
+  border-radius: $qBtn-rectangle-borderRadius;
+}
+
+body.fa-appTheme--flat .q-btn--rectangle {
+  border-radius: $qBtn-rectangle-borderRadius-flat;
+}
+
+.q-card {
+  box-shadow: $qCard-boxShadow;
+}
+
+.q-checkbox {
+  &__bg {
+    border-color: $qCheckbox-bg-borderColor;
+    transition: $qCheckbox-bg-transition;
+  }
+
+  &__svg {
+    color: $qCheckbox-svg-color !important;
+  }
+
+  &__inner {
+    &::before {
+      /* Kill Quasar Material hover/focus halo circle behind the box. */
+      content: none !important;
+      display: none !important;
+    }
+
+    &--truthy,
+    &--indeterminate {
+      .q-checkbox__bg {
+        border: $qCheckbox-truthy-borderWidth solid $qCheckbox-truthy-borderColor !important;
+      }
+    }
+  }
+
+  path {
+    transition: $qCheckbox-path-strokeDashoffsetTransition;
+  }
+
+  &.disabled {
+    .q-checkbox__bg {
+      border-color: $qCheckbox-disabled-borderColor;
+    }
+  }
+
+  /* Active border tint on hover only — not focus / focus-within (click would stick).
+   * Same primary-bright as checked border / checkmark. */
+  &:not(.disabled):hover {
+    .q-checkbox__inner:not(.q-checkbox__inner--truthy, .q-checkbox__inner--indeterminate) .q-checkbox__bg {
+      border-color: $qCheckbox-truthy-borderColor;
+    }
+  }
+}
+
+/*
+ * Fantasy: keep Fantasia outline checkbox shape (transparent fill + stroke check).
+ * Gradient only on border ring (::after mask) and SVG check/indet paint servers.
+ * Slightly larger hit box; scale SVG check so it clears the ring (Quasar .fit is 100% — inset alone does not shrink).
+ */
+body.fa-appTheme--fantasy .q-checkbox {
+  .q-checkbox__inner {
+    font-size: $qCheckbox-fantasy-inner-fontSize;
+  }
+
+  .q-checkbox__bg {
+    #{glyphVars.$faColorGlyph-baseVar}: #{$qCheckbox-fantasy-idleBorder-base};
+
+    transition: $qCheckbox-fantasy-borderBase-transition;
+
+    @include colorGlyph.fa-color-border-shading($qCheckbox-truthy-borderWidth);
+  }
+
+  /* Gold ring on hover only — not focus / focus-within (click would stick). */
+  &:not(.disabled):hover .q-checkbox__bg {
+    #{glyphVars.$faColorGlyph-baseVar}: #{$qCheckbox-fantasy-hoverBorder-base};
+  }
+
+  .q-checkbox__svg {
+    transform: scale(#{$qCheckbox-fantasy-svg-scale});
+    transform-origin: center center;
+  }
+
+  .q-checkbox__inner--truthy,
+  .q-checkbox__inner--indeterminate {
+    .q-checkbox__bg {
+      #{glyphVars.$faColorGlyph-baseVar}: #{$qCheckbox-fantasy-checkedBorder-base};
+
+      @include colorGlyph.fa-color-border-shading($qCheckbox-truthy-borderWidth);
+    }
+
+    .q-checkbox__svg {
+      color: transparent !important;
+      filter: drop-shadow(#{glyphVars.$faColorGlyph-dropShadow});
+      transform: scale(#{$qCheckbox-fantasy-svg-scale});
+      transform-origin: center center;
+    }
+
+    .q-checkbox__truthy {
+      stroke: $qCheckbox-fantasy-checkedPaintServer !important;
+    }
+
+    .q-checkbox__indet {
+      fill: $qCheckbox-fantasy-checkedPaintServer !important;
+    }
+  }
+
+  &.disabled {
+    opacity: 1 !important;
+
+    .q-checkbox__bg {
+      #{glyphVars.$faColorGlyph-baseVar}: #{$qCheckbox-fantasy-disabledBorder-base};
+
+      @include colorGlyph.fa-color-border-shading($qCheckbox-truthy-borderWidth);
+    }
+
+    .q-checkbox__inner--truthy,
+    .q-checkbox__inner--indeterminate {
+      .q-checkbox__svg {
+        color: transparent !important;
+        filter: drop-shadow(#{glyphVars.$faColorGlyph-dropShadow});
+        transform: scale(#{$qCheckbox-fantasy-svg-scale});
+        transform-origin: center center;
+      }
+
+      .q-checkbox__truthy {
+        stroke: $qCheckbox-fantasy-disabledPaintServer !important;
+      }
+
+      .q-checkbox__indet {
+        fill: $qCheckbox-fantasy-disabledPaintServer !important;
+      }
+    }
+  }
+}
+
+.q-dark {
+
+  /* Quasar ships color: #fff; bind to Fantasia token so Custom app CSS can theme dark surfaces consistently. */
+  color: var(--fa-color-white);
+}
+
+.q-dialog > .q-dialog__inner > .q-card {
+  /* Flat: $dark shell. Fantasy override below uses --fa-color-fantasy-dark. */
+  background: $qDialog-card-backgroundColor-flat !important;
+  border: 0;
+  border-radius: $qDialog-card-borderRadius;
+  max-width: $qDialog-card-maxWidth;
+  position: relative;
+}
+
+/* Fantasy: cyan rim ring + top bloom + side feathers (flat keeps global .q-card elevation only). */
+body.fa-appTheme--fantasy .q-dialog > .q-dialog__inner > .q-card {
+  @include dialogCyanRim.fa-dialog-cyan-rim-chrome;
+
+  background: $qDialog-card-backgroundColor !important;
+}
+
+/*
+ * Top-anchored quick dialogs (dialogComponent--topPopup): Material-ish elevation 4.
+ * Fantasy keeps cyan 1px rim + swaps default card elevation for the stronger stack.
+ * Radius matches floating windows — not the heavily rounded centered modal cards.
+ */
+.q-dialog.dialogComponent.dialogComponent--topPopup > .q-dialog__inner > .q-card.dialogComponent__wrapper {
+  @include dialogCyanRim.fa-dialog-top-popup-card-elevation;
+
+  border-radius: $qDialog-topPopup-card-borderRadius;
+}
+
+body.fa-appTheme--fantasy .q-dialog.dialogComponent.dialogComponent--topPopup > .q-dialog__inner > .q-card.dialogComponent__wrapper {
+  @include dialogCyanRim.fa-dialog-top-popup-card-elevation-fantasy;
+}
+
+/*
+ * Keybind capture popup: keep flat light grey-lighter surface + dark ink.
+ * Global dialog shell ($dark / $fantasy-dark !important) would otherwise paint over it
+ * (invisible title, invisible color=dark SET button, wrong help contrast).
+ */
+.q-dialog > .q-dialog__inner > .q-card.dialogKeybindSettingsCapture {
+  background: $dialogKeybindSettingsCapture-cardBackground !important;
+}
+
+body.fa-appTheme--fantasy .q-dialog > .q-dialog__inner > .q-card.dialogKeybindSettingsCapture {
+  background: $dialogKeybindSettingsCapture-cardBackground !important;
+  box-shadow: none !important;
+
+  &::after,
+  &::before {
+    content: none;
+  }
+}
+
+.q-dialog__backdrop {
+  background: $qDialog-backdrop-background;
+}
+
+.q-card.dialogComponent__wrapper {
+
+  /* Hard ceiling for every Fantasia dialog card shell — must beat per-dialog height/max-height. */
+  max-height: calc(100vh - #{$qDialog-card-maxHeightSubtract}) !important;
+}
+
+.q-field--dark .q-field__input,
+.q-field--dark .q-field__native,
+.q-field--dark .q-field__prefix,
+.q-field--dark .q-field__suffix {
+  color: var(--fa-color-white);
+}
+
+.q-field--dark.q-field--readonly .q-field__input,
+.q-field--dark.q-field--readonly .q-field__native,
+.q-field--dark.q-field--readonly .q-field__prefix,
+.q-field--dark.q-field--readonly .q-field__suffix {
+  color: var(--fa-color-text-muted);
+}
+
+textarea.q-field__native,
+.q-field--dark textarea.q-field__native,
+.q-field--dark.q-field--readonly textarea.q-field__native {
+  color: $globals-contentFields-textColor;
+  font-size: $globals-contentFields-fontSize;
+  line-height: $globals-contentFields-lineHeight;
+  padding-bottom: $globals-contentFields-paddingBottom;
+  padding-top: $globals-contentFields-paddingTop;
+}
+
+/* Flat Quasar focus chrome: thin hairline (fantasy uses micro-corner fields instead). */
+body.fa-appTheme--flat .q-field__control {
+  color: $qField-flat-control-color;
+}
+
+.q-field--standard .q-field__control::after,
+.q-field--filled .q-field__control::after {
+  height: $qField-activeUnderline-height;
+}
+
+.q-field--outlined.q-field--highlighted .q-field__control::after {
+  border-width: $qField-outlined-focusBorderWidth;
+}
+
+.q-field--dark .q-field__bottom,
+.q-field--dark .q-field__marginal,
+.q-field--dark:not(.q-field--highlighted) .q-field__label {
+  color: color-mix(in srgb, var(--fa-color-white) 70%, transparent);
+}
+
+/* Error copy uses danger-emphasis (not muted bottom/label mix, not Quasar text-negative alone). */
+.q-field--error .q-field__messages,
+.q-field--dark.q-field--error .q-field__bottom,
+.q-field--dark.q-field--error .q-field__messages {
+  color: var(--fa-color-text-danger-emphasis) !important;
+}
+
+/*
+ * Fantasy: glyph shading on dark-field prepend/append icons (search, colorize, etc.).
+ * Pin --fa-color-glyph-base by Quasar text-* so secondary/primary-bright/warning buttons
+ * keep their colors (same idea as outline save-button glow pins).
+ */
+body.fa-appTheme--fantasy {
+  .q-field--dark .q-field__prepend > .q-icon,
+  .q-field--dark .q-field__append > .q-icon,
+  .q-field--dark .q-field__marginal > .q-icon,
+  .q-field--dark .q-field__after > .q-icon {
+    --fa-color-glyph-base: #{$qField-marginalIcon-color};
+
+    @include colorGlyph.fa-color-glyph-shading;
+  }
+
+  .q-field__prepend .q-btn .q-icon,
+  .q-field__append .q-btn .q-icon {
+    @include colorGlyph.fa-color-glyph-shading;
+  }
+
+  .q-field__prepend .q-btn.text-primary-bright .q-icon,
+  .q-field__append .q-btn.text-primary-bright .q-icon,
+  .q-field__prepend > .q-icon.text-primary-bright,
+  .q-field__append > .q-icon.text-primary-bright,
+  .q-field__after > .q-icon.text-primary-bright,
+  .q-field__marginal > .q-icon.text-primary-bright {
+    --fa-color-glyph-base: #{$faOutlineButtonGlow-color-primaryBright};
+  }
+
+  .q-field__prepend .q-btn.text-secondary .q-icon,
+  .q-field__append .q-btn.text-secondary .q-icon,
+  .q-field__prepend > .q-icon.text-secondary,
+  .q-field__append > .q-icon.text-secondary {
+    --fa-color-glyph-base: #{$qMenu-destructiveItem-icon-color};
+  }
+
+  .q-field__prepend .q-btn.text-warning .q-icon,
+  .q-field__append .q-btn.text-warning .q-icon,
+  .q-field__prepend > .q-icon.text-warning,
+  .q-field__append > .q-icon.text-warning,
+  .q-field__after > .q-icon.text-warning {
+    --fa-color-glyph-base: #{$qField-warningIcon-color};
+  }
+
+  .q-field__prepend .q-btn:not(.text-primary-bright, .text-secondary, .text-warning) .q-icon,
+  .q-field__append .q-btn:not(.text-primary-bright, .text-secondary, .text-warning) .q-icon {
+    --fa-color-glyph-base: #{$qField-marginalIcon-color};
+  }
+}
+
+/*
+ * Decorative prepend/append (search icon, etc.): let clicks reach the control so the
+ * native input focuses. Interactive children keep pointer-events.
+ */
+.q-field__prepend,
+.q-field__append {
+  pointer-events: none;
+}
+
+.q-field__prepend .q-btn,
+.q-field__append .q-btn,
+.q-field__prepend .q-field__focusable-action,
+.q-field__append .q-field__focusable-action,
+.q-field__prepend .cursor-pointer,
+.q-field__append .cursor-pointer,
+.q-field__prepend button,
+.q-field__append button,
+.q-field__prepend a,
+.q-field__append a,
+.q-field__prepend [role='button'],
+.q-field__append [role='button'] {
+  pointer-events: auto;
+}
+
+/*
+ * Standard / filled / outlined dark fields: micro corner chrome in faMicroCornerField.scss.
+ * Standout keeps Quasar border/fill language — retain hover border tint here only.
+ */
+.q-field--standout.q-field--dark .q-field__control::before {
+  border-color: color-mix(in srgb, var(--fa-color-white) 60%, transparent);
+}
+
+.q-field--standout.q-field--dark .q-field__control:hover::before {
+  border-color: var(--fa-color-white);
+}
+
+.q-field--standout.q-field--dark.q-field--highlighted .q-field__control {
+  background: var(--fa-color-white);
+}
+
+.q-field--standout.q-field--dark.q-field--readonly .q-field__control::before {
+  border-color: color-mix(in srgb, var(--fa-color-white) 24%, transparent);
+}
+
+.q-item {
+  padding: $qItem-padding;
+}
+
+.q-layout {
+  &__shadow::after {
+
+    /* Tweak for default light shadow rendering in the dark-mode variation of the element */
+    box-shadow: $qLayout-shadowAfter-boxShadow !important;
+  }
+}
+
+.q-layout__section--marginal {
+
+  /* Quasar ships color: #fff against var(--q-primary); bind foreground to Fantasia token for Custom app CSS. */
+  color: var(--fa-color-white);
+}
+
+.q-list--dark.q-list--separator > .q-item-type + .q-item-type,
+.q-list--dark.q-list--separator > .q-virtual-scroll__content > .q-item-type + .q-item-type {
+
+  /* Quasar uses rgba white at 28% opacity; tint follows --fa-color-white via color-mix. */
+  border-top-color: color-mix(in srgb, var(--fa-color-white) 28%, transparent);
+}
+
+.q-list--dark,
+.q-item--dark {
+  border-color: color-mix(in srgb, var(--fa-color-white) 28%, transparent);
+  color: var(--fa-color-white);
+}
+
+.q-list--dark .q-item__label--header,
+.q-item--dark .q-item__label--header {
+  color: color-mix(in srgb, var(--fa-color-white) 64%, transparent);
+}
+
+.q-list--dark .q-item__label--caption,
+.q-list--dark .q-item__label--overline,
+.q-item--dark .q-item__label--caption,
+.q-item--dark .q-item__label--overline {
+  color: color-mix(in srgb, var(--fa-color-white) 80%, transparent);
+}
+
+.q-list--dark .q-item__section--side:not(.q-item__section--avatar),
+.q-item--dark .q-item__section--side:not(.q-item__section--avatar) {
+  color: color-mix(in srgb, var(--fa-color-white) 70%, transparent);
+}
+
+.q-markdown {
+  color: $qMarkdown-color !important;
+  line-height: $qMarkdown-lineHeight;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .q-markdown--heading,
+  .q-markdown--heading-h1,
+  .q-markdown--heading-h2,
+  .q-markdown--heading-h3,
+  .q-markdown--heading-h4,
+  .q-markdown--heading-h5,
+  .q-markdown--heading-h6,
+  p,
+  li,
+  th,
+  td,
+  strong,
+  em,
+  span,
+  blockquote {
+    color: $qMarkdown-color !important;
+    opacity: 1 !important;
+  }
+
+  h2,
+  .q-markdown--heading-h2 {
+    color: $qMarkdown-h2-color !important;
+  }
+
+  hr {
+    background-color: $qMarkdown-hr-color;
+    border: 0;
+    height: $qMarkdown-hr-height;
+    opacity: 1;
+  }
+
+  a {
+    border-bottom: $qMarkdown-link-borderBottomWidth $qMarkdown-link-borderBottomStyle $aLinkColor;
+  }
+
+  blockquote {
+    border-bottom: $qMarkdown-blockquote-borderWidthVertical solid $qMarkdown-blockquote-borderColor !important;
+    border-left: $qMarkdown-blockquote-borderWidthSide solid $qMarkdown-blockquote-borderColor !important;
+    border-radius: $qMarkdown-table-borderRadius !important;
+    border-right: $qMarkdown-blockquote-borderWidthSide solid $qMarkdown-blockquote-borderColor !important;
+    border-top: $qMarkdown-blockquote-borderWidthVertical solid $qMarkdown-blockquote-borderColor !important;
+    padding: $qMarkdown-blockquote-padding !important;
+  }
+
+  blockquote,
+  blockquote p {
+    font-style: $qMarkdown-blockquote-textStyle !important;
+  }
+
+  table {
+    border: $qMarkdown-table-borderWidth solid $qMarkdown-table-borderColor;
+    border-collapse: separate;
+    border-radius: $qMarkdown-table-borderRadius;
+    border-spacing: 0;
+    overflow: hidden;
+
+    th,
+    td {
+      border-bottom: $qMarkdown-table-borderWidth solid $qMarkdown-table-borderColor;
+      border-left: 0;
+      border-right: $qMarkdown-table-borderWidth solid $qMarkdown-table-borderColor;
+      border-top: 0;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: 0;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tr:first-child th:first-child {
+      border-top-left-radius: $qMarkdown-table-borderRadius;
+    }
+
+    tr:first-child th:last-child {
+      border-top-right-radius: $qMarkdown-table-borderRadius;
+    }
+
+    tr:last-child td:first-child {
+      border-bottom-left-radius: $qMarkdown-table-borderRadius;
+    }
+
+    tr:last-child td:last-child {
+      border-bottom-right-radius: $qMarkdown-table-borderRadius;
+    }
+  }
+
+  pre {
+    border-radius: $qMarkdown-code-borderRadius;
+    margin: 0 0 $qMarkdown-pre-marginBottom !important;
+    padding: $qMarkdown-code-padding !important;
+  }
+
+  pre.line-numbers {
+    padding-left: calc(#{$qMarkdown-lineNumbers-gutterEm} + #{$qMarkdown-code-padding}) !important;
+  }
+
+  pre.line-numbers code {
+    display: block;
+    line-height: $qMarkdown-code-lineHeight !important;
+  }
+
+  pre.line-numbers .line-numbers-rows {
+    padding-top: $qMarkdown-code-padding;
+    top: 0 !important;
+  }
+
+  pre.line-numbers .line-numbers-rows > span {
+    line-height: $qMarkdown-code-lineHeight !important;
+  }
+
+  pre.line-numbers .line-numbers-rows > span::before {
+    line-height: $qMarkdown-code-lineHeight !important;
+  }
+
+  .q-markdown--token {
+    background-color: $qMarkdown-code-backgroundColor !important;
+    border-color: $qMarkdown-code-borderColor !important;
+    color: $qMarkdown-code-textColor !important;
+    font-weight: $qMarkdown-token-fontWeight;
+    overflow-wrap: anywhere;
+    padding: 0 $qMarkdown-token-paddingX;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  code {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  pre > code {
+    display: block;
+    line-height: $qMarkdown-code-lineHeight !important;
+  }
+
+  .q-markdown--line-numbers {
+    padding: $qMarkdown-lineNumbers-padding;
+  }
+}
+
+body.fa-appTheme--fantasy .q-markdown hr {
+  @include paintedDivider.fa-painted-divider(horizontal);
+}
+
+.q-menu {
+  border-radius: $qMenu-borderRadius;
+  /* Keep radius clip on X; allow vertical scroll so tall menus (tab context) are not cut off. */
+  overflow: hidden auto;
+
+  /* Any hoverable in a menu (q-item rows + icon-picker cells, etc.). */
+  .q-hoverable > .q-focus-helper,
+  .q-focusable > .q-focus-helper {
+    transition: $qMenu-item-hover-focusHelperTransition;
+  }
+
+  .q-item {
+    min-height: $qMenu-item-minHeight;
+    padding: $qMenu-item-padding;
+    transition: $qMenu-item-hover-colorTransition, $qMenu-item-hover-backgroundTransition;
+
+    /* Nested labels/icons that set color on row hover (inherit or explicit). */
+    .q-icon,
+    .q-item__label,
+    .q-item__section,
+    [class*='__primaryLabel'],
+    [class*='__secondaryHint'],
+    [class*='__contextMenuLabel'],
+    [class*='__contextMenuIcon'],
+    [class*='__browseTabIcon'],
+    [class*='__icon'] {
+      transition: $qMenu-item-hover-colorTransition;
+    }
+
+    /* Legibility: destructive menu rows use text-secondary; labels only (main section), not icons. */
+    &.text-secondary {
+      .q-item__section--main {
+        font-weight: $qMenu-negativeMenuItemLabel-fontWeight;
+        text-shadow: $qMenu-negativeMenuItemLabel-textShadow;
+      }
+
+      /*
+       * Keep destructive icons on secondary through hover/focus. Feature menus set
+       * --fa-color-glyph-base to menu gold on hover; that must not win for text-secondary rows.
+       */
+      .q-icon,
+      .fa-color-glyph,
+      [class*='__icon'],
+      [class*='__contextMenuIcon'] {
+        --fa-color-glyph-base: #{$qMenu-destructiveItem-icon-color};
+
+        color: var(--fa-color-glyph-base, #{$qMenu-destructiveItem-icon-color});
+      }
+
+      &:hover:not([aria-disabled='true']),
+      &:focus:not([aria-disabled='true']) {
+        .q-icon,
+        .fa-color-glyph,
+        [class*='__icon'],
+        [class*='__contextMenuIcon'] {
+          --fa-color-glyph-base: #{$qMenu-destructiveItem-icon-color};
+
+          color: var(--fa-color-glyph-base, #{$qMenu-destructiveItem-icon-color});
+        }
+      }
+    }
+  }
+
+  &--dark {
+
+    /* Tweak for default light shadow rendering in the dark-mode variation of the element */
+    box-shadow: $qCard-boxShadow !important;
+  }
+
+  &.-subMenu {
+
+    /* Submenu having 1 lower z-index than normal menu for fancier looking animation of sliding underneath the parent */
+    z-index: $qMenu-subMenu-zIndex;
+  }
+}
+
+/* Fantasy: same cyan rim as dialog cards / floating windows (beats .q-menu--dark !important).
+ * Custom CSS help QMenus use parchment ::before/::after — skip cyan rim on those. */
+body.fa-appTheme--fantasy .q-menu:not(.windowAppStyling__helpTooltip, .windowProjectStyling__helpTooltip) {
+  @include dialogCyanRim.fa-dialog-cyan-rim-chrome;
+
+  /* Lock label weight; global .disabled { opacity: 0.35 } makes strokes look wrong-weight. */
+  .q-item {
+    font-weight: $qMenu-item-fontWeight-fantasy;
+
+    &.disabled,
+    &[disabled],
+    &[aria-disabled='true'] {
+      color: $qMenu-item-disabled-color-fantasy;
+      opacity: 1 !important;
+
+      /*
+       * Glyph bases pin solid menu colors; without this, disabled icons stay full white/gold
+       * while labels use the fantasy disabled mix (opacity is forced to 1 above).
+       */
+      .q-icon,
+      .fa-color-glyph,
+      [class*='__icon'],
+      [class*='__contextMenuIcon'] {
+        --fa-color-glyph-base: #{$qMenu-item-disabled-color-fantasy};
+
+        color: var(--fa-color-glyph-base, #{$qMenu-item-disabled-color-fantasy});
+      }
+
+      .fa-text-keybind-hint {
+        color: $qMenu-item-disabled-keybind-color-fantasy !important;
+      }
+    }
+  }
+}
+
+/* Fantasy: darkened flat root menus; submenus = $fantasy-dark-light
+ * (not splash slate / language parchment).
+ * Root: $dark-lighter → $fantasy-medium; submenu: $fantasy-dark-light. */
+body.fa-appTheme--fantasy .q-menu:not(
+  .splashControls__resumeMenu,
+  .globalLanguageSelector__menu,
+  .windowAppStyling__helpTooltip,
+  .windowProjectStyling__helpTooltip
+) {
+  background-color: $qMenu-backgroundColor-fantasy !important;
+}
+
+body.fa-appTheme--fantasy {
+  .appControlSingleMenu__subMenu.q-menu,
+  .projectAppControlBarTabContextMenu__browseSubmenu.q-menu,
+  .projectHierarchyTreeNodeContextMenu__sortBySubmenu.q-menu {
+    background-color: $qMenu-subMenu-backgroundColor-fantasy !important;
+  }
+}
+
+/* Fantasy: opaque inner list/panels that still painted flat $dark / $dark-lighter. */
+body.fa-appTheme--fantasy {
+  .appControlSingleMenu__menu .appControlSingleMenu__list,
+  .dialogProjectSettingsWorldColorPaletteSwatch__contextMenuList,
+  .dialogProjectSettingsWorldTemplateLayoutTreeNode__renameMenuBody,
+  .faIconPickerInput__menuPanel,
+  .faLocaleTranslationsInput__menuBody,
+  .projectAppControlBarTabContextMenu.q-menu .projectAppControlBarTabContextMenu__list,
+  .projectHierarchyTreeNodeContextMenu.q-menu .projectHierarchyTreeNodeContextMenu__list {
+    background-color: $qMenu-backgroundColor-fantasy;
+  }
+
+  .appControlSingleMenu__subMenu .appControlSingleMenu__list,
+  .projectAppControlBarTabContextMenu__browseSubmenu .projectAppControlBarTabContextMenu__list,
+  .projectHierarchyTreeNodeContextMenu__sortBySubmenu .projectHierarchyTreeNodeContextMenu__list {
+    background-color: $qMenu-subMenu-backgroundColor-fantasy;
+  }
+}
+
+.q-notification {
+  /* Keep wrapper above fantasy double-frame pseudos. */
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+body.fa-appTheme--fantasy .q-notification {
+  @include notificationParchment.fa-notification-parchment-chrome;
+
+  /*
+   * Frame/progress CB without position:relative (relative + Quasar pre-leave left
+   * = horizontal jump). Rest only — must not beat leave/enter transform classes.
+   */
+  &:not([class*='leave-'], [class*='enter-']) {
+    transform: translateZ(0);
+  }
+
+  /* Re-assert grain longhands after Quasar .bg-* `background` shorthand. */
+  &.bg-info,
+  &.bg-positive,
+  &.bg-negative,
+  &.bg-warning,
+  &.bg-primary,
+  &.bg-primary-bright,
+  &.bg-dark,
+  &.bg-grey-8 {
+    background-blend-mode: soft-light, soft-light !important;
+    background-image: $qNotification-parchmentTextureImage !important;
+    background-repeat: repeat, no-repeat !important;
+    background-size: $qNotification-parchmentTextureSize !important;
+  }
+
+  /*
+   * Progress lives inside __wrapper (Quasar: row items-center). Pin to the toast
+   * chrome instead so the bar sits on the inner frame — not vertically centered
+   * through the icon/message.
+   */
+  .q-notification__wrapper.relative-position {
+    position: static !important;
+  }
+
+  .q-notification__progress {
+    background: var(--fa-toast-frame-color, #{$qNotification-frame-color-info}) !important;
+    inset: auto $qNotification-frame-innerInset $qNotification-frame-innerInset !important;
+    opacity: 1 !important;
+    position: absolute !important;
+    z-index: 1;
+  }
+
+  &--multi-line .q-notification__progress {
+    inset: auto $qNotification-frame-innerInset $qNotification-frame-innerInset !important;
+  }
+}
+
+.q-notification {
+  /* Quasar adds .text-white on the same node as .bg-info; faSemanticText.scss uses
+   * .text-white { color: var(--fa-color-white) !important; }. This block must be !important
+   * and match or beat that selector's specificity so dark text stays on the light info tint. */
+  &.bg-info {
+    --fa-toast-frame-color: #{$qNotification-frame-color-info};
+    --fa-toast-text-color: #{$qNotification-text-color-onLight};
+
+    background-color: var(--fa-color-info, #{$info}) !important;
+    color: var(--fa-toast-text-color) !important;
+    max-width: $qNotification-bgInfo-maxWidth;
+
+    i {
+      color: var(--fa-toast-text-color) !important;
+    }
+  }
+
+  &.bg-positive {
+    --fa-toast-frame-color: #{$qNotification-frame-color-positive};
+    --fa-toast-text-color: #{$qNotification-text-color-onDark};
+
+    background-color: var(--fa-color-positive, #{$positive}) !important;
+    color: var(--fa-toast-text-color) !important;
+  }
+
+  &.bg-negative {
+    --fa-toast-frame-color: #{$qNotification-frame-color-negative};
+    --fa-toast-text-color: #{$qNotification-text-color-onDark};
+
+    background-color: var(--fa-color-negative, #{$negative}) !important;
+    color: var(--fa-toast-text-color) !important;
+  }
+
+  &.bg-warning {
+    --fa-toast-frame-color: #{$qNotification-frame-color-warning};
+    --fa-toast-text-color: #{$qNotification-text-color-onLight};
+
+    background-color: var(--fa-color-warning, #{$warning}) !important;
+    color: var(--fa-toast-text-color) !important;
+  }
+
+  &.bg-primary {
+    --fa-toast-frame-color: #{$qNotification-frame-color-primary};
+    --fa-toast-text-color: #{$qNotification-text-color-onLight};
+
+    background-color: var(--fa-color-primary, #{$primary}) !important;
+    color: var(--fa-toast-text-color) !important;
+  }
+
+  &.bg-primary-bright {
+    --fa-toast-frame-color: #{$qNotification-frame-color-primary};
+    --fa-toast-text-color: #{$qNotification-text-color-onLight};
+
+    background-color: var(--fa-color-primary-bright, #{$primary-bright}) !important;
+    color: var(--fa-toast-text-color) !important;
+  }
+
+  /* Quasar type 'ongoing' → color grey-8 (not dark). */
+  &.bg-dark,
+  &.bg-grey-8 {
+    --fa-toast-frame-color: #{$qNotification-frame-color-ongoing};
+    --fa-toast-text-color: #{$qNotification-text-color-onDark};
+
+    color: var(--fa-toast-text-color) !important;
+  }
+
+  &.bg-dark {
+    background-color: var(--fa-color-dark, #{$dark}) !important;
+  }
+
+  /* Close actions: same token as body text; kill Quasar hover/focus square fill. */
+  &__actions .q-btn {
+    @include tabEdgeGlow.fa-tab-edge-glow-kill-focus-helper;
+
+    color: var(--fa-toast-text-color) !important;
+
+    .q-icon {
+      color: var(--fa-toast-text-color) !important;
+    }
+  }
+
+  &__message {
+    font-size: $qNotification-message-fontSize;
+    font-weight: $qNotification-message-fontWeight;
+  }
+
+  &__caption {
+    opacity: 1;
+  }
+
+  &__progress {
+    /* Flat: Quasar currentcolor @ 30%. Position relative to __wrapper (inside side padding) —
+     * negative left/right cancel Quasar --standard/--multi-line horizontal padding (16px). */
+    background: currentcolor !important;
+    border-radius: 0 !important;
+    bottom: 0 !important;
+    left: -$qNotification-progress-horizontalInset !important;
+    opacity: 0.3 !important;
+    position: absolute !important;
+    right: -$qNotification-progress-horizontalInset !important;
+    z-index: 1;
+  }
+
+  &--multi-line &__progress {
+    bottom: -$qNotification-progress-bottomInset-multiLine !important;
+  }
+
+  &__avatar {
+    border-radius: 0;
+    flex-shrink: 0;
+    height: $qNotification-avatar-height;
+    margin-bottom: $qNotification-avatar-marginBottom;
+    margin-right: $qNotification-avatar-marginRight;
+    margin-top: $qNotification-avatar-marginTop;
+    width: $qNotification-avatar-width;
+
+    img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+    }
+  }
+}
+
+.q-notification__caption {
+  line-height: 1.4;
+}
+
+div + .q-notification__caption {
+  margin-top: $qNotification-captionSibling-marginTop;
+}
+
+/* Sticky update-available toast: caption Download CTA + absolute dismiss.
+ * Do not set position on .q-notification — that blocks Quasar leave absolute
+ * (bottom-right slide down) and turns inline left into a horizontal jump. */
+.q-notification.fa-notifyAppUpdateAvailable {
+  .fa-notifyAppUpdateAvailable__version {
+    color: $qNotification-appUpdateAvailable-version-color;
+    font-weight: $qNotification-appUpdateAvailable-version-fontWeight;
+  }
+
+  .q-notification__message {
+    padding-bottom: $qNotification-appUpdateAvailable-message-paddingBottom;
+    padding-top: $qNotification-appUpdateAvailable-message-paddingTop;
+  }
+
+  .fa-notifyAppUpdateAvailable__cta {
+    margin-top: $qNotification-appUpdateAvailable-cta-marginTop;
+    text-align: center;
+  }
+
+  /* Keep success fill on the faux QBtn inside the light info toast. */
+  .fa-notifyAppUpdateAvailable__download.bg-positive {
+    background-color: var(--fa-color-positive, #{$positive}) !important;
+    color: var(--fa-color-white, #{$white}) !important;
+  }
+
+  /* Close only — collapse the actions column so CTA stays under copy. */
+  .q-notification__actions {
+    margin: 0;
+    min-width: 0;
+    padding: 0;
+    width: 0;
+  }
+
+  /* Position against Quasar __wrapper (already relative-position), not the toast root. */
+  .q-notification__actions .q-btn:has(.q-icon) {
+    padding: 0;
+    position: absolute;
+    right: $qNotification-appUpdateAvailable-close-right;
+    top: $qNotification-appUpdateAvailable-close-top;
+    z-index: 2;
+  }
+}
+
+.q-page {
+
+  /* Max-height of the window minus the app header (no app control bar). */
+  max-height: calc(100vh - #{$qPage-maxHeightSubtract});
+  overflow: auto;
+}
+
+.q-page-container:has(.projectAppControlBar__flowSpacer) .q-page {
+  max-height: calc(100vh - #{$qPage-maxHeightSubtractWithAppControlBar});
+}
+
+/* Beat Quasar 1px stroke. Menu hairlines keep 0.5px via more specific scoped !important. */
+.q-separator--horizontal {
+  height: $qSeparator-stroke-width !important;
+}
+
+.q-separator--vertical {
+  width: $qSeparator-stroke-width !important;
+}
+
+/* Flush with parent (dialog card / page). Beat Quasar #fff and .q-dark $dark fill. */
+.q-stepper,
+.q-stepper.q-dark {
+  background: $qStepper-backgroundColor;
+  box-shadow: $qStepper-boxShadow;
+}
+
+.q-tab {
+  min-height: $qTab-minHeight;
+}
+
+/* Flush with parent (dialog card / page). Beat Quasar #fff and .q-dark $dark fill. */
+.q-markup-table,
+.q-markup-table.q-dark,
+.q-table__card,
+.q-table__card.q-dark,
+.q-table__card--dark {
+  background: $qTable-backgroundColor;
+  box-shadow: $qTable-boxShadow;
+}
+
+/* Vertical Quasar tabs: gold right-edge glow instead of side indicator / square hover. */
+.q-tabs--vertical {
+  overflow: visible;
+  position: relative;
+  z-index: $faTabEdgeGlow-zIndex;
+
+  .q-tabs__content {
+    overflow: visible;
+  }
+
+  .q-tab {
+    overflow: visible;
+  }
+}
+
+body.fa-appTheme--fantasy .q-tabs--vertical .q-tab {
+  &::after {
+    @include tabEdgeGlow.fa-tab-edge-glow-idle(right);
+  }
+
+  &.q-tab--active::after {
+    @include tabEdgeGlow.fa-tab-edge-glow-active(right);
+  }
+
+  &:hover::after {
+    @include tabEdgeGlow.fa-tab-edge-glow-hover(right);
+  }
+}
+
+body.desktop.fa-appTheme--fantasy .q-tabs--vertical .q-tab.q-focusable:focus > .q-focus-helper,
+body.desktop.fa-appTheme--fantasy .q-tabs--vertical .q-tab.q-hoverable:hover > .q-focus-helper,
+body.desktop.fa-appTheme--fantasy .q-tabs--vertical .q-tab.q-manual-focusable--focused > .q-focus-helper {
+  opacity: 0 !important;
+
+  &::after,
+  &::before {
+    opacity: 0 !important;
+  }
+}
+
+/* Fantasy glow replaces side indicator; flat keeps Quasar .q-tab__indicator. */
+body.fa-appTheme--fantasy .q-tabs--vertical .q-tab__indicator {
+  display: none;
+}
+
+.q-tab__indicator {
+  height: $qTab-indicator-height;
+}
+
+.q-tabs__arrow {
+  font-size: $qTabs-arrow-fontSize;
+  text-shadow: none;
+}
+
+.q-tooltip {
+  font-size: $qTooltip-fontSize;
+  font-weight: $qTooltip-fontWeight;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  max-width: $qTooltip-maxWidth;
+  z-index: $qTooltip-zIndex !important;
+}
+
+/* Flat: light tip + dark ink (beats Quasar .q-tooltip--style grey-7 / #fafafa). */
+body.fa-appTheme--flat .q-tooltip,
+body.fa-appTheme--flat .q-tooltip--style {
+  background: $qTooltip-flat-backgroundColor;
+  box-shadow: $qTooltip-flat-boxShadow;
+  color: $qTooltip-flat-color;
+  padding: $qTooltip-flat-padding;
+}
+
+body.fa-appTheme--fantasy .q-tooltip {
+  @include tooltipParchment.fa-tooltip-parchment-surface;
+}
+
+/* Moon pill toggle (PoC 03): fixed dark track + sliding disc.
+ * Flat = rim only; fantasy adds soft glow on track + thumb. */
+.q-toggle {
+  width: auto;
+
+  &:focus-visible {
+    outline: $qToggle-focusOutline-width solid $qToggle-focusOutline-color;
+    outline-offset: $qToggle-focusOutline-offset;
+  }
+}
+
+.q-toggle__inner {
+  font-size: inherit;
+  height: $qToggle-height;
+  max-width: $qToggle-width;
+  min-width: $qToggle-width;
+  padding: 0;
+  position: relative;
+  width: $qToggle-width;
+}
+
+.q-toggle__track {
+  background: $qToggle-track-backgroundColor;
+  border-radius: $qToggle-border-radius;
+  box-shadow: $qToggle-track-boxShadow-off;
+  height: 100%;
+  inset: 0;
+  opacity: 1;
+  position: absolute;
+  transition: $qToggle-track-transition;
+  width: 100%;
+}
+
+.q-toggle__inner--truthy .q-toggle__track {
+  background: $qToggle-track-backgroundColor;
+  box-shadow: $qToggle-track-boxShadow-on;
+  opacity: 1;
+}
+
+.q-toggle__thumb {
+  height: $qToggle-thumb-size;
+  left: $qToggle-thumb-inset;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: $qToggle-thumb-transition;
+  width: $qToggle-thumb-size;
+  z-index: 1;
+}
+
+.q-toggle__inner--indet .q-toggle__thumb {
+  left: calc(50% - #{$qToggle-thumb-size} / 2);
+}
+
+.q-toggle__inner--truthy .q-toggle__thumb {
+  left: calc(100% - #{$qToggle-thumb-size} - #{$qToggle-thumb-inset});
+}
+
+.q-toggle__inner--truthy .q-toggle__thumb .q-icon {
+  color: var(--fa-color-white);
+}
+
+.q-toggle__thumb::after {
+  background: $qToggle-thumb-backgroundColor-off;
+  border: none;
+  box-shadow: none;
+  transition: $qToggle-thumb-transition;
+}
+
+.q-toggle__inner--truthy .q-toggle__thumb::after {
+  background: $qToggle-thumb-backgroundColor-on;
+  box-shadow: none;
+}
+
+/* Quasar dark skin sets white track color; keep moon palette instead. */
+.q-toggle--dark .q-toggle__inner,
+.q-toggle--dark .q-toggle__inner--truthy {
+  color: inherit;
+}
+
+/* Kill Material hover halo on thumb — moon rim (off) / gold glow (on, fantasy) is the feedback. */
+body.desktop .q-toggle:not(.disabled) .q-toggle__thumb::before {
+  content: none;
+  display: none;
+}
+
+/* Fantasy orbs: moon-disc lighting (angled fill shading); off = silver, on = gold + glow. */
+body.fa-appTheme--fantasy .q-toggle__thumb::after {
+  #{glyphVars.$faColorGlyph-baseVar}: #{$qToggle-thumb-backgroundColor-off};
+
+  @include colorGlyph.fa-color-fill-shading($qToggle-thumb-gradientAngle-fantasy);
+}
+
+body.fa-appTheme--fantasy .q-toggle__inner--truthy .q-toggle__track {
+  box-shadow: $qToggle-track-boxShadow-on-fantasy;
+}
+
+body.fa-appTheme--fantasy .q-toggle__inner--truthy .q-toggle__thumb::after {
+  #{glyphVars.$faColorGlyph-baseVar}: #{$qToggle-thumb-backgroundColor-on};
+
+  @include colorGlyph.fa-color-fill-shading($qToggle-thumb-gradientAngle-fantasy);
+
+  box-shadow: $qToggle-thumb-boxShadow-on-fantasy;
+}
+
+.q-transition--fade-enter-active,
+.q-transition--fade-leave-active,
+.q-transition--flip-enter-active,
+.q-transition--flip-leave-active,
+.q-transition--jump-down-enter-active,
+.q-transition--jump-down-leave-active,
+.q-transition--jump-left-enter-active,
+.q-transition--jump-left-leave-active,
+.q-transition--jump-right-enter-active,
+.q-transition--jump-right-leave-active,
+.q-transition--jump-up-enter-active,
+.q-transition--jump-up-leave-active,
+.q-transition--rotate-enter-active,
+.q-transition--rotate-leave-active,
+.q-transition--scale-enter-active,
+.q-transition--scale-leave-active,
+.q-transition--slide-down-enter-active,
+.q-transition--slide-down-leave-active,
+.q-transition--slide-left-enter-active,
+.q-transition--slide-left-leave-active,
+.q-transition--slide-right-enter-active,
+.q-transition--slide-right-leave-active,
+.q-transition--slide-up-enter-active,
+.q-transition--slide-up-leave-active {
+  pointer-events: none;
+
+  /* Transitions glitches with user input/select fix */
+  user-select: none;
+}

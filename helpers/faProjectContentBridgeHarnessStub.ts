@@ -1,0 +1,170 @@
+import type { I_faProjectContentAPI } from 'app/types/I_faProjectContentAPI'
+
+function stubNamedEntity () {
+  return {
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    displayName: 'Stub',
+    displayNameTranslations: { 'en-US': 'Stub' },
+    createdAtMs: 0,
+    updatedAtMs: 0
+  }
+}
+
+function stubMedia () {
+  return {
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    displayName: 'Stub',
+    type: 'external' as const,
+    internalType: '' as const,
+    externalType: '' as const,
+    externalLink: '',
+    externalEmbed: '',
+    internalLink: '',
+    internalEmbed: null,
+    createdAtMs: 0,
+    updatedAtMs: 0
+  }
+}
+
+function stubWorld () {
+  return {
+    ...stubNamedEntity(),
+    color: '#808080',
+    colorPalette: '',
+    sortOrder: 0
+  }
+}
+
+function stubWorldForSettings () {
+  return {
+    ...stubWorld(),
+    documentCount: 0,
+    templateLayout: {
+      groups: [],
+      placements: []
+    }
+  }
+}
+
+function stubDocumentTemplate () {
+  return {
+    ...stubNamedEntity(),
+    icon: '',
+    sortOrder: 0,
+    titlePluralTranslations: { 'en-US': 'Stub' },
+    titleSingularTranslations: {},
+    worldAppendix: '',
+    worldAppendixTranslations: {}
+  }
+}
+
+import {
+  FA_PROJECT_DOCUMENT_STATUS_FLAG_DEFAULTS
+} from './openedDocumentTabTestStatusFlagDefaults'
+
+function stubDocument () {
+  return {
+    ...stubNamedEntity(),
+    templateId: null,
+    worldId: '550e8400-e29b-41d4-a716-446655440000',
+    placementId: null,
+    parentDocumentId: null,
+    sortOrder: 0,
+    documentTextColor: null,
+    documentBackgroundColor: null,
+    ...FA_PROJECT_DOCUMENT_STATUS_FLAG_DEFAULTS
+  }
+}
+
+/**
+ * No-op projectContent bridge for Storybook canvas and Vitest renderer harnesses.
+ */
+export function createFaProjectContentBridgeHarnessStub (): I_faProjectContentAPI {
+  const emptyList = async () => ({ items: [] })
+  const noop = async () => undefined
+  return {
+    createDocument: async () => stubDocument(),
+    createDocumentTemplate: async () => stubDocumentTemplate(),
+    createMedia: async () => stubMedia(),
+    createWorld: async () => stubWorld(),
+    deleteDocument: noop,
+    deleteDocumentTemplate: noop,
+    deleteMedia: noop,
+    deleteWorld: noop,
+    getDocumentById: async () => stubDocument(),
+    getDocumentTemplateById: async () => stubDocumentTemplate(),
+    getMediaById: async () => stubMedia(),
+    getWorldById: async () => stubWorld(),
+    linkDocumentMedia: noop,
+    listDocumentDistribution: async () => ({
+      counts: [],
+      documentTemplateTotalCount: 0,
+      templates: [],
+      totalDocumentCount: 0,
+      worlds: []
+    }),
+    listDocumentLastOpened: emptyList,
+    listDocumentMedia: emptyList,
+    listDocumentTags: emptyList,
+    listDocumentsUnderTag: emptyList,
+    listTagsForWorld: emptyList,
+    listTagsWithDocumentCountsForWorld: emptyList,
+    listDocumentTemplates: emptyList,
+    listDocumentTemplatesForProjectSettings: async () => ({ items: [] }),
+    listDocuments: emptyList,
+    listMedia: emptyList,
+    listWorlds: emptyList,
+    listWorldsForProjectSettings: async () => ({ items: [stubWorldForSettings()] }),
+    listWorkspaceHierarchyLayout: async () => ({ worlds: [] }),
+    listPlacementDocumentChildren: emptyList,
+    reindexDocumentSiblingsInHierarchy: async () => ({
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      displayName: 'Stub',
+      placementId: 'placement-stub',
+      parentDocumentId: null,
+      sortOrder: 0,
+      isCategory: false,
+      hasChildren: false
+    }),
+    moveDocumentInHierarchy: async () => ({
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      displayName: 'Stub',
+      placementId: 'placement-stub',
+      parentDocumentId: null,
+      sortOrder: 0,
+      isCategory: false,
+      hasChildren: false
+    }),
+    renameTag: async () => ({
+      tag: {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        worldId: '550e8400-e29b-41d4-a716-446655440000',
+        name: 'Stub',
+        createdAtMs: 0,
+        updatedAtMs: 0
+      },
+      merged: false,
+      mergedFromTagId: null
+    }),
+    recordDocumentLastOpened: noop,
+    reorderDocumentsUnderTag: noop,
+    searchProjectHierarchy: async (query) => {
+      return {
+        hits: [],
+        query
+      }
+    },
+    saveDocumentTemplatesSnapshot: noop,
+    saveWorldsSnapshot: noop,
+    setDocumentTags: emptyList,
+    setDocumentTemplate: async () => stubDocument(),
+    setDocumentWorld: async () => stubDocument(),
+    deleteTag: noop,
+    unlinkDocumentMedia: noop,
+    updateDocument: async () => stubDocument(),
+    updateDocumentTemplate: async () => stubDocumentTemplate(),
+    updateMedia: async () => stubMedia(),
+    updateWorld: async () => stubWorld(),
+    upsertMedia: async () => ({ items: [stubMedia()] })
+  }
+}

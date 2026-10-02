@@ -1,0 +1,141 @@
+import { Test, TestingModule } from "@nestjs/testing";
+import {
+  INestApplication,
+  RequestMethod,
+  ValidationPipe,
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import cookieParser from "cookie-parser";
+import { AppModule } from "../app.module";
+import { PrismaService } from "../prisma/prisma.service";
+import { CookieService } from "../auth/services/cookie.service";
+import { AppConfig } from "../config/app.config";
+import { corsOptionsDelegate } from "../common/cors";
+import { PrismaExceptionFilter } from "../common/filters/prisma-exception.filter";
+import { assertTestDatabase } from "./db-guard";
+
+/**
+ * Boots a full NestJS app for integration tests.
+ * Uses the real AppModule with a test database.
+ */
+export async function createTestApp(): Promise<{
+  app: INestApplication;
+  prisma: PrismaService;
+  module: TestingModule;
+}> {
+  assertTestDatabase();
+
+  const module = await Test.createTestingModule({
+    imports: [AppModule],
+  }).compile();
+
+  const app = module.createNestApplication();
+
+  app.setGlobalPrefix("v1", {
+    exclude: [{ path: ".well-known/*path", method: RequestMethod.GET }],
+  });
+  app.use(cookieParser());
+  app.enableCors(corsOptionsDelegate(app.get(AppConfig)));
+  app.useGlobalFilters(new PrismaExceptionFilter());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  await app.init();
+
+  const prisma = module.get(PrismaService);
+
+  return { app, prisma, module };
+}
+
+/**
+ * Creates a test user in the database and returns a valid JWT + auth header.
+ */
+export async function createAuthenticatedUser(
+  prisma: PrismaService,
+  module: TestingModule,
+  overrides?: { email?: string; name?: string },
+) {
+  const jwtService = module.get(JwtService);
+
+  const email = overrides?.email ?? "test@example.com";
+  const name = overrides?.name ?? "Test User";
+
+  // Create user with required extension tables
+  const user = await prisma.user.create({
+    data: {
+      email,
+      name,
+      username:
+        email.split("@")[0] + "-" + Math.random().toString(36).slice(2, 6),
+      profile: { create: {} },
+      preferences: { create: {} },
+    },
+  });
+
+  // Create a valid session
+  const session = await prisma.session.create({
+    data: {
+      userId: user.id,
+      tokenFamily: crypto.randomUUID(),
+      expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days
+    },
+  });
+
+  const token = jwtService.sign({
+    sub: user.id,
+    email: user.email,
+    roles: user.roles,
+    sessionId: session.id,
+    tokenFamily: session.tokenFamily,
+  });
+
+  const cookieService = module.get(CookieService);
+  const csrfToken = cookieService.generateCsrfToken(session.id);
+
+  return {
+    user,
+    session,
+    token,
+    cookie: `auth_token=${token}; csrf_token=${csrfToken}`,
+    csrfToken,
+  };
+}
+
+/**
+ * Gives a test user a subscription so plan limits reflect that plan.
+ */
+export async function giveSubscription(
+  prisma: PrismaService,
+  userId: string,
+  plan: "FREE" | "PRO" | "TEAM" = "PRO",
+) {
+  return prisma.subscription.create({
+    data: { userId, plan, status: "ACTIVE" },
+  });
+}
+
+/**
+ * Empties every table so each test starts from a known state.
+ *
+ * Refuses to run unless DATABASE_URL names a test database: pointed at a
+ * development database this would delete real work.
+ */
+export async function cleanDatabase(prisma: PrismaService) {
+  assertTestDatabase();
+  await prisma.$executeRawUnsafe(`
+    DO $$ DECLARE r RECORD;
+    BEGIN
+      FOR r IN (
+        SELECT tablename FROM pg_tables
+        WHERE schemaname = 'public' AND tablename != '_prisma_migrations'
+      ) LOOP
+        EXECUTE 'TRUNCATE TABLE "' || r.tablename || '" CASCADE';
+      END LOOP;
+    END $$;
+  `);
+}

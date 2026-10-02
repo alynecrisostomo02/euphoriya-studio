@@ -1,0 +1,27 @@
+@use '../../../../css/app.palette.scss' as *;
+
+/* COMPONENT - FA LOCALE TRANSLATIONS INPUT */
+$faLocaleTranslationsInput-columnHeaders-gap: 8px;
+$faLocaleTranslationsInput-fallbackWarning-marginLeft: 8px;
+$faLocaleTranslationsInput-formHeader-color: rgba($white, 0.7);
+$faLocaleTranslationsInput-formHeader-fontSize: 11px;
+$faLocaleTranslationsInput-formHeader-fontWeight: 600;
+$faLocaleTranslationsInput-formHeader-letterSpacing: 0.02em;
+$faLocaleTranslationsInput-menu-backgroundColor: fa-v('dark-lighter', $dark-lighter);
+/* Fantasy: $dark-lighter darkened by same L drop as $dark → $fantasy-dark. */
+$faLocaleTranslationsInput-menu-backgroundColor-fantasy: fa-v('fantasy-medium', $fantasy-medium);
+/* Left inset only — right edge stays flush so scrollbar sits on the menu side (all themes). */
+$faLocaleTranslationsInput-menu-body-padding-x: 12px;
+$faLocaleTranslationsInput-menu-maxHeight: 450px;
+$faLocaleTranslationsInput-menu-maxWidth: 500px;
+$faLocaleTranslationsInput-menu-minWidth: 350px;
+$faLocaleTranslationsInput-menu-singularPluralMaxWidth: 700px;
+$faLocaleTranslationsInput-menu-singularPluralMinWidth: 650px;
+$faLocaleTranslationsInput-menu-zIndex: 7002;
+$faLocaleTranslationsInput-menuRow-gap: 12px;
+$faLocaleTranslationsInput-pinnedAside-gap: 12px;
+$faLocaleTranslationsInput-pinnedAside-width: 200px;
+/* Compensates left-only body padding (no top/bottom on shell). */
+$faLocaleTranslationsInput-rows-padding-y: 10px;
+$faLocaleTranslationsInput-scroll-scrollbarGap: 10px;
+$faLocaleTranslationsInput-singularPlural-row-gap: 8px;

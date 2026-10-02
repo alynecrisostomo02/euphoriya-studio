@@ -1,0 +1,275 @@
+import type Database from 'better-sqlite3'
+import { v4 as uuidv4 } from 'uuid'
+
+import {
+  applyFaProjectOpenedDocumentsSchemaV1,
+  applyFaProjectProjectDataSchemaV1,
+  FA_PROJECT_DATA_TABLE_NAME,
+  FA_PROJECT_DOCUMENT_TREE_CUSTOM_SORT_ORDER_COLUMN,
+  FA_PROJECT_DOCUMENT_TREE_LEGACY_PARENT_DOCUMENT_ID_COLUMN,
+  FA_PROJECT_DOCUMENT_TREE_LEGACY_PLACEMENT_ID_COLUMN,
+  FA_PROJECT_DOCUMENT_TREE_LEGACY_PLACEMENT_PARENT_SORT_INDEX,
+  FA_PROJECT_DOCUMENT_TREE_LEGACY_SORT_ORDER_COLUMN,
+  FA_PROJECT_DOCUMENT_TREE_PARENT_DOCUMENT_ID_COLUMN,
+  FA_PROJECT_DOCUMENT_TREE_PLACEMENT_ID_COLUMN,
+  FA_PROJECT_DOCUMENT_TREE_PLACEMENT_PARENT_SORT_INDEX,
+  FA_PROJECT_TABLE_DOCUMENTS,
+  FA_PROJECT_TABLE_WORLDS,
+  FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS
+} from './functions/faProjectDbSchemaDdl'
+import { applyFaProjectContentSchemaV1 } from './faProjectDbContentSchemaV1Wiring'
+import { createApplyFaProjectDocumentsHierarchySchemaPatch } from './functions/faProjectDocumentsHierarchySchemaPatch'
+import { applyFaProjectDocumentAppearanceEmptyColorSchemaPatch } from './projectDbContent/faProjectDocumentAppearanceEmptyColorSchemaPatchWiring'
+import { applyFaProjectDocumentAppearanceSchemaPatch } from './projectDbContent/faProjectDocumentAppearanceSchemaPatchWiring'
+import { applyFaProjectDocumentCategorySchemaPatch } from './projectDbContent/faProjectDocumentCategorySchemaPatchWiring'
+import { applyFaProjectDocumentStatusFlagsSchemaPatch } from './projectDbContent/faProjectDocumentStatusFlagsSchemaPatchWiring'
+import { applyFaProjectDocumentTreeOrderNumberSchemaPatch } from './projectDbContent/faProjectDocumentTreeOrderNumberSchemaPatchWiring'
+import { applyFaProjectDocumentExtraClassesSchemaPatch } from './projectDbContent/faProjectDocumentExtraClassesSchemaPatchWiring'
+import { seedFaProjectDefaultWorldIfEmpty } from './projectDbContent/faProjectWorldBootstrapWiring'
+import { applyFaProjectWorldColorEmptyAllowedSchemaPatch } from './projectDbContent/faProjectWorldColorEmptyAllowedSchemaPatchWiring'
+import { applyFaProjectTagsSchemaPatch } from './projectDbContent/faProjectTagsSchemaPatchWiring'
+import { applyFaProjectDocumentLastOpenedSchemaPatch } from './projectDbContent/faProjectDocumentLastOpenedSchemaPatchWiring'
+import { applyFaProjectMediaTypeColumnsSchemaPatch } from './projectDbContent/faProjectMediaTypeColumnsSchemaPatchWiring'
+import {
+  applyFaProjectMediaInternalTypeV10SchemaPatch,
+  rebuildFaProjectMediaTableForV10
+} from './projectDbContent/faProjectMediaInternalTypeV10SchemaPatchWiring'
+import {
+  applyFaProjectMediaExternalEmbedV11SchemaPatch,
+  rebuildFaProjectMediaTableForV11
+} from './projectDbContent/faProjectMediaExternalEmbedV11SchemaPatchWiring'
+
+const OPTION_PROJECT_NAME = 'project_name'
+const OPTION_PROJECT_UUID = 'project_uuid'
+
+/** Current schema revision: flattened bootstrap + v2–v10 + v11 media external embed. */
+export const FA_PROJECT_USER_VERSION_SUPPORTED_MAX = 11
+
+const applyFaProjectDocumentsHierarchySchemaPatch = createApplyFaProjectDocumentsHierarchySchemaPatch({
+  documentsTableName: FA_PROJECT_TABLE_DOCUMENTS,
+  placementsTableName: FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS,
+  treePlacementIdColumn: FA_PROJECT_DOCUMENT_TREE_PLACEMENT_ID_COLUMN,
+  treeParentDocumentIdColumn: FA_PROJECT_DOCUMENT_TREE_PARENT_DOCUMENT_ID_COLUMN,
+  treeCustomSortOrderColumn: FA_PROJECT_DOCUMENT_TREE_CUSTOM_SORT_ORDER_COLUMN,
+  legacyPlacementIdColumn: FA_PROJECT_DOCUMENT_TREE_LEGACY_PLACEMENT_ID_COLUMN,
+  legacyParentDocumentIdColumn: FA_PROJECT_DOCUMENT_TREE_LEGACY_PARENT_DOCUMENT_ID_COLUMN,
+  legacySortOrderColumn: FA_PROJECT_DOCUMENT_TREE_LEGACY_SORT_ORDER_COLUMN,
+  treePlacementParentSortIndex: FA_PROJECT_DOCUMENT_TREE_PLACEMENT_PARENT_SORT_INDEX,
+  legacyPlacementParentSortIndex: FA_PROJECT_DOCUMENT_TREE_LEGACY_PLACEMENT_PARENT_SORT_INDEX
+})
+
+function readUserVersion (db: Database): number {
+  const rawVer = db.pragma('user_version', { simple: true })
+  const current = typeof rawVer === 'number' ? rawVer : Number(rawVer)
+  return Number.isFinite(current) ? current : 0
+}
+
+function sqlSelectValueFromActiveTable (): string {
+  return `SELECT option_value AS v FROM ${FA_PROJECT_DATA_TABLE_NAME} WHERE option_name = ?`
+}
+
+function bootstrapFaProjectSchemaFresh (
+  db: Database,
+  displayProjectName: string
+): void {
+  const runBootstrap = db.transaction(() => {
+    applyFaProjectProjectDataSchemaV1(db)
+    db.prepare(
+      `INSERT INTO ${FA_PROJECT_DATA_TABLE_NAME} ` +
+        '(option_name, option_value) VALUES (?, ?)'
+    ).run(OPTION_PROJECT_NAME, displayProjectName)
+    db.prepare(
+      `INSERT INTO ${FA_PROJECT_DATA_TABLE_NAME} ` +
+        '(option_name, option_value) VALUES (?, ?)'
+    ).run(OPTION_PROJECT_UUID, uuidv4())
+    applyFaProjectContentSchemaV1(db)
+    db.pragma(`user_version = ${FA_PROJECT_USER_VERSION_SUPPORTED_MAX}`)
+  })
+  runBootstrap()
+}
+
+function verifyFaProjectMetadataAfterBootstrap (db: Database, displayProjectName: string): void {
+  const verifyName = db
+    .prepare(sqlSelectValueFromActiveTable())
+    .get(OPTION_PROJECT_NAME) as { v?: string } | undefined
+  if (verifyName?.v !== displayProjectName) {
+    throw new Error('Failed to verify project_name row after migration')
+  }
+
+  const uuidVerify = db
+    .prepare(sqlSelectValueFromActiveTable())
+    .get(OPTION_PROJECT_UUID) as { v?: string } | undefined
+  const uuidStr = uuidVerify?.v?.trim()
+  if (uuidStr === undefined || uuidStr.length === 0) {
+    throw new Error('Failed to verify project_uuid row after migration')
+  }
+}
+
+function applyFaProjectSchemaPatchesAtCurrentVersion (db: Database): void {
+  applyFaProjectDocumentsHierarchySchemaPatch(db)
+  applyFaProjectDocumentAppearanceSchemaPatch(db)
+  applyFaProjectDocumentCategorySchemaPatch(db)
+  applyFaProjectDocumentStatusFlagsSchemaPatch(db)
+  applyFaProjectDocumentTreeOrderNumberSchemaPatch(db)
+  applyFaProjectDocumentExtraClassesSchemaPatch(db)
+  applyFaProjectWorldColorEmptyAllowedSchemaPatch(db)
+  applyFaProjectDocumentAppearanceEmptyColorSchemaPatch(db)
+  applyFaProjectTagsSchemaPatch(db)
+  applyFaProjectDocumentLastOpenedSchemaPatch(db)
+  applyFaProjectMediaTypeColumnsSchemaPatch(db)
+  applyFaProjectMediaInternalTypeV10SchemaPatch(db)
+  applyFaProjectMediaExternalEmbedV11SchemaPatch(db)
+  applyFaProjectOpenedDocumentsSchemaV1(db)
+}
+
+function migrateFaProjectSchemaV1ToV2 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    applyFaProjectDocumentCategorySchemaPatch(db)
+    db.pragma('user_version = 2')
+  })
+  runMigration()
+}
+
+function migrateFaProjectSchemaV2ToV3 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    applyFaProjectDocumentStatusFlagsSchemaPatch(db)
+    db.pragma('user_version = 3')
+  })
+  runMigration()
+}
+
+function migrateFaProjectSchemaV3ToV4 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    applyFaProjectDocumentTreeOrderNumberSchemaPatch(db)
+    db.pragma('user_version = 4')
+  })
+  runMigration()
+}
+
+function migrateFaProjectSchemaV4ToV5 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    applyFaProjectDocumentExtraClassesSchemaPatch(db)
+    db.pragma('user_version = 5')
+  })
+  runMigration()
+}
+
+type T_faProjectTableInfoRow = {
+  name: string
+}
+
+function renameFaProjectWorldsColorPaletteColumnIfNeeded (db: Database): void {
+  const rows = db.pragma(`table_info(${FA_PROJECT_TABLE_WORLDS})`) as T_faProjectTableInfoRow[]
+  const columnNames = new Set(rows.map((row) => row.name))
+  // Legacy misspelling color_pallete → color_palette (v5 files / pre-v6 bootstrap).
+  const hasLegacy = columnNames.has('color_pallete')
+  const hasCanonical = columnNames.has('color_palette')
+  if (!hasLegacy || hasCanonical) {
+    return
+  }
+  db.exec(
+    `ALTER TABLE ${FA_PROJECT_TABLE_WORLDS} RENAME COLUMN color_pallete TO color_palette`
+  )
+}
+
+function migrateFaProjectSchemaV5ToV6 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    renameFaProjectWorldsColorPaletteColumnIfNeeded(db)
+    db.pragma('user_version = 6')
+  })
+  runMigration()
+}
+
+function migrateFaProjectSchemaV6ToV7 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    applyFaProjectTagsSchemaPatch(db)
+    db.pragma('user_version = 7')
+  })
+  runMigration()
+}
+
+function migrateFaProjectSchemaV7ToV8 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    applyFaProjectDocumentLastOpenedSchemaPatch(db)
+    db.pragma('user_version = 8')
+  })
+  runMigration()
+}
+
+function migrateFaProjectSchemaV8ToV9 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    applyFaProjectMediaTypeColumnsSchemaPatch(db)
+    db.pragma('user_version = 9')
+  })
+  runMigration()
+}
+
+function migrateFaProjectSchemaV9ToV10 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    rebuildFaProjectMediaTableForV10(db)
+    db.pragma('user_version = 10')
+  })
+  runMigration()
+}
+
+function migrateFaProjectSchemaV10ToV11 (db: Database): void {
+  const runMigration = db.transaction(() => {
+    rebuildFaProjectMediaTableForV11(db)
+    db.pragma('user_version = 11')
+  })
+  runMigration()
+}
+
+const FA_PROJECT_SCHEMA_CLIMB_STEPS = [
+  migrateFaProjectSchemaV1ToV2,
+  migrateFaProjectSchemaV2ToV3,
+  migrateFaProjectSchemaV3ToV4,
+  migrateFaProjectSchemaV4ToV5,
+  migrateFaProjectSchemaV5ToV6,
+  migrateFaProjectSchemaV6ToV7,
+  migrateFaProjectSchemaV7ToV8,
+  migrateFaProjectSchemaV8ToV9,
+  migrateFaProjectSchemaV9ToV10,
+  migrateFaProjectSchemaV10ToV11
+]
+
+function climbFaProjectSchemaFromVersion (db: Database, startVer: number): void {
+  const firstStepIndex = startVer - 1
+  for (const migrateStep of FA_PROJECT_SCHEMA_CLIMB_STEPS.slice(firstStepIndex)) {
+    migrateStep(db)
+  }
+  applyFaProjectSchemaPatchesAtCurrentVersion(db)
+}
+
+/**
+ * Applies schema migrations. Fresh files bootstrap to the current revision and seed the default world.
+ * Files already at the supported version run idempotent patches only.
+ */
+export function applyFaProjectMigrations (
+  db: Database,
+  displayProjectName: string
+): void {
+  const startVer = readUserVersion(db)
+  if (startVer > FA_PROJECT_USER_VERSION_SUPPORTED_MAX) {
+    throw new Error('This project file requires a newer version of Fantasia Archive')
+  }
+  if (startVer === FA_PROJECT_USER_VERSION_SUPPORTED_MAX) {
+    applyFaProjectSchemaPatchesAtCurrentVersion(db)
+    return
+  }
+  const canClimb =
+    Number.isInteger(startVer) &&
+    startVer >= 1 &&
+    startVer < FA_PROJECT_USER_VERSION_SUPPORTED_MAX
+  if (canClimb) {
+    climbFaProjectSchemaFromVersion(db, startVer)
+    return
+  }
+  if (startVer === 0) {
+    bootstrapFaProjectSchemaFresh(db, displayProjectName)
+    verifyFaProjectMetadataAfterBootstrap(db, displayProjectName)
+    seedFaProjectDefaultWorldIfEmpty(db, displayProjectName)
+    return
+  }
+  throw new Error('Unexpected project file schema state')
+}

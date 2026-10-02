@@ -1,0 +1,100 @@
+import type { I_faProjectHierarchyTreeExpandedSnapshotRestoreOptions } from 'app/types/I_faProjectHierarchyTreeDomain'
+
+/** he-tree Draggable indent prop (px) per nested level. */
+export const PROJECT_HIERARCHY_TREE_INDENT_PX = 28
+
+/**
+ * he-tree treeLineOffset (px) — horizontal position of connector lines.
+ * Tuned toward nested open-icon column (indent 28, icon left -23).
+ */
+export const PROJECT_HIERARCHY_TREE_LINE_OFFSET_PX = 12
+
+/** Root class on the he-tree Draggable scroll container. */
+export const PROJECT_HIERARCHY_TREE_ROOT_CLASS = 'projectHierarchyTree'
+
+/** Selector for he-tree row wrappers inside the workspace hierarchy tree. */
+export const PROJECT_HIERARCHY_TREE_NODE_ITEM_SELECTOR = '.tree-node'
+
+/** Default Material icon for template group rows. */
+export const PROJECT_HIERARCHY_TREE_GROUP_ICON = 'mdi-database'
+
+/** Material icon for template placement add-new rows and matching context menu action. */
+export const PROJECT_HIERARCHY_TREE_ADD_NEW_DOCUMENT_ICON = 'mdi-plus'
+
+/** he-tree Draggable trigger-class — added on primary-button pointerdown before drag may start. */
+export const PROJECT_HIERARCHY_TREE_DRAG_HANDLE_CLASS = 'projectHierarchyTree__dragHandle'
+
+/** Primary-button press cursor on document rows; paired with drag handle for he-tree only. */
+export const PROJECT_HIERARCHY_TREE_LEFT_POINTER_DOWN_CLASS = 'projectHierarchyTree__leftPointerDown'
+
+/**
+ * Pointer movement (px) before a document row press+release counts as drag, not expand click.
+ */
+export const PROJECT_HIERARCHY_TREE_DOCUMENT_ROW_DRAG_CLICK_TOLERANCE_PX = 8
+
+/** Hover delay (ms) before he-tree opens a closed row during drag for nest drops. */
+export const PROJECT_HIERARCHY_TREE_DRAG_OPEN_DELAY_MS = 400
+
+/** Matches projectHierarchyTree-openIcon-rotateTransitionDuration in styles/_variables.scss. */
+export const PROJECT_HIERARCHY_TREE_OPEN_ICON_ROTATE_TRANSITION_MS = 300
+
+/**
+ * Default q-icon for template placement and document rows when template icon unset.
+ * Matches FaIconPickerInput empty placeholder (FA_ICON_PICKER_EMPTY_PLACEHOLDER_ICON).
+ */
+export const PROJECT_HIERARCHY_TREE_DOCUMENT_TEMPLATE_DEFAULT_ICON = 'mdi-file-outline'
+
+/**
+ * Matches styles/_variables.scss $projectHierarchyTree-node-minHeight.
+ */
+export const PROJECT_HIERARCHY_TREE_NODE_MIN_HEIGHT_PX = 29
+
+/**
+ * Matches styles/_variables.scss $projectHierarchyTree-node-marginTop.
+ * VirtualList size includes margin; unmeasured rows use min-height + margin.
+ */
+export const PROJECT_HIERARCHY_TREE_NODE_MARGIN_TOP_PX = 3
+
+/**
+ * Estimated row stride for @virtual-list/vue itemSize before DOM measure.
+ */
+export const PROJECT_HIERARCHY_TREE_VIRTUAL_ROW_SIZE_PX =
+  PROJECT_HIERARCHY_TREE_NODE_MIN_HEIGHT_PX + PROJECT_HIERARCHY_TREE_NODE_MARGIN_TOP_PX
+
+/**
+ * @virtual-list/vue buffer (px) beyond viewport. he-tree does not forward buffer;
+ * hierarchy boot mutates VirtualList default (~8 rows).
+ * Keep modest: VirtualList skips onscroll updates while |delta| <= buffer-10;
+ * hierarchy forces update on scroll, so huge buffer is not required for blank gaps.
+ */
+export const PROJECT_HIERARCHY_TREE_VIRTUAL_LIST_BUFFER_PX =
+  PROJECT_HIERARCHY_TREE_VIRTUAL_ROW_SIZE_PX * 8
+
+/**
+ * Animation frames to re-apply scrollTop after preserved work settles
+ * (covers late virt remount / expand reapply after drag commit).
+ */
+export const PROJECT_HIERARCHY_TREE_SCROLL_PRESERVE_SETTLE_FRAMES = 6
+
+/**
+ * Settle delay (ms) after drag ends before expand snapshot restore.
+ * Kept at 0 — drag-open is gated by isTreeDragActive; remount quiet no longer needed.
+ */
+export const PROJECT_HIERARCHY_TREE_DRAG_OPEN_REMOUNT_QUIET_MS = 0
+
+/** nextTick polls while suppressTreeEmit blocks drag commit persist. */
+export const PROJECT_HIERARCHY_TREE_DRAG_COMMIT_SUPPRESS_WAIT_MAX_ATTEMPTS = 30
+
+/** nextTick polls after suppress clears so deferred he-tree model-value can land. */
+export const PROJECT_HIERARCHY_TREE_DRAG_MODEL_SETTLE_MAX_ATTEMPTS = 30
+
+/**
+ * Press-and-hold delay (ms) on a document row before he-tree drag may start.
+ */
+export const PROJECT_HIERARCHY_TREE_DOCUMENT_ROW_DRAG_HOLD_DELAY_MS = 200
+
+/** Drag post-commit restore keeps full snapshot ids plus ancestor chain. */
+export const PROJECT_HIERARCHY_TREE_DRAG_EXPAND_SNAPSHOT_RESTORE_OPTIONS = {
+  includeAncestorClosure: true,
+  skipAncestorPrune: true
+} satisfies I_faProjectHierarchyTreeExpandedSnapshotRestoreOptions

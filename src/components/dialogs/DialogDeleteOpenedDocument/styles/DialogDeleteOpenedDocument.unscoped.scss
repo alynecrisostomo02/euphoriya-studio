@@ -1,0 +1,45 @@
+@use './variables' as *;
+@use '../../../globals/AppControlSingleMenu/styles/variables' as appControlSingleMenu;
+
+.dialogDeleteOpenedDocument {
+  min-width: $dialogDeleteOpenedDocument-minWidth;
+}
+
+/* Confirm inset: beat Quasar .q-card__section--vert (16px) so only shared tokens apply. */
+.q-dialog > .q-dialog__inner > .q-card.faConfirmationDialog.dialogDeleteOpenedDocument > .faConfirmationDialog__content {
+  padding: $faConfirmationDialog-content-padding;
+
+  > .q-card__section:not(.faConfirmationDialog__body),
+  > .q-card__section--vert:not(.faConfirmationDialog__body) {
+    padding: 0;
+  }
+
+  > .faConfirmationDialog__body {
+    padding: $faConfirmationDialog-body-padding;
+    text-align: left;
+  }
+}
+
+.dialogDeleteOpenedDocument__title {
+  word-break: break-word;
+}
+
+.dialogDeleteOpenedDocument__body {
+  margin: 0;
+  max-width: 100%;
+  text-align: left;
+}
+
+.dialogDeleteOpenedDocument__warning,
+.dialogDeleteOpenedDocument__proceed {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.dialogDeleteOpenedDocument__proceed {
+  margin-top: $dialogDeleteOpenedDocument-proceed-marginTop;
+}
+
+.dialogDeleteOpenedDocument__warning .text-secondary {
+  text-shadow: appControlSingleMenu.$appControlSingleMenu-item-secondary-textShadow;
+}

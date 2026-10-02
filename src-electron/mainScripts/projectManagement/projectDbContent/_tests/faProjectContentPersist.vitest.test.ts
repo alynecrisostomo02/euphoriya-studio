@@ -1,0 +1,2263 @@
+import { expect, test, vi } from 'vitest'
+
+import {
+  FA_PROJECT_TABLE_MEDIA,
+  FA_PROJECT_WORLD_DEFAULT_COLOR
+} from '../../functions/faProjectDbSchemaDdl'
+import { FaProjectContentNotFoundError } from '../faProjectContentNotFoundError'
+import {
+  createFaProjectDocument,
+  deleteFaProjectDocument,
+  getFaProjectDocumentById,
+  listFaProjectDocuments,
+  setFaProjectDocumentTemplate,
+  setFaProjectDocumentWorld,
+  updateFaProjectDocument
+} from '../faProjectDocumentsPersistWiring'
+import {
+  createFaProjectDocumentTemplate,
+  deleteFaProjectDocumentTemplate,
+  getFaProjectDocumentTemplateById,
+  listFaProjectDocumentTemplates,
+  listFaProjectDocumentTemplatesForProjectSettings,
+  replaceFaProjectDocumentTemplatesSnapshot,
+  updateFaProjectDocumentTemplate
+} from '../faProjectDocumentTemplatesPersistWiring'
+import {
+  linkFaProjectDocumentMedia,
+  listFaProjectMediaForDocument,
+  unlinkFaProjectDocumentMedia
+} from '../faProjectDocumentMediaLinksWiring'
+import { createFaProjectNamedEntity } from '../faProjectContentNamedEntitySqlWiring'
+import {
+  createFaProjectMedia,
+  getFaProjectMediaById,
+  upsertFaProjectMedia,
+  upsertFaProjectMediaMany
+} from '../faProjectMediaPersistWiring'
+import {
+  createFaProjectWorld,
+  deleteFaProjectWorld,
+  getFaProjectWorldById,
+  listFaProjectWorlds,
+  listFaProjectWorldsForProjectSettings,
+  replaceFaProjectWorldsSnapshot,
+  updateFaProjectWorld
+} from '../faProjectWorldsPersistWiring'
+import {
+  deleteFaProjectMedia,
+  listFaProjectMedia,
+  updateFaProjectMedia
+} from '../faProjectMediaPersistWiring'
+import { assertFaProjectDocumentTemplateExists } from '../faProjectDocumentTemplatesSqlWiring'
+import { replaceFaProjectWorldTemplateLayoutSnapshot } from '../faProjectWorldTemplateLayoutSnapshotWiring'
+
+type T_row = Record<string, string | number | null | Uint8Array>
+
+function readMockWorldMaxSortOrder (worlds: Map<string, T_row>): number | null {
+  let max: number | null = null
+  for (const row of worlds.values()) {
+    const sortOrder = row.sort_order as number
+    if (max === null || sortOrder > max) {
+      max = sortOrder
+    }
+  }
+  return max
+}
+
+function sortFaProjectMediaListMockRows (media: Map<string, T_row>): T_row[] {
+  return [...media.values()].sort((left, right) => {
+    const createdDelta = (right.created_at_ms as number) - (left.created_at_ms as number)
+    if (createdDelta !== 0) {
+      return createdDelta
+    }
+    const rightId = String(right.id)
+    const leftId = String(left.id)
+    if (rightId === leftId) {
+      return 0
+    }
+    return rightId < leftId ? -1 : 1
+  })
+}
+
+function readMockDocumentTemplateMaxSortOrder (
+  documentTemplates: Map<string, T_row>
+): number | null {
+  let max: number | null = null
+  for (const row of documentTemplates.values()) {
+    const sortOrder = row.sort_order as number
+    if (max === null || sortOrder > max) {
+      max = sortOrder
+    }
+  }
+  return max
+}
+
+type T_projectContentTestTables = {
+  document_templates: Map<string, T_row>
+  documents: Map<string, T_row>
+  media: Map<string, T_row>
+  world_template_groups: Map<string, T_row>
+  world_template_placements: Map<string, T_row>
+  worlds: Map<string, T_row>
+}
+
+function makeProjectContentTestDb (): {
+  db: {
+    prepare: ReturnType<typeof vi.fn>
+  }
+  tables: T_projectContentTestTables
+  junctionDocumentMedia: Set<string>
+} {
+  const tables: T_projectContentTestTables = {
+    document_templates: new Map(),
+    documents: new Map(),
+    media: new Map(),
+    world_template_groups: new Map(),
+    world_template_placements: new Map(),
+    worlds: new Map()
+  }
+  const junctionDocumentMedia = new Set<string>()
+
+  const db = {
+    transaction: (fn: () => unknown) => {
+      return () => fn()
+    },
+    prepare: vi.fn((sql: string) => {
+      const normalized = sql.replace(/\s+/g, ' ').trim()
+      if (normalized.includes('INSERT INTO worlds')) {
+        return {
+          run: (...args: Array<string | number>) => {
+            const row: T_row = {
+              id: args[0] as string,
+              display_name: args[1] as string,
+              display_name_translations_json: args[2] as string,
+              color: args[3] as string,
+              color_palette: args[4] as string,
+              sort_order: args[5] as number,
+              created_at_ms: args[6] as number,
+              updated_at_ms: args[7] as number
+            }
+            tables.worlds.set(row.id as string, row)
+          }
+        }
+      }
+      if (normalized.includes('MAX(sort_order)')) {
+        return {
+          get: () => {
+            if (normalized.includes('document_templates')) {
+              return {
+                max_sort: readMockDocumentTemplateMaxSortOrder(tables.document_templates)
+              }
+            }
+            return { max_sort: readMockWorldMaxSortOrder(tables.worlds) }
+          }
+        }
+      }
+      if (normalized.includes('COUNT(*)') && normalized.includes('worlds')) {
+        return {
+          get: () => ({ c: tables.worlds.size })
+        }
+      }
+      if (normalized.includes('INSERT INTO document_templates')) {
+        return {
+          run: (...args: Array<string | number>) => {
+            const row: T_row = {
+              id: args[0] as string,
+              display_name: args[1] as string,
+              title_translations_json: args[2] as string,
+              title_singular_translations_json: args[3] as string,
+              sort_order: args[4] as number,
+              world_appendix: args[5] as string,
+              world_appendix_translations_json: args[6] as string,
+              icon: args[7] as string,
+              created_at_ms: args[8] as number,
+              updated_at_ms: args[9] as number
+            }
+            tables.document_templates.set(row.id as string, row)
+          }
+        }
+      }
+      if (normalized.includes('INSERT INTO media') && normalized.includes('internal_type')) {
+        return {
+          run: (...args: Array<string | number>) => {
+            const row: T_row = {
+              id: args[0] as string,
+              display_name: args[1] as string,
+              type: args[2] as string,
+              internal_type: args[3] as string,
+              external_type: args[4] as string,
+              external_link: args[5] as string,
+              external_embed: args[6] as string,
+              internal_link: args[7] as string,
+              internal_embed: null,
+              created_at_ms: args[8] as number,
+              updated_at_ms: args[9] as number
+            }
+            tables.media.set(row.id as string, row)
+          }
+        }
+      }
+      if (normalized.includes('INSERT INTO media')) {
+        return {
+          run: (...args: Array<string | number>) => {
+            const row: T_row = {
+              id: args[0] as string,
+              display_name: args[1] as string,
+              type: 'external',
+              internal_type: '',
+              external_type: '',
+              external_link: '',
+              external_embed: '',
+              internal_link: '',
+              internal_embed: null,
+              created_at_ms: args[2] as number,
+              updated_at_ms: args[3] as number
+            }
+            tables.media.set(row.id as string, row)
+          }
+        }
+      }
+      if (normalized.includes('INSERT INTO documents')) {
+        return {
+          run: (...args: Array<string | number | null>) => {
+            const row: T_row = {
+              id: args[0] as string,
+              world_id: args[1] as string,
+              template_id: args[2] as string | null,
+              tree_placement_id: args[3] as string | null,
+              tree_parent_document_id: args[4] as string | null,
+              tree_custom_sort_order: args[5] as number,
+              display_name: args[6] as string,
+              document_text_color: args[7] as string | null,
+              document_background_color: args[8] as string | null,
+              is_category: args[9] as number,
+              is_finished: args[10] as number,
+              is_minor: args[11] as number,
+              is_dead: args[12] as number,
+              tree_order_number: args[13] as number,
+              extra_classes: args[14] as string,
+              created_at_ms: args[15] as number,
+              updated_at_ms: args[16] as number
+            }
+            tables.documents.set(row.id as string, row)
+          }
+        }
+      }
+      if (normalized.includes('INSERT OR IGNORE INTO document_media')) {
+        return {
+          run: (documentId: string, mediaId: string) => {
+            junctionDocumentMedia.add(`${documentId}:${mediaId}`)
+          }
+        }
+      }
+      if (normalized.includes('DELETE FROM document_media')) {
+        return {
+          run: (documentId: string, mediaId: string) => {
+            junctionDocumentMedia.delete(`${documentId}:${mediaId}`)
+          }
+        }
+      }
+      if (normalized.includes('INSERT INTO world_template_groups')) {
+        return {
+          run: (...args: Array<string | number>) => {
+            const row: T_row = {
+              created_at_ms: args[5] as number,
+              display_name: args[2] as string,
+              display_name_translations_json: args[3] as string,
+              id: args[0] as string,
+              root_sort_order: args[4] as number,
+              updated_at_ms: args[6] as number,
+              world_id: args[1] as string
+            }
+            tables.world_template_groups.set(row.id as string, row)
+          }
+        }
+      }
+      if (normalized.includes('INSERT INTO world_template_placements')) {
+        return {
+          run: (...args: Array<string | number | null>) => {
+            const row: T_row = {
+              created_at_ms: args[8] as number,
+              document_template_id: args[2] as string,
+              group_id: args[3] as string | null,
+              group_sort_order: args[5] as number | null,
+              id: args[0] as string,
+              nickname: args[6] as string,
+              nickname_translations_json: args[7] as string,
+              root_sort_order: args[4] as number | null,
+              updated_at_ms: args[9] as number,
+              world_id: args[1] as string
+            }
+            tables.world_template_placements.set(row.id as string, row)
+          }
+        }
+      }
+      if (normalized.includes('DELETE FROM world_template_placements WHERE id = ?')) {
+        return {
+          run: (placementId: string) => {
+            tables.world_template_placements.delete(placementId)
+          }
+        }
+      }
+      if (normalized.includes('DELETE FROM world_template_placements')) {
+        return {
+          run: (worldId: string) => {
+            for (const [id, row] of tables.world_template_placements) {
+              if (row.world_id === worldId) {
+                tables.world_template_placements.delete(id)
+              }
+            }
+          }
+        }
+      }
+      if (normalized.includes('DELETE FROM world_template_groups WHERE id = ?')) {
+        return {
+          run: (groupId: string) => {
+            tables.world_template_groups.delete(groupId)
+          }
+        }
+      }
+      if (normalized.includes('DELETE FROM world_template_groups')) {
+        return {
+          run: (worldId: string) => {
+            for (const [id, row] of tables.world_template_groups) {
+              if (row.world_id === worldId) {
+                tables.world_template_groups.delete(id)
+              }
+            }
+          }
+        }
+      }
+      if (normalized.includes('FROM world_template_groups')) {
+        return {
+          all: (worldId: string) => {
+            return [...tables.world_template_groups.values()]
+              .filter((row) => row.world_id === worldId)
+              .sort((left, right) => {
+                return (left.root_sort_order as number) - (right.root_sort_order as number)
+              })
+          }
+        }
+      }
+      if (
+        normalized.includes('FROM world_template_placements') &&
+        normalized.includes('INNER JOIN')
+      ) {
+        return {
+          all: (worldId: string) => {
+            return [...tables.world_template_placements.values()]
+              .filter((row) => row.world_id === worldId)
+              .map((row) => {
+                const template = tables.document_templates.get(row.document_template_id as string)
+                return {
+                  ...row,
+                  display_name: template?.display_name ?? '',
+                  icon: template?.icon ?? '',
+                  world_appendix: template?.world_appendix ?? ''
+                }
+              })
+          }
+        }
+      }
+      if (normalized.includes('DELETE FROM worlds')) {
+        return {
+          run: (id: string) => {
+            const deleted = tables.worlds.delete(id)
+            return { changes: deleted ? 1 : 0 }
+          }
+        }
+      }
+      if (normalized.includes('DELETE FROM documents')) {
+        if (normalized.includes('tree_placement_id')) {
+          return {
+            run: (placementId: string) => {
+              let changes = 0
+              for (const [id, row] of tables.documents) {
+                if (row.tree_placement_id === placementId) {
+                  tables.documents.delete(id)
+                  changes += 1
+                }
+              }
+              return { changes }
+            }
+          }
+        }
+        return {
+          run: (id: string) => {
+            const deleted = tables.documents.delete(id)
+            return { changes: deleted ? 1 : 0 }
+          }
+        }
+      }
+      if (normalized.includes('DELETE FROM media')) {
+        return {
+          run: (id: string) => {
+            const deleted = tables.media.delete(id)
+            return { changes: deleted ? 1 : 0 }
+          }
+        }
+      }
+      if (normalized.includes('DELETE FROM document_templates')) {
+        return {
+          run: (id: string) => {
+            const deleted = tables.document_templates.delete(id)
+            return { changes: deleted ? 1 : 0 }
+          }
+        }
+      }
+      if (normalized.includes('UPDATE') && normalized.includes('document_templates')) {
+        return {
+          run: (...args: Array<string | number>) => {
+            const id = args[args.length - 1] as string
+            const existing = tables.document_templates.get(id)
+            if (existing === undefined) {
+              return
+            }
+            const patch: T_row = { ...existing }
+            let argIdx = 0
+            if (normalized.includes('display_name = ?')) {
+              patch.display_name = args[argIdx++] as string
+            }
+            if (normalized.includes('title_translations_json = ?')) {
+              patch.title_translations_json = args[argIdx++] as string
+            }
+            if (normalized.includes('title_singular_translations_json = ?')) {
+              patch.title_singular_translations_json = args[argIdx++] as string
+            }
+            if (normalized.includes('world_appendix = ?')) {
+              patch.world_appendix = args[argIdx++] as string
+            }
+            if (normalized.includes('world_appendix_translations_json = ?')) {
+              patch.world_appendix_translations_json = args[argIdx++] as string
+            }
+            if (normalized.includes('icon = ?')) {
+              patch.icon = args[argIdx++] as string
+            }
+            if (normalized.includes('sort_order = ?')) {
+              patch.sort_order = args[argIdx++] as number
+            }
+            if (normalized.includes('updated_at_ms = ?')) {
+              patch.updated_at_ms = args[argIdx++] as number
+            }
+            tables.document_templates.set(id, patch)
+          }
+        }
+      }
+      if (normalized.includes('UPDATE') && normalized.includes('worlds')) {
+        return {
+          run: (...args: Array<string | number>) => {
+            const id = args[args.length - 1] as string
+            const existing = tables.worlds.get(id)
+            if (existing === undefined) {
+              return
+            }
+            const patch: T_row = { ...existing }
+            let argIdx = 0
+            if (normalized.includes('display_name = ?')) {
+              patch.display_name = args[argIdx++] as string
+            }
+            if (normalized.includes('display_name_translations_json = ?')) {
+              patch.display_name_translations_json = args[argIdx++] as string
+            }
+            if (normalized.includes('color = ?')) {
+              patch.color = args[argIdx++] as string
+            }
+            if (normalized.includes('color_palette = ?')) {
+              patch.color_palette = args[argIdx++] as string
+            }
+            if (normalized.includes('sort_order = ?')) {
+              patch.sort_order = args[argIdx++] as number
+            }
+            if (normalized.includes('updated_at_ms = ?')) {
+              patch.updated_at_ms = args[argIdx++] as number
+            }
+            tables.worlds.set(id, patch)
+          }
+        }
+      }
+      if (
+        normalized.includes('UPDATE') &&
+        normalized.includes('media') &&
+        normalized.includes('type = ?')
+      ) {
+        return {
+          run: (...args: Array<string | number>) => {
+            const id = args[args.length - 1] as string
+            const existing = tables.media.get(id)
+            if (existing === undefined) {
+              return
+            }
+            tables.media.set(id, {
+              ...existing,
+              display_name: args[0] as string,
+              type: args[1] as string,
+              internal_type: args[2] as string,
+              external_type: args[3] as string,
+              external_link: args[4] as string,
+              external_embed: args[5] as string,
+              internal_link: args[6] as string,
+              updated_at_ms: args[7] as number
+            })
+          }
+        }
+      }
+      if (
+        normalized.includes('UPDATE') &&
+        normalized.includes('SET display_name = ?') &&
+        !normalized.includes('world_template_groups') &&
+        !normalized.includes('world_template_placements')
+      ) {
+        return {
+          run: (displayName: string, updatedAtMs: number, id: string) => {
+            const tableName = normalized.includes('document_templates')
+              ? 'document_templates'
+              : normalized.includes('media')
+                ? 'media'
+                : null
+            if (tableName === null) {
+              return
+            }
+            const existing = tables[tableName].get(id)
+            if (existing !== undefined) {
+              tables[tableName].set(id, {
+                ...existing,
+                display_name: displayName,
+                updated_at_ms: updatedAtMs
+              })
+            }
+          }
+        }
+      }
+      if (normalized.includes('SELECT id FROM worlds WHERE id = ?')) {
+        return {
+          get: (id: string) => {
+            return tables.worlds.has(id) ? { id } : undefined
+          }
+        }
+      }
+      if (normalized.includes('SELECT id FROM documents WHERE id = ?')) {
+        return {
+          get: (id: string) => {
+            return tables.documents.has(id) ? { id } : undefined
+          }
+        }
+      }
+      if (normalized.includes('FROM media m') && normalized.includes('document_media')) {
+        return {
+          all: (documentId: string) => {
+            const rows: T_row[] = []
+            for (const key of junctionDocumentMedia) {
+              const [d, m] = key.split(':')
+              if (d === documentId) {
+                const media = tables.media.get(m!)
+                if (media !== undefined) {
+                  rows.push(media)
+                }
+              }
+            }
+            return rows
+          }
+        }
+      }
+      if (normalized.includes('GROUP BY template_id')) {
+        return {
+          all: (worldId?: string) => {
+            const counts = new Map<string, number>()
+            for (const row of tables.documents.values()) {
+              if (worldId !== undefined && row.world_id !== worldId) {
+                continue
+              }
+              const templateId = row.template_id as string | null
+              if (templateId === null) {
+                continue
+              }
+              counts.set(templateId, (counts.get(templateId) ?? 0) + 1)
+            }
+            return [...counts.entries()].map(([template_id, c]) => ({
+              c,
+              template_id
+            }))
+          }
+        }
+      }
+      if (
+        normalized.includes('GROUP BY') &&
+        normalized.includes('tree_placement_id') &&
+        normalized.includes('is_category')
+      ) {
+        return {
+          all: (worldId: string) => {
+            const counts = new Map<string, { categoryCount: number, documentCount: number }>()
+            for (const row of tables.documents.values()) {
+              if (row.world_id !== worldId) {
+                continue
+              }
+              const placementId = row.tree_placement_id as string | null
+              if (placementId === null) {
+                continue
+              }
+              const existing = counts.get(placementId) ?? {
+                categoryCount: 0,
+                documentCount: 0
+              }
+              if ((row.is_category as number) === 1) {
+                existing.categoryCount += 1
+              } else {
+                existing.documentCount += 1
+              }
+              counts.set(placementId, existing)
+            }
+            const rows: Array<{ c: number, is_category: number, placement_id: string }> = []
+            for (const [placement_id, value] of counts.entries()) {
+              if (value.documentCount > 0) {
+                rows.push({
+                  c: value.documentCount,
+                  is_category: 0,
+                  placement_id
+                })
+              }
+              if (value.categoryCount > 0) {
+                rows.push({
+                  c: value.categoryCount,
+                  is_category: 1,
+                  placement_id
+                })
+              }
+            }
+            return rows
+          }
+        }
+      }
+      if (normalized.includes('GROUP BY world_id')) {
+        return {
+          all: () => {
+            const counts = new Map<string, number>()
+            for (const row of tables.documents.values()) {
+              const worldId = row.world_id as string
+              counts.set(worldId, (counts.get(worldId) ?? 0) + 1)
+            }
+            return [...counts.entries()].map(([world_id, c]) => ({
+              c,
+              world_id
+            }))
+          }
+        }
+      }
+      if (normalized.includes('SELECT') && normalized.includes('FROM documents')) {
+        return {
+          get: (id: string) => tables.documents.get(id),
+          all: (worldId?: string) => {
+            const rows = [...tables.documents.values()]
+            if (worldId === undefined) {
+              return rows
+            }
+            return rows.filter((row) => row.world_id === worldId)
+          }
+        }
+      }
+      if (normalized.includes('SELECT id FROM media WHERE id = ?')) {
+        return {
+          get: (id: string) => {
+            return tables.media.has(id) ? { id } : undefined
+          }
+        }
+      }
+      if (normalized.includes('SELECT') && normalized.includes('FROM worlds')) {
+        const sortWorldRows = (): T_row[] => {
+          return [...tables.worlds.values()].sort((left, right) => {
+            const orderDelta = (left.sort_order as number) - (right.sort_order as number)
+            if (orderDelta !== 0) {
+              return orderDelta
+            }
+            const createdDelta = (left.created_at_ms as number) - (right.created_at_ms as number)
+            if (createdDelta !== 0) {
+              return createdDelta
+            }
+            return String(left.id).localeCompare(String(right.id))
+          })
+        }
+        return {
+          get: (id: string) => tables.worlds.get(id),
+          all: () => sortWorldRows()
+        }
+      }
+      if (
+        normalized.includes('SELECT') &&
+        normalized.includes(`FROM ${FA_PROJECT_TABLE_MEDIA}`) &&
+        normalized.includes('ORDER BY')
+      ) {
+        return {
+          get: (id: string) => tables.media.get(id),
+          all: () => sortFaProjectMediaListMockRows(tables.media)
+        }
+      }
+      if (normalized.includes('SELECT') && normalized.includes(`FROM ${FA_PROJECT_TABLE_MEDIA}`)) {
+        return {
+          get: (id: string) => tables.media.get(id)
+        }
+      }
+      if (normalized === 'SELECT id FROM document_templates') {
+        return {
+          all: () => [...tables.document_templates.keys()].map((id) => ({ id }))
+        }
+      }
+      if (normalized.includes('SELECT id FROM document_templates WHERE id = ?')) {
+        return {
+          get: (id: string) => {
+            return tables.document_templates.has(id) ? { id } : undefined
+          }
+        }
+      }
+      if (
+        normalized.includes('SELECT') &&
+        normalized.includes('document_templates') &&
+        normalized.includes('ORDER BY')
+      ) {
+        const sortTemplateRows = (): T_row[] => {
+          return [...tables.document_templates.values()].sort((left, right) => {
+            const orderDelta = (left.sort_order as number) - (right.sort_order as number)
+            if (orderDelta !== 0) {
+              return orderDelta
+            }
+            const createdDelta =
+              (left.created_at_ms as number) - (right.created_at_ms as number)
+            if (createdDelta !== 0) {
+              return createdDelta
+            }
+            return String(left.id).localeCompare(String(right.id))
+          })
+        }
+        return {
+          get: (id: string) => tables.document_templates.get(id),
+          all: () => sortTemplateRows()
+        }
+      }
+      if (normalized.includes('SELECT') && normalized.includes('document_templates')) {
+        return {
+          get: (id: string) => tables.document_templates.get(id)
+        }
+      }
+      if (normalized.includes('UPDATE documents')) {
+        return {
+          run: (...args: Array<string | number | null>) => {
+            const id = args[15]! as string
+            const existing = tables.documents.get(id)
+            if (existing !== undefined) {
+              tables.documents.set(id, {
+                id,
+                world_id: args[0] as string,
+                template_id: args[1] as string | null,
+                tree_placement_id: args[2] as string | null,
+                tree_parent_document_id: args[3] as string | null,
+                tree_custom_sort_order: args[4] as number,
+                display_name: args[5] as string,
+                document_text_color: args[6] as string | null,
+                document_background_color: args[7] as string | null,
+                is_category: args[8] as number,
+                is_finished: args[9] as number,
+                is_minor: args[10] as number,
+                is_dead: args[11] as number,
+                tree_order_number: args[12] as number,
+                extra_classes: args[13] as string,
+                created_at_ms: existing.created_at_ms as number,
+                updated_at_ms: args[14] as number
+              })
+            }
+          }
+        }
+      }
+      if (normalized.includes('UPDATE world_template_groups SET')) {
+        return {
+          run: (...args: Array<string | number>) => {
+            const groupId = args[4] as string
+            const existing = tables.world_template_groups.get(groupId)
+            if (existing === undefined) {
+              return
+            }
+            tables.world_template_groups.set(groupId, {
+              ...existing,
+              display_name: args[0] as string,
+              display_name_translations_json: args[1] as string,
+              root_sort_order: args[2] as number,
+              updated_at_ms: args[3] as number
+            })
+          }
+        }
+      }
+      if (normalized.includes('UPDATE world_template_placements SET')) {
+        return {
+          run: (...args: Array<string | number | null>) => {
+            const placementId = args[8] as string
+            const existing = tables.world_template_placements.get(placementId)
+            if (existing === undefined) {
+              return
+            }
+            tables.world_template_placements.set(placementId, {
+              ...existing,
+              document_template_id: args[0] as string,
+              group_id: args[1] as string | null,
+              root_sort_order: args[2] as number | null,
+              group_sort_order: args[3] as number | null,
+              nickname: args[4] as string,
+              nickname_translations_json: args[5] as string,
+              nickname_singular_translations_json: args[6] as string,
+              updated_at_ms: args[7] as number
+            })
+          }
+        }
+      }
+      if (
+        normalized.includes('SELECT id FROM world_template_placements') &&
+        normalized.includes('document_template_id = ?')
+      ) {
+        return {
+          get: (worldId: string, templateId: string) => {
+            for (const row of tables.world_template_placements.values()) {
+              if (row.world_id === worldId && row.document_template_id === templateId) {
+                return { id: row.id as string }
+              }
+            }
+            return undefined
+          }
+        }
+      }
+      if (
+        normalized.includes('SELECT id FROM world_template_placements') &&
+        normalized.includes('world_id = ?')
+      ) {
+        return {
+          all: (worldId: string) => {
+            return [...tables.world_template_placements.values()]
+              .filter((row) => row.world_id === worldId)
+              .map((row) => ({ id: row.id as string }))
+          }
+        }
+      }
+      if (
+        normalized.includes('SELECT id FROM world_template_groups') &&
+        normalized.includes('world_id = ?')
+      ) {
+        return {
+          all: (worldId: string) => {
+            return [...tables.world_template_groups.values()]
+              .filter((row) => row.world_id === worldId)
+              .map((row) => ({ id: row.id as string }))
+          }
+        }
+      }
+      if (normalized.includes('MAX(tree_custom_sort_order)') && normalized.includes('documents')) {
+        return {
+          get: () => ({ max_sort: null })
+        }
+      }
+      if (
+        normalized.includes('SELECT tag_id AS id FROM document_tags') &&
+        normalized.includes('document_id = ?')
+      ) {
+        return {
+          all: () => []
+        }
+      }
+      if (
+        normalized.includes('SELECT COUNT(*) AS c FROM document_tags') &&
+        normalized.includes('tag_id = ?')
+      ) {
+        return {
+          get: () => ({ c: 0 })
+        }
+      }
+      if (normalized.includes('DELETE FROM tags WHERE id = ?')) {
+        return {
+          run: () => ({ changes: 0 })
+        }
+      }
+      throw new Error(`Unmocked SQL in test db: ${normalized}`)
+    })
+  }
+
+  return {
+    db,
+    junctionDocumentMedia,
+    tables
+  }
+}
+
+/**
+ * Project content persist
+ * Exercises CRUD and junction helpers against an in-memory mock database.
+ */
+test('Test that project content persist modules create and link rows', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'World' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const media = createFaProjectMedia(db as never, { displayName: 'Art' })
+  const document = createFaProjectDocument(db as never, {
+    displayName: 'Doc',
+    templateId: template.id,
+    worldId: world.id
+  })
+  linkFaProjectDocumentMedia(db as never, document.id, media.id)
+  expect(listFaProjectWorlds(db as never).items).toHaveLength(1)
+  expect(listFaProjectMediaForDocument(db as never, document.id).items).toHaveLength(1)
+  setFaProjectDocumentWorld(db as never, document.id, world.id)
+  setFaProjectDocumentTemplate(db as never, document.id, null)
+  expect(getFaProjectDocumentById(db as never, document.id).templateId).toBeNull()
+  expect(listFaProjectDocuments(db as never, { worldId: world.id }).items).toHaveLength(1)
+})
+
+/**
+ * FaProjectContentNotFoundError
+ * Missing ids surface a not-found error from getters.
+ */
+test('Test that getFaProjectWorldById throws FaProjectContentNotFoundError when absent', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() => getFaProjectWorldById(db as never, '550e8400-e29b-41d4-a716-446655440000')).toThrow(
+    FaProjectContentNotFoundError
+  )
+})
+
+/**
+ * getFaProjectWorldById
+ * Returns a world row that was created in the mock database.
+ */
+test('Test that getFaProjectWorldById returns a created world row', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Found' })
+  expect(getFaProjectWorldById(db as never, world.id).displayName).toBe('Found')
+})
+
+/**
+ * deleteFaProjectDocument
+ * Deleting a document succeeds when the row exists.
+ */
+test('Test that deleteFaProjectDocument removes an existing document row', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'W' })
+  const document = createFaProjectDocument(db as never, {
+    displayName: 'D',
+    worldId: world.id
+  })
+  deleteFaProjectDocument(db as never, document.id)
+  expect(tables.documents.has(document.id)).toBe(false)
+})
+
+/**
+ * getFaProjectMediaById
+ * Resolves a media row after create.
+ */
+test('Test that getFaProjectMediaById returns a created media row', () => {
+  const { db } = makeProjectContentTestDb()
+  const media = createFaProjectMedia(db as never, { displayName: 'Pic' })
+  expect(media.displayName).toBe('Pic')
+  expect(media.type).toBe('external')
+  expect(media.internalType).toBe('')
+  expect(media.externalType).toBe('')
+  expect(media.externalLink).toBe('')
+  expect(media.externalEmbed).toBe('')
+  expect(media.internalLink).toBe('')
+  expect(media.internalEmbed).toBeNull()
+  expect(getFaProjectMediaById(db as never, media.id).displayName).toBe('Pic')
+  expect(getFaProjectMediaById(db as never, media.id).type).toBe('external')
+})
+
+/**
+ * getFaProjectMediaById
+ * Missing media ids throw FaProjectContentNotFoundError.
+ */
+test('Test that getFaProjectMediaById throws when the media id is unknown', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() => {
+    getFaProjectMediaById(db as never, '550e8400-e29b-41d4-a716-446655440000')
+  }).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * deleteFaProjectWorld
+ * delete reports not found when the id never existed.
+ */
+test('Test that deleteFaProjectWorld throws when the world id is unknown', () => {
+  const { db } = makeProjectContentTestDb()
+  const prepare = db.prepare as ReturnType<typeof vi.fn>
+  prepare.mockImplementationOnce(() => ({
+    run: () => ({ changes: 0 })
+  }))
+  expect(() => deleteFaProjectWorld(db as never, '550e8400-e29b-41d4-a716-446655440000')).toThrow(
+    FaProjectContentNotFoundError
+  )
+})
+
+/**
+ * deleteFaProjectWorld
+ * Removes an existing world row from the mock store.
+ */
+test('Test that deleteFaProjectWorld removes an existing world row', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Gone' })
+  deleteFaProjectWorld(db as never, world.id)
+  expect(tables.worlds.has(world.id)).toBe(false)
+})
+
+/**
+ * getFaProjectDocumentTemplateById
+ * Loads a template row created earlier in the mock database.
+ */
+test('Test that getFaProjectDocumentTemplateById returns a template row', () => {
+  const { db } = makeProjectContentTestDb()
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Sheet' })
+  expect(getFaProjectDocumentTemplateById(db as never, template.id).displayName).toBe('Sheet')
+})
+
+/**
+ * unlinkFaProjectDocumentMedia
+ * Unlink is a no-op run on the mock junction set.
+ */
+test('Test that unlinkFaProjectDocumentMedia invokes delete on the junction table', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'W' })
+  const media = createFaProjectMedia(db as never, { displayName: 'M' })
+  const document = createFaProjectDocument(db as never, {
+    displayName: 'D',
+    worldId: world.id
+  })
+  linkFaProjectDocumentMedia(db as never, document.id, media.id)
+  unlinkFaProjectDocumentMedia(db as never, document.id, media.id)
+  expect(listFaProjectMediaForDocument(db as never, document.id).items).toHaveLength(0)
+})
+
+/**
+ * getFaProjectDocumentTemplateById
+ * Missing template ids throw FaProjectContentNotFoundError.
+ */
+test('Test that getFaProjectDocumentTemplateById throws for a missing template', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() =>
+    getFaProjectDocumentTemplateById(db as never, '550e8400-e29b-41d4-a716-446655440000')
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * assertFaProjectDocumentTemplateExists
+ * Throws when the template id is absent.
+ */
+test('Test that assertFaProjectDocumentTemplateExists throws for a missing template', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() =>
+    assertFaProjectDocumentTemplateExists(db as never, '550e8400-e29b-41d4-a716-446655440000')
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * assertFaProjectDocumentTemplateExists
+ * Resolves without error when the template row exists.
+ */
+test('Test that assertFaProjectDocumentTemplateExists passes for an existing template', () => {
+  const { db } = makeProjectContentTestDb()
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Sheet' })
+  expect(() => assertFaProjectDocumentTemplateExists(db as never, template.id)).not.toThrow()
+})
+
+/**
+ * deleteFaProjectDocumentTemplate
+ * Template delete removes the row from the mock store.
+ */
+test('Test that deleteFaProjectDocumentTemplate succeeds for an existing template', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'T' })
+  deleteFaProjectDocumentTemplate(db as never, template.id)
+  expect(tables.document_templates.has(template.id)).toBe(false)
+})
+
+/**
+ * updateFaProjectWorld
+ * Empty patch re-reads the row without mutating display_name.
+ */
+test('Test that updateFaProjectWorld with an empty patch keeps display name', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Stable' })
+  const updated = updateFaProjectWorld(db as never, world.id, {})
+  expect(updated.displayName).toBe('Stable')
+})
+
+/**
+ * updateFaProjectMedia
+ * Renames a media row through the shared named-entity update path.
+ */
+test('Test that updateFaProjectMedia changes display name', () => {
+  const { db } = makeProjectContentTestDb()
+  const media = createFaProjectMedia(db as never, { displayName: 'Old' })
+  const updated = updateFaProjectMedia(db as never, media.id, { displayName: 'New' })
+  expect(updated.displayName).toBe('New')
+})
+
+/**
+ * updateFaProjectDocumentTemplate
+ * An empty patch returns the existing row without running UPDATE.
+ */
+test('Test that updateFaProjectDocumentTemplate with an empty patch returns the existing row', () => {
+  const { db } = makeProjectContentTestDb()
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Stable' })
+  const updated = updateFaProjectDocumentTemplate(db as never, template.id, {})
+  expect(updated.displayName).toBe('Stable')
+})
+
+/**
+ * updateFaProjectDocumentTemplate
+ * Renames a template through the shared named-entity update helper.
+ */
+test('Test that updateFaProjectDocumentTemplate changes display name', () => {
+  const { db } = makeProjectContentTestDb()
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Old' })
+  const updated = updateFaProjectDocumentTemplate(db as never, template.id, {
+    displayName: 'New'
+  })
+  expect(updated.displayName).toBe('New')
+})
+
+/**
+ * listFaProjectDocuments
+ * Unfiltered list returns every document row.
+ */
+test('Test that listFaProjectDocuments without filter returns all documents', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'W' })
+  createFaProjectDocument(db as never, {
+    displayName: 'A',
+    worldId: world.id
+  })
+  createFaProjectDocument(db as never, {
+    displayName: 'B',
+    worldId: world.id
+  })
+  expect(listFaProjectDocuments(db as never).items).toHaveLength(2)
+})
+
+/**
+ * updateFaProjectDocument
+ * Patch can update display name on an existing document.
+ */
+test('Test that updateFaProjectDocument updates display name', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'W' })
+  const document = createFaProjectDocument(db as never, {
+    displayName: 'Before',
+    worldId: world.id
+  })
+  const updated = updateFaProjectDocument(db as never, document.id, {
+    displayName: 'After'
+  })
+  expect(updated.displayName).toBe('After')
+})
+
+/**
+ * linkFaProjectDocumentMedia
+ * Throws when the document id does not exist.
+ */
+test('Test that linkFaProjectDocumentMedia throws for a missing document', () => {
+  const { db } = makeProjectContentTestDb()
+  const media = createFaProjectMedia(db as never, { displayName: 'M' })
+  expect(() =>
+    linkFaProjectDocumentMedia(
+      db as never,
+      '550e8400-e29b-41d4-a716-446655440000',
+      media.id
+    )
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * linkFaProjectDocumentMedia
+ * Throws when the media id does not exist.
+ */
+test('Test that linkFaProjectDocumentMedia throws for a missing media row', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'W' })
+  const document = createFaProjectDocument(db as never, {
+    displayName: 'D',
+    worldId: world.id
+  })
+  expect(() =>
+    linkFaProjectDocumentMedia(
+      db as never,
+      document.id,
+      '550e8400-e29b-41d4-a716-446655440000'
+    )
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * listFaProjectMediaForDocument
+ * Throws when listing media for a missing document.
+ */
+test('Test that listFaProjectMediaForDocument throws for a missing document', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() =>
+    listFaProjectMediaForDocument(db as never, '550e8400-e29b-41d4-a716-446655440000')
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * listFaProjectMedia and listFaProjectDocumentTemplates
+ * Named-entity list helpers return created rows.
+ */
+test('Test that listFaProjectMedia and listFaProjectDocumentTemplates return items', () => {
+  const { db } = makeProjectContentTestDb()
+  createFaProjectMedia(db as never, { displayName: 'One' })
+  createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const listedMedia = listFaProjectMedia(db as never).items
+  expect(listedMedia).toHaveLength(1)
+  expect(listedMedia[0]?.type).toBe('external')
+  expect(listedMedia[0]?.internalEmbed).toBeNull()
+  expect(listFaProjectDocumentTemplates(db as never).items).toHaveLength(1)
+})
+
+/**
+ * listFaProjectMedia
+ * Newest created_at_ms first; name order is ignored; updated_at_ms is ignored.
+ */
+test('Test that listFaProjectMedia sorts by created_at_ms newest first', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const older = createFaProjectMedia(db as never, { displayName: 'AAA' })
+  const newer = createFaProjectMedia(db as never, { displayName: 'ZZZ' })
+  const olderRow = tables.media.get(older.id)
+  const newerRow = tables.media.get(newer.id)
+  expect(olderRow).toBeDefined()
+  expect(newerRow).toBeDefined()
+  if (olderRow !== undefined) {
+    olderRow.created_at_ms = 100
+    olderRow.updated_at_ms = 500
+  }
+  if (newerRow !== undefined) {
+    newerRow.created_at_ms = 200
+    newerRow.updated_at_ms = 300
+  }
+  const listedIds = listFaProjectMedia(db as never).items.map((item) => item.id)
+  expect(listedIds).toEqual([newer.id, older.id])
+})
+
+/**
+ * deleteFaProjectMedia
+ * Throws when the media id does not exist.
+ */
+test('Test that deleteFaProjectMedia throws when the media id is unknown', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() =>
+    deleteFaProjectMedia(db as never, '550e8400-e29b-41d4-a716-446655440000')
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * deleteFaProjectMedia
+ * Media delete removes the row when present.
+ */
+test('Test that deleteFaProjectMedia removes an existing media row', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const media = createFaProjectMedia(db as never, { displayName: 'X' })
+  deleteFaProjectMedia(db as never, media.id)
+  expect(tables.media.has(media.id)).toBe(false)
+})
+
+/**
+ * upsertFaProjectMedia
+ * Inserts a new media row when the id is unused.
+ */
+test('Test that upsertFaProjectMedia inserts a new row when the id is unused', () => {
+  const { db } = makeProjectContentTestDb()
+  const id = '550e8400-e29b-41d4-a716-446655440099'
+  const inserted = upsertFaProjectMedia(db as never, {
+    displayName: 'Poster',
+    externalEmbed: '<iframe></iframe>',
+    externalLink: 'https://cdn.example.test/poster.png',
+    externalType: 'embed',
+    id,
+    internalLink: '',
+    internalType: '',
+    type: 'external'
+  })
+  expect(inserted.id).toBe(id)
+  expect(inserted.displayName).toBe('Poster')
+  expect(inserted.externalType).toBe('embed')
+  expect(inserted.externalEmbed).toBe('<iframe></iframe>')
+  expect(inserted.internalEmbed).toBeNull()
+})
+
+/**
+ * upsertFaProjectMedia
+ * Updates type and link columns when the id already exists.
+ */
+test('Test that upsertFaProjectMedia updates an existing row by id', () => {
+  const { db } = makeProjectContentTestDb()
+  const media = createFaProjectMedia(db as never, { displayName: 'Old' })
+  const updated = upsertFaProjectMedia(db as never, {
+    displayName: 'New',
+    externalEmbed: '',
+    externalLink: '',
+    externalType: '',
+    id: media.id,
+    internalLink: 'https://files.example.test/clip.mp4',
+    internalType: 'linked_outside',
+    type: 'internal'
+  })
+  expect(updated.id).toBe(media.id)
+  expect(updated.displayName).toBe('New')
+  expect(updated.type).toBe('internal')
+  expect(updated.internalType).toBe('linked_outside')
+  expect(updated.internalLink).toBe('https://files.example.test/clip.mp4')
+  expect(updated.createdAtMs).toBe(media.createdAtMs)
+})
+
+/**
+ * upsertFaProjectMedia
+ * Update leaves the internal embed blob untouched.
+ */
+test('Test that upsertFaProjectMedia update keeps internal embed bytes', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const media = createFaProjectMedia(db as never, { displayName: 'Blob' })
+  const existing = tables.media.get(media.id)
+  expect(existing).toBeDefined()
+  if (existing !== undefined) {
+    existing.internal_embed = new Uint8Array([7, 8])
+    tables.media.set(media.id, existing)
+  }
+  const updated = upsertFaProjectMedia(db as never, {
+    displayName: 'Blob 2',
+    externalEmbed: '',
+    externalLink: '',
+    externalType: '',
+    id: media.id,
+    internalLink: '',
+    internalType: 'embedded',
+    type: 'internal'
+  })
+  expect(updated.displayName).toBe('Blob 2')
+  expect(updated.internalEmbed).toEqual(new Uint8Array([7, 8]))
+})
+
+/**
+ * upsertFaProjectMediaMany
+ * Empty list is a no-op and mixed ids insert or update.
+ */
+test('Test that upsertFaProjectMediaMany inserts and updates in one batch', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(upsertFaProjectMediaMany(db as never, []).items).toEqual([])
+  const existing = createFaProjectMedia(db as never, { displayName: 'Keep' })
+  const freshId = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+  const result = upsertFaProjectMediaMany(db as never, [
+    {
+      displayName: 'Keep 2',
+      externalEmbed: '',
+      externalLink: 'https://cdn.example.test/keep.png',
+      externalType: 'linked',
+      id: existing.id,
+      internalLink: '',
+      internalType: '',
+      type: 'external'
+    },
+    {
+      displayName: 'Fresh',
+      externalEmbed: '',
+      externalLink: 'https://cdn.example.test/fresh.png',
+      externalType: 'linked',
+      id: freshId,
+      internalLink: '',
+      internalType: '',
+      type: 'external'
+    }
+  ])
+  expect(result.items).toHaveLength(2)
+  expect(getFaProjectMediaById(db as never, existing.id).displayName).toBe('Keep 2')
+  expect(getFaProjectMediaById(db as never, freshId).displayName).toBe('Fresh')
+})
+
+/**
+ * updateFaProjectWorld
+ * Display name patch updates the stored world row.
+ */
+test('Test that updateFaProjectWorld changes display name', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Old' })
+  const updated = updateFaProjectWorld(db as never, world.id, { displayName: 'New' })
+  expect(updated.displayName).toBe('New')
+})
+
+/**
+ * updateFaProjectWorld
+ * An empty patch returns the existing row without running UPDATE.
+ */
+test('Test that updateFaProjectWorld with an empty patch returns the existing row', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Stable' })
+  const updated = updateFaProjectWorld(db as never, world.id, {})
+  expect(updated.displayName).toBe('Stable')
+})
+
+/**
+ * updateFaProjectMedia
+ * An empty patch returns the existing row without running UPDATE.
+ */
+test('Test that updateFaProjectMedia with an empty patch returns the existing row', () => {
+  const { db } = makeProjectContentTestDb()
+  const media = createFaProjectMedia(db as never, { displayName: 'Still' })
+  const updated = updateFaProjectMedia(db as never, media.id, {})
+  expect(updated.displayName).toBe('Still')
+})
+
+/**
+ * getFaProjectDocumentById
+ * Missing document ids throw FaProjectContentNotFoundError.
+ */
+test('Test that getFaProjectDocumentById throws for a missing document', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() =>
+    getFaProjectDocumentById(db as never, '550e8400-e29b-41d4-a716-446655440000')
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * deleteFaProjectDocument
+ * Delete throws when no row was removed.
+ */
+test('Test that deleteFaProjectDocument throws when the document is absent', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() =>
+    deleteFaProjectDocument(db as never, '550e8400-e29b-41d4-a716-446655440000')
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * createFaProjectDocument
+ * Creating with a template id validates the template foreign key.
+ */
+test('Test that createFaProjectDocument accepts a template id', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'W' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const document = createFaProjectDocument(db as never, {
+    displayName: 'Doc',
+    templateId: template.id,
+    worldId: world.id
+  })
+  expect(document.templateId).toBe(template.id)
+})
+
+/**
+ * createFaProjectDocument
+ * Optional client id is used when the documents row is free; otherwise a fresh id is assigned.
+ */
+test('Test that createFaProjectDocument uses a free client id and substitutes when taken', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'W' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const clientId = '550e8400-e29b-41d4-a716-446655440099'
+  const first = createFaProjectDocument(db as never, {
+    displayName: 'First',
+    id: clientId,
+    templateId: template.id,
+    worldId: world.id
+  })
+  expect(first.id).toBe(clientId)
+  const second = createFaProjectDocument(db as never, {
+    displayName: 'Second',
+    id: clientId,
+    templateId: template.id,
+    worldId: world.id
+  })
+  expect(second.id).not.toBe(clientId)
+})
+
+/**
+ * createFaProjectWorld
+ * Assigns default color, zero-based sort_order, and increments order for later worlds.
+ */
+test('Test that createFaProjectNamedEntity throws when the insert read-back row is missing', () => {
+  const db = {
+    prepare: vi.fn((sql: string) => {
+      const normalized = sql.replace(/\s+/g, ' ').trim()
+      if (normalized.includes('INSERT INTO media')) {
+        return { run: vi.fn() }
+      }
+      if (normalized.includes('SELECT') && normalized.includes('FROM media')) {
+        return { get: () => undefined }
+      }
+      throw new Error(`Unmocked SQL: ${normalized}`)
+    })
+  }
+  const mediaSpec = {
+    entityLabel: 'Media',
+    tableName: FA_PROJECT_TABLE_MEDIA
+  }
+  expect(() =>
+    createFaProjectNamedEntity(db as never, mediaSpec, 'Ghost')
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+test('Test that createFaProjectWorld assigns sortOrder and empty default color', () => {
+  const { db } = makeProjectContentTestDb()
+  const first = createFaProjectWorld(db as never, { displayName: 'Alpha' })
+  const second = createFaProjectWorld(db as never, { displayName: 'Beta' })
+  expect(first.sortOrder).toBe(0)
+  expect(first.color).toBe(FA_PROJECT_WORLD_DEFAULT_COLOR)
+  expect(first.colorPalette).toBe('')
+  expect(second.sortOrder).toBe(1)
+  expect(listFaProjectWorlds(db as never).items.map((world) => world.displayName)).toEqual([
+    'Alpha',
+    'Beta'
+  ])
+})
+
+/**
+ * updateFaProjectWorld
+ * Persists color and sort_order patches for an existing world row.
+ */
+test('Test that updateFaProjectWorld persists color and sortOrder', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const updated = updateFaProjectWorld(db as never, world.id, {
+    color: '#aabbcc',
+    colorPalette: '#112233;#445566',
+    displayNameTranslations: { 'en-US': 'Realm 2' },
+    sortOrder: 4
+  })
+  expect(updated.displayName).toBe('Realm 2')
+  expect(updated.color).toBe('#AABBCC')
+  expect(updated.colorPalette).toBe('#112233;#445566')
+  expect(updated.sortOrder).toBe(4)
+})
+
+/**
+ * updateFaProjectWorld
+ * Blank world color persists as empty string (optional color).
+ */
+test('Test that updateFaProjectWorld persists blank color as empty', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const updated = updateFaProjectWorld(db as never, world.id, {
+    color: '   '
+  })
+  expect(updated.color).toBe('')
+})
+
+/**
+ * listFaProjectWorldsForProjectSettings
+ * Merges document counts into each world row for Project Settings.
+ */
+test('Test that listFaProjectWorldsForProjectSettings includes document counts', () => {
+  const { db } = makeProjectContentTestDb()
+  const emptyWorld = createFaProjectWorld(db as never, { displayName: 'Empty' })
+  const busyWorld = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  createFaProjectDocument(db as never, {
+    displayName: 'Doc A',
+    worldId: busyWorld.id
+  })
+  createFaProjectDocument(db as never, {
+    displayName: 'Doc B',
+    worldId: busyWorld.id
+  })
+  const result = listFaProjectWorldsForProjectSettings(db as never)
+  expect(result.items).toHaveLength(2)
+  const emptyRow = result.items.find((item) => item.id === emptyWorld.id)
+  const busyRow = result.items.find((item) => item.id === busyWorld.id)
+  expect(emptyRow?.documentCount).toBe(0)
+  expect(busyRow?.documentCount).toBe(2)
+  expect(emptyRow?.templateLayout.placements).toEqual([])
+  expect(busyRow?.templateLayout.groups).toEqual([])
+})
+
+const SAMPLE_WORLD_UUID = '550e8400-e29b-41d4-a716-446655440000'
+
+/**
+ * replaceFaProjectWorldsSnapshot
+ * Reorders worlds, inserts new ids, and deletes worlds omitted from the snapshot.
+ */
+test('Test that replaceFaProjectWorldsSnapshot replaces the ordered worlds list', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const first = createFaProjectWorld(db as never, { displayName: 'Keep' })
+  const second = createFaProjectWorld(db as never, { displayName: 'Remove' })
+  replaceFaProjectWorldsSnapshot(db as never, [
+    {
+      color: '#112233',
+      colorPalette: '#aabbcc;#ddeeff',
+      displayNameTranslations: { 'en-US': 'Keep renamed' },
+      id: first.id
+    },
+    {
+      displayNameTranslations: { 'en-US': 'Brand new' },
+      id: SAMPLE_WORLD_UUID
+    }
+  ])
+  expect(tables.worlds.has(second.id)).toBe(false)
+  expect(tables.worlds.has(SAMPLE_WORLD_UUID)).toBe(true)
+  const listed = listFaProjectWorlds(db as never).items
+  expect(listed.map((world) => world.displayName)).toEqual(['Keep renamed', 'Brand new'])
+  expect(listed[0]!.sortOrder).toBe(0)
+  expect(listed[1]!.sortOrder).toBe(1)
+  expect(listed[0]!.color).toBe('#112233')
+  expect(listed[0]!.colorPalette).toBe('#AABBCC;#DDEEFF')
+})
+
+/**
+ * replaceFaProjectWorldsSnapshot
+ * Rejects an empty snapshot because a project must retain at least one world.
+ */
+test('Test that replaceFaProjectWorldsSnapshot throws when items is empty', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() => replaceFaProjectWorldsSnapshot(db as never, [])).toThrow(
+    'Project must contain at least one world'
+  )
+})
+
+/**
+ * replaceFaProjectWorldTemplateLayoutSnapshot
+ * Persists per-world template groups and placements for Project Settings.
+ */
+test('Test that replaceFaProjectWorldTemplateLayoutSnapshot persists layout rows', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const groupId = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+  const placementId = '6ba7b811-9dad-11d1-80b4-00c04fd430c8'
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [
+      {
+        displayName: 'Creatures',
+        displayNameTranslations: { 'en-US': 'Creatures' },
+        id: groupId,
+        rootSortOrder: 0
+      }
+    ],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId: null,
+        groupSortOrder: null,
+        id: placementId,
+        rootSortOrder: 1,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {},
+      }
+    ]
+  })
+  expect(tables.world_template_groups.size).toBe(1)
+  expect(tables.world_template_placements.size).toBe(1)
+  const listed = listFaProjectWorldsForProjectSettings(db as never)
+  expect(listed.items[0]!?.templateLayout.groups[0]!?.displayName).toBe('Creatures')
+  expect(listed.items[0]!?.templateLayout.placements[0]!?.documentTemplateId).toBe(template.id)
+})
+
+/**
+ * replaceFaProjectWorldTemplateLayoutSnapshot
+ * Rejects invalid root and grouped placement sort fields.
+ */
+test('Test that replaceFaProjectWorldTemplateLayoutSnapshot throws on invalid placement sort fields', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const placementId = '6ba7b811-9dad-11d1-80b4-00c04fd430c8'
+  expect(() => replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId: null,
+        groupSortOrder: 0,
+        id: placementId,
+        rootSortOrder: 0,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {},
+      }
+    ]
+  })).toThrow(/Root template placement/)
+  expect(() => replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+        groupSortOrder: null,
+        id: placementId,
+        rootSortOrder: null,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {},
+      }
+    ]
+  })).toThrow(/Grouped template placement/)
+})
+
+/**
+ * replaceFaProjectWorldTemplateLayoutSnapshot
+ * Rejects unknown group ids and blank group names.
+ */
+test('Test that replaceFaProjectWorldTemplateLayoutSnapshot validates groups and references', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const placementId = '6ba7b811-9dad-11d1-80b4-00c04fd430c8'
+  expect(() => replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+        groupSortOrder: 0,
+        id: placementId,
+        rootSortOrder: null,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {},
+      }
+    ]
+  })).toThrow(/unknown group id/)
+  expect(() => replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [
+      {
+        displayName: '   ',
+        displayNameTranslations: { 'en-US': '   ' },
+        id: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+        rootSortOrder: 0
+      }
+    ],
+    placements: []
+  })).toThrow(/display name must not be empty/)
+})
+
+/**
+ * replaceFaProjectWorldTemplateLayoutSnapshot
+ * Persists grouped template placements under a world group row.
+ */
+test('Test that replaceFaProjectWorldTemplateLayoutSnapshot persists grouped placements', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const groupId = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+  const placementId = '6ba7b811-9dad-11d1-80b4-00c04fd430c8'
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [
+      {
+        displayName: 'Creatures',
+        displayNameTranslations: { 'en-US': 'Creatures' },
+        id: groupId,
+        rootSortOrder: 0
+      }
+    ],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId,
+        groupSortOrder: 0,
+        id: placementId,
+        rootSortOrder: null,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {},
+      }
+    ]
+  })
+  expect(tables.world_template_placements.get(placementId)?.group_id).toBe(groupId)
+})
+
+/**
+ * replaceFaProjectWorldTemplateLayoutSnapshot
+ * Updates existing placements in place when hierarchy documents reference them.
+ */
+test('Test that replaceFaProjectWorldTemplateLayoutSnapshot updates placements with documents', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const placementId = '6ba7b811-9dad-11d1-80b4-00c04fd430c8'
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId: null,
+        groupSortOrder: null,
+        id: placementId,
+        rootSortOrder: 0,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {}
+      }
+    ]
+  })
+  createFaProjectDocument(db as never, {
+    displayName: 'Hero',
+    placementId,
+    sortOrder: 0,
+    templateId: template.id,
+    worldId: world.id
+  })
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId: null,
+        groupSortOrder: null,
+        id: placementId,
+        rootSortOrder: 0,
+        nickname: 'Heroes',
+        nicknamePluralTranslations: { 'en-US': 'Heroes' },
+        nicknameSingularTranslations: { 'en-US': 'Hero' }
+      }
+    ]
+  })
+  const listed = listFaProjectWorldsForProjectSettings(db as never)
+  expect(listed.items[0]?.templateLayout.placements[0]?.nickname).toBe('Heroes')
+  expect(listFaProjectDocuments(db as never).items).toHaveLength(1)
+})
+
+/**
+ * replaceFaProjectWorldTemplateLayoutSnapshot
+ * Deletes layout rows removed from the snapshot when no documents reference them.
+ */
+test('Test that replaceFaProjectWorldTemplateLayoutSnapshot deletes stale layout rows', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const placementA = '6ba7b811-9dad-11d1-80b4-00c04fd430c8'
+  const placementB = '6ba7b812-9dad-11d1-80b4-00c04fd430c9'
+  const groupId = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+  const layoutWithTwoPlacements = {
+    groups: [
+      {
+        displayName: 'Creatures',
+        displayNameTranslations: { 'en-US': 'Creatures' },
+        id: groupId,
+        rootSortOrder: 0
+      }
+    ],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId,
+        groupSortOrder: 0,
+        id: placementA,
+        rootSortOrder: null,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {}
+      },
+      {
+        documentTemplateId: template.id,
+        groupId: null,
+        groupSortOrder: null,
+        id: placementB,
+        rootSortOrder: 0,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {}
+      }
+    ]
+  }
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, layoutWithTwoPlacements)
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [],
+    placements: [
+      layoutWithTwoPlacements.placements[1]!
+    ]
+  })
+  expect(tables.world_template_placements.size).toBe(1)
+  expect(tables.world_template_placements.has(placementB)).toBe(true)
+  expect(tables.world_template_groups.size).toBe(0)
+})
+
+/**
+ * replaceFaProjectWorldTemplateLayoutSnapshot
+ * Updates existing group rows when the same group id is saved again.
+ */
+test('Test that replaceFaProjectWorldTemplateLayoutSnapshot updates existing groups', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const groupId = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [
+      {
+        displayName: 'Creatures',
+        displayNameTranslations: { 'en-US': 'Creatures' },
+        id: groupId,
+        rootSortOrder: 0
+      }
+    ],
+    placements: []
+  })
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [
+      {
+        displayName: 'Beasts',
+        displayNameTranslations: { 'en-US': 'Beasts' },
+        id: groupId,
+        rootSortOrder: 1
+      }
+    ],
+    placements: []
+  })
+  const listed = listFaProjectWorldsForProjectSettings(db as never)
+  expect(listed.items[0]?.templateLayout.groups[0]?.displayName).toBe('Beasts')
+  expect(listed.items[0]?.templateLayout.groups[0]?.rootSortOrder).toBe(1)
+})
+
+/**
+ * replaceFaProjectWorldTemplateLayoutSnapshot
+ * Deletes hierarchy documents before removing placements dropped from the layout snapshot.
+ */
+test('Test that replaceFaProjectWorldTemplateLayoutSnapshot deletes documents when placements are removed', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const groupId = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+  const placementId = '6ba7b811-9dad-11d1-80b4-00c04fd430c8'
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [
+      {
+        displayName: 'Creatures',
+        displayNameTranslations: { 'en-US': 'Creatures' },
+        id: groupId,
+        rootSortOrder: 0
+      }
+    ],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId,
+        groupSortOrder: 0,
+        id: placementId,
+        rootSortOrder: null,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {}
+      }
+    ]
+  })
+  createFaProjectDocument(db as never, {
+    displayName: 'Hero',
+    placementId,
+    sortOrder: 0,
+    templateId: template.id,
+    worldId: world.id
+  })
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [
+      {
+        displayName: 'Creatures',
+        displayNameTranslations: { 'en-US': 'Creatures' },
+        id: groupId,
+        rootSortOrder: 0
+      }
+    ],
+    placements: []
+  })
+  expect(listFaProjectDocuments(db as never).items).toHaveLength(0)
+  const listed = listFaProjectWorldsForProjectSettings(db as never)
+  expect(listed.items[0]?.templateLayout.placements).toHaveLength(0)
+  expect(listed.items[0]?.templateLayout.groups).toHaveLength(1)
+})
+
+/**
+ * replaceFaProjectWorldsSnapshot
+ * Persists per-world template layout when the snapshot item includes templateLayout.
+ */
+test('Test that replaceFaProjectWorldsSnapshot persists templateLayout on each world item', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const groupId = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+  const placementId = '6ba7b811-9dad-11d1-80b4-00c04fd430c8'
+  replaceFaProjectWorldsSnapshot(db as never, [
+    {
+      displayNameTranslations: { 'en-US': 'Realm' },
+      id: world.id,
+      templateLayout: {
+        groups: [
+          {
+            displayName: 'Group',
+            displayNameTranslations: { 'en-US': 'Group' },
+            id: groupId,
+            rootSortOrder: 0
+          }
+        ],
+        placements: [
+          {
+            documentTemplateId: template.id,
+            groupId: null,
+            groupSortOrder: null,
+            id: placementId,
+            rootSortOrder: 0,
+            nickname: '',
+            nicknamePluralTranslations: {},
+            nicknameSingularTranslations: {},
+          }
+        ]
+      }
+    }
+  ])
+  const listed = listFaProjectWorldsForProjectSettings(db as never)
+  expect(listed.items[0]!?.templateLayout.groups).toHaveLength(1)
+  expect(listed.items[0]!?.templateLayout.placements[0]!?.documentTemplateId).toBe(template.id)
+})
+
+/**
+ * listFaProjectWorldsForProjectSettings
+ * Includes per-placement document and category counts for the selected world.
+ */
+test('Test that listFaProjectWorldsForProjectSettings includes placement document counts', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const placementId = '6ba7b811-9dad-11d1-80b4-00c04fd430c8'
+  replaceFaProjectWorldTemplateLayoutSnapshot(db as never, world.id, {
+    groups: [],
+    placements: [
+      {
+        documentTemplateId: template.id,
+        groupId: null,
+        groupSortOrder: null,
+        id: placementId,
+        rootSortOrder: 0,
+        nickname: '',
+        nicknamePluralTranslations: {},
+        nicknameSingularTranslations: {},
+      }
+    ]
+  })
+  createFaProjectDocument(db as never, {
+    displayName: 'Doc',
+    placementId,
+    templateId: template.id,
+    worldId: world.id
+  })
+  const listed = listFaProjectWorldsForProjectSettings(db as never)
+  expect(listed.items[0]!?.templateLayout.placements[0]!?.documentCountInWorld).toBe(1)
+  expect(listed.items[0]!?.templateLayout.placements[0]!?.categoryCountInWorld).toBe(0)
+})
+
+test('Test that createFaProjectDocumentTemplate stores worldAppendix and icon', () => {
+  const { db } = makeProjectContentTestDb()
+  const template = createFaProjectDocumentTemplate(db as never, {
+    displayName: 'Character',
+    icon: 'person',
+    worldAppendix: ' of Middle-earth'
+  })
+  expect(template.worldAppendix).toBe('of Middle-earth')
+  expect(template.icon).toBe('person')
+  expect(template.sortOrder).toBe(0)
+})
+
+/**
+ * updateFaProjectDocumentTemplate
+ * Persists sortOrder, worldAppendix, and icon patches.
+ */
+test('Test that updateFaProjectDocumentTemplate persists extended fields', () => {
+  const { db } = makeProjectContentTestDb()
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Sheet' })
+  const updated = updateFaProjectDocumentTemplate(db as never, template.id, {
+    icon: 'article',
+    sortOrder: 3,
+    worldAppendix: ' notes'
+  })
+  expect(updated.icon).toBe('article')
+  expect(updated.sortOrder).toBe(3)
+  expect(updated.worldAppendix).toBe('notes')
+})
+
+/**
+ * updateFaProjectDocumentTemplate
+ * Persists titlePluralTranslations and worldAppendixTranslations patches.
+ */
+test('Test that updateFaProjectDocumentTemplate persists translation map patches', () => {
+  const { db } = makeProjectContentTestDb()
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Sheet' })
+  const updated = updateFaProjectDocumentTemplate(db as never, template.id, {
+    titlePluralTranslations: { 'en-US': 'Renamed template' },
+    titleSingularTranslations: {},
+    worldAppendixTranslations: { 'en-US': ' appendix' }
+  })
+  expect(updated.displayName).toBe('Renamed template')
+  expect(updated.titlePluralTranslations).toEqual({ 'en-US': 'Renamed template' })
+  expect(updated.worldAppendix).toBe('appendix')
+  expect(updated.worldAppendixTranslations).toEqual({ 'en-US': 'appendix' })
+})
+
+/**
+ * deleteFaProjectDocumentTemplate
+ * Throws when the template id does not exist.
+ */
+test('Test that deleteFaProjectDocumentTemplate throws when the template is absent', () => {
+  const { db } = makeProjectContentTestDb()
+  expect(() =>
+    deleteFaProjectDocumentTemplate(db as never, '550e8400-e29b-41d4-a716-446655440000')
+  ).toThrow(FaProjectContentNotFoundError)
+})
+
+/**
+ * listFaProjectDocumentTemplatesForProjectSettings
+ * Merges document counts into each template row for Project Settings.
+ */
+test('Test that listFaProjectDocumentTemplatesForProjectSettings includes document counts', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'Realm' })
+  const unused = createFaProjectDocumentTemplate(db as never, { displayName: 'Unused' })
+  const busy = createFaProjectDocumentTemplate(db as never, { displayName: 'Busy' })
+  createFaProjectDocument(db as never, {
+    displayName: 'Doc',
+    templateId: busy.id,
+    worldId: world.id
+  })
+  const result = listFaProjectDocumentTemplatesForProjectSettings(db as never)
+  expect(result.items).toHaveLength(2)
+  const unusedRow = result.items.find((item) => item.id === unused.id)
+  const busyRow = result.items.find((item) => item.id === busy.id)
+  expect(unusedRow?.documentCount).toBe(0)
+  expect(busyRow?.documentCount).toBe(1)
+})
+
+const SAMPLE_TEMPLATE_UUID = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+
+/**
+ * replaceFaProjectDocumentTemplatesSnapshot
+ * Reorders templates, inserts new ids, deletes omitted rows, and allows an empty list.
+ */
+test('Test that replaceFaProjectDocumentTemplatesSnapshot replaces the ordered templates list', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  const first = createFaProjectDocumentTemplate(db as never, { displayName: 'Keep' })
+  const second = createFaProjectDocumentTemplate(db as never, { displayName: 'Remove' })
+  replaceFaProjectDocumentTemplatesSnapshot(db as never, [
+    {
+      icon: 'star',
+      id: first.id,
+      titlePluralTranslations: { 'en-US': 'Keep renamed' },
+      titleSingularTranslations: {},
+      worldAppendixTranslations: { 'en-US': 'appendix' }
+    },
+    {
+      id: SAMPLE_TEMPLATE_UUID,
+      titlePluralTranslations: { 'en-US': 'Brand new' },
+      titleSingularTranslations: {},
+    }
+  ])
+  expect(tables.document_templates.has(second.id)).toBe(false)
+  expect(tables.document_templates.has(SAMPLE_TEMPLATE_UUID)).toBe(true)
+  const listed = listFaProjectDocumentTemplates(db as never).items
+  expect(listed.map((template) => template.displayName)).toEqual(['Keep renamed', 'Brand new'])
+  expect(listed[0]!.sortOrder).toBe(0)
+  expect(listed[1]!.sortOrder).toBe(1)
+  expect(listed[0]!.icon).toBe('star')
+  expect(listed[0]!.worldAppendix).toBe('appendix')
+})
+
+/**
+ * replaceFaProjectDocumentTemplatesSnapshot
+ * Accepts an empty snapshot (unlike worlds).
+ */
+test('Test that replaceFaProjectDocumentTemplatesSnapshot allows an empty items array', () => {
+  const { db, tables } = makeProjectContentTestDb()
+  createFaProjectDocumentTemplate(db as never, { displayName: 'Gone' })
+  replaceFaProjectDocumentTemplatesSnapshot(db as never, [])
+  expect(tables.document_templates.size).toBe(0)
+})
+
+/**
+ * createFaProjectDocument / updateFaProjectDocument
+ * Persists nullable document appearance colors.
+ */
+test('Test that document persist stores and updates appearance colors', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'World' })
+  const template = createFaProjectDocumentTemplate(db as never, { displayName: 'Tpl' })
+  const created = createFaProjectDocument(db as never, {
+    displayName: 'Doc',
+    templateId: template.id,
+    worldId: world.id,
+    documentTextColor: '#aabbcc',
+    documentBackgroundColor: ''
+  })
+  expect(created.documentTextColor).toBe('#AABBCC')
+  expect(created.documentBackgroundColor).toBeNull()
+
+  const updated = updateFaProjectDocument(db as never, created.id, {
+    documentBackgroundColor: '#112233',
+    documentTextColor: ''
+  })
+  expect(updated.documentTextColor).toBeNull()
+  expect(updated.documentBackgroundColor).toBe('#112233')
+
+  const loaded = getFaProjectDocumentById(db as never, created.id)
+  expect(loaded?.documentTextColor).toBeNull()
+  expect(loaded?.documentBackgroundColor).toBe('#112233')
+})
+
+/**
+ * createFaProjectDocument / updateFaProjectDocument
+ * Persists documents.is_category for category folder rows.
+ */
+test('Test that document persist stores and updates isCategory flag', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'World' })
+  const categoryDoc = createFaProjectDocument(db as never, {
+    displayName: 'Category',
+    isCategory: true,
+    worldId: world.id
+  })
+  expect(categoryDoc.isCategory).toBe(true)
+
+  const regularDoc = createFaProjectDocument(db as never, {
+    displayName: 'Regular',
+    worldId: world.id
+  })
+  expect(regularDoc.isCategory).toBe(false)
+
+  const promoted = updateFaProjectDocument(db as never, regularDoc.id, {
+    isCategory: true
+  })
+  expect(promoted.isCategory).toBe(true)
+
+  const demoted = updateFaProjectDocument(db as never, categoryDoc.id, {
+    isCategory: false
+  })
+  expect(demoted.isCategory).toBe(false)
+})
+
+test('Test that document persist stores and updates extraClasses', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'World' })
+  const created = createFaProjectDocument(db as never, {
+    displayName: 'Styled doc',
+    extraClasses: 'foo bar',
+    worldId: world.id
+  })
+  expect(created.extraClasses).toBe('foo bar')
+
+  const updated = updateFaProjectDocument(db as never, created.id, {
+    extraClasses: 'baz'
+  })
+  expect(updated.extraClasses).toBe('baz')
+
+  const loaded = getFaProjectDocumentById(db as never, created.id)
+  expect(loaded?.extraClasses).toBe('baz')
+})
+
+test('Test that document persist stores and updates status flags', () => {
+  const { db } = makeProjectContentTestDb()
+  const world = createFaProjectWorld(db as never, { displayName: 'World' })
+  const doc = createFaProjectDocument(db as never, {
+    displayName: 'Status doc',
+    isFinished: true,
+    isMinor: true,
+    isDead: true,
+    worldId: world.id
+  })
+  expect(doc.isFinished).toBe(true)
+  expect(doc.isMinor).toBe(true)
+  expect(doc.isDead).toBe(true)
+
+  const updated = updateFaProjectDocument(db as never, doc.id, {
+    isFinished: false,
+    isMinor: false,
+    isDead: false
+  })
+  expect(updated.isFinished).toBe(false)
+  expect(updated.isMinor).toBe(false)
+  expect(updated.isDead).toBe(false)
+})

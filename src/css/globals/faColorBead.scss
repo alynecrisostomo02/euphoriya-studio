@@ -1,0 +1,7 @@
+@use 'faColorBead.mixin.scss' as colorBead;
+@use 'faColorBead.variables.scss' as *;
+
+/* Fantasy theme: opt-in utility — prefer @include colorBead.fa-color-bead-shading in feature SCSS. */
+body.fa-appTheme--fantasy .fa-color-bead {
+  @include colorBead.fa-color-bead-shading;
+}

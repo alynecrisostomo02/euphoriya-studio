@@ -1,0 +1,292 @@
+import { beforeEach, expect, test, vi } from 'vitest'
+
+const { runFaActionMock } = vi.hoisted(() => ({
+  runFaActionMock: vi.fn()
+}))
+
+vi.mock('app/src/scripts/actionManager/faActionManagerRun_manager', () => ({
+  runFaAction: runFaActionMock,
+  runFaActionAwait: vi.fn()
+}))
+
+import { buildDocumentsMenu } from '../documents'
+import { buildProjectMenu } from '../project'
+import { buildToolsMenu } from '../tools'
+
+function emptyRecentSession (hasActiveProject: boolean): {
+  hasActiveProject: boolean
+  recentProjects: readonly []
+} {
+  return {
+    hasActiveProject,
+    recentProjects: []
+  }
+}
+
+beforeEach(() => {
+  runFaActionMock.mockClear()
+})
+
+/**
+ * Menu feed helpers treat `conditions: false` as disabled rows (see AppControlSingleMenu).
+ */
+
+/**
+ * Project menu
+ * Create new project dispatches the open dialog action from the first row trigger.
+ */
+test('Test that buildProjectMenu create new project row opens the settings dialog action', () => {
+  const menu = buildProjectMenu(emptyRecentSession(false))
+  const items = menu.data.filter((row) => row.mode === 'item')
+  items[0]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledTimes(1)
+  expect(runFaActionMock).toHaveBeenCalledWith('openNewProjectDialog', undefined)
+})
+
+/**
+ * Project menu
+ * Load existing project dispatches the load action from the load row trigger.
+ */
+test('Test that buildProjectMenu load existing project row dispatches loadExistingProject', () => {
+  const menu = buildProjectMenu(emptyRecentSession(false))
+  const items = menu.data.filter((row) => row.mode === 'item')
+  items[1]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledWith('loadExistingProject', {})
+})
+
+test('Test that buildProjectMenu toggle noteboard row dispatches toggleProjectNoteboardWindow', () => {
+  const menu = buildProjectMenu(emptyRecentSession(true))
+  const items = menu.data.filter((row) => row.mode === 'item')
+  items[4]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledWith('toggleProjectNoteboardWindow', undefined)
+})
+
+/**
+ * Project menu
+ * Content presence dot follows projectNoteboardHasContent on the noteboard row.
+ */
+test('Test that buildProjectMenu sets showContentDot from projectNoteboardHasContent', () => {
+  const withoutDot = buildProjectMenu({
+    ...emptyRecentSession(true),
+    projectNoteboardHasContent: false
+  })
+  const withDot = buildProjectMenu({
+    ...emptyRecentSession(true),
+    projectNoteboardHasContent: true
+  })
+  const withoutItems = withoutDot.data.filter((row) => row.mode === 'item')
+  const withItems = withDot.data.filter((row) => row.mode === 'item')
+  expect(withoutItems[4]!.showContentDot).toBe(false)
+  expect(withItems[4]!.showContentDot).toBe(true)
+})
+
+test('Test that buildProjectMenu custom Project CSS row dispatches openProjectStylingDialog', () => {
+  const menu = buildProjectMenu(emptyRecentSession(true))
+  const items = menu.data.filter((row) => row.mode === 'item')
+  expect(items[5]!.keybindCommandId).toBe('openProjectStyling')
+  items[5]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledWith('openProjectStylingDialog', undefined)
+})
+
+test('Test that buildProjectMenu show project dashboard row dispatches showProjectDashboard', () => {
+  const menu = buildProjectMenu(emptyRecentSession(true))
+  const items = menu.data.filter((row) => row.mode === 'item')
+  expect(items[3]!.keybindCommandId).toBe('showProjectDashboard')
+  items[3]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledWith('showProjectDashboard', undefined)
+})
+
+test('Test that buildProjectMenu project settings row dispatches openProjectSettingsDialog', () => {
+  const menu = buildProjectMenu(emptyRecentSession(true))
+  const items = menu.data.filter((row) => row.mode === 'item')
+  expect(items[6]!.keybindCommandId).toBe('openProjectSettings')
+  items[6]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledWith('openProjectSettingsDialog', undefined)
+})
+
+/**
+ * Project menu
+ * Implemented project-scoped rows honor hasActiveProject; unimplemented rows stay hidden.
+ */
+test('Test that buildProjectMenu disables gated rows when hasActiveProject is false', () => {
+  const menu = buildProjectMenu(emptyRecentSession(false))
+  const items = menu.data.filter((row) => row.mode === 'item')
+
+  expect(items[0]!.conditions).not.toBe(false)
+  expect(items[1]!.conditions).not.toBe(false)
+  expect(items[2]!.conditions).toBe(false)
+  expect(items[3]!.conditions).toBe(false)
+  expect(items[4]!.conditions).toBe(false)
+  expect(items[5]!.conditions).toBe(false)
+  expect(items[6]!.conditions).toBe(false)
+  expect(items[7]!.conditions).not.toBe(false)
+
+  const sub = items[7]!.submenu?.filter((row) => row.mode === 'item') ?? []
+  expect(sub.every((row) => row.conditions === false)).toBe(true)
+})
+
+/**
+ * Project menu
+ * Implemented gated rows enable when a project is active; unimplemented rows stay hidden.
+ */
+test('Test that buildProjectMenu enables gated rows when hasActiveProject is true', () => {
+  const menu = buildProjectMenu(emptyRecentSession(true))
+  const items = menu.data.filter((row) => row.mode === 'item')
+
+  expect(items[0]!.conditions).not.toBe(false)
+  expect(items[1]!.conditions).not.toBe(false)
+  expect(items[2]!.conditions).toBe(false)
+  expect(items[3]!.conditions).not.toBe(false)
+  expect(items[4]!.conditions).not.toBe(false)
+  expect(items[5]!.conditions).not.toBe(false)
+  expect(items[6]!.conditions).not.toBe(false)
+  expect(items[7]!.conditions).not.toBe(false)
+  const sub = items[7]!.submenu?.filter((row) => row.mode === 'item') ?? []
+  expect(sub.every((row) => row.conditions === false)).toBe(true)
+})
+
+/**
+ * Project menu
+ * Recent submenu dispatches load with filePath when entries exist.
+ */
+test('Test that buildProjectMenu recent row dispatches loadExistingProject with filePath', () => {
+  const menu = buildProjectMenu({
+    hasActiveProject: false,
+    recentProjects: [{
+      filePath: 'C:\\x\\a.faproject',
+      name: 'Alpha'
+    }]
+  })
+  const items = menu.data.filter((row) => row.mode === 'item')
+  const recentParent = items[2]!
+  expect(recentParent?.conditions).not.toBe(false)
+  expect(recentParent?.icon).toBe('keyboard_arrow_right')
+  expect(recentParent?.specialColor).toBe('grey')
+  expect(recentParent?.submenu?.length).toBe(1)
+  const subRow = recentParent?.submenu?.find((r) => r.mode === 'item')
+  expect(subRow?.secondaryHintText).toBe('C:\\x\\a.faproject')
+  expect(subRow?.icon).toBeUndefined()
+  subRow?.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledWith(
+    'loadExistingProject',
+    {
+      filePath: 'C:\\x\\a.faproject'
+    }
+  )
+})
+
+/**
+ * Project menu
+ * Omitted recentProjects disables load-recent parent with no submenu placeholder.
+ */
+test('Test that buildProjectMenu treats omitted recentProjects as no recent entries', () => {
+  const menu = buildProjectMenu({ hasActiveProject: false })
+  const items = menu.data.filter((row) => row.mode === 'item')
+  const recentParent = items[2]!
+  expect(recentParent?.conditions).toBe(false)
+  expect(recentParent?.submenu).toBeUndefined()
+  expect(recentParent?.icon).toBe('keyboard_arrow_right')
+  expect(recentParent?.specialColor).toBe('grey')
+})
+
+/**
+ * Documents menu
+ * Project-scoped rows disable when `hasActiveProject` is false.
+ */
+test('Test that buildDocumentsMenu disables project-scoped rows when hasActiveProject is false', () => {
+  const menu = buildDocumentsMenu({ hasActiveProject: false })
+  const items = menu.data.filter((row) => row.mode === 'item')
+  expect(items.length).toBe(5)
+  expect(items[0]!.conditions).toBe(false)
+  expect(items[1]!.conditions).toBe(false)
+  expect(items[2]!.conditions).toBe(false)
+  expect(items[3]!.conditions).toBe(false)
+  expect(items[4]!.conditions).toBe(false)
+})
+
+/**
+ * Documents menu
+ * Quick-Add enables with an active project and routes through openQuickAddDocumentDialog.
+ */
+test('Test that buildDocumentsMenu enables quick add and fires openQuickAddDocumentDialog', () => {
+  const menu = buildDocumentsMenu({ hasActiveProject: true })
+  const items = menu.data.filter((row) => row.mode === 'item')
+  expect(items[0]!.conditions).toBe(true)
+  expect(items[0]!.keybindCommandId).toBe('quickNewDocument')
+  items[0]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledWith('openQuickAddDocumentDialog', undefined)
+})
+
+/**
+ * Documents menu
+ * Project Media enables with an active project and routes through openProjectMediaDialog.
+ */
+test('Test that buildDocumentsMenu enables project media and fires openProjectMediaDialog', () => {
+  const menu = buildDocumentsMenu({ hasActiveProject: true })
+  const items = menu.data.filter((row) => row.mode === 'item')
+  expect(items[2]!.conditions).toBe(true)
+  expect(items[2]!.keybindCommandId).toBe('openProjectMedia')
+  items[2]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledWith('openProjectMediaDialog', undefined)
+})
+
+/**
+ * Tools menu
+ * Toggle hierarchical tree is project-gated and fires the same action as the app control bar.
+ */
+test('Test that buildToolsMenu toggle hierarchical tree row dispatches toggleHierarchicalTree', () => {
+  const menu = buildToolsMenu({ hasActiveProject: true })
+  const items = menu.data.filter((row) => row.mode === 'item')
+  expect(items[1]!.conditions).toBe(true)
+  expect(items[1]!.keybindCommandId).toBe('toggleHierarchicalTree')
+  items[1]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledWith('toggleHierarchicalTree', undefined)
+})
+
+/**
+ * Tools menu
+ * Import / Export App Configuration fires the centralized action regardless of loaded project session.
+ */
+test('Test that buildToolsMenu import export row opens the app configuration dialog action', () => {
+  const menu = buildToolsMenu({ hasActiveProject: false })
+  const items = menu.data.filter((row) => row.mode === 'item')
+  items[5]!.trigger?.()
+  expect(runFaActionMock).toHaveBeenCalledTimes(1)
+  expect(runFaActionMock).toHaveBeenCalledWith('openImportExportAppConfigDialog', undefined)
+})
+
+/**
+ * Tools menu
+ * Hierarchical tree toggle disables without an open project; other rows stay available.
+ */
+test('Test that buildToolsMenu disables hierarchical tree toggle when hasActiveProject is false', () => {
+  const menu = buildToolsMenu({ hasActiveProject: false })
+  const items = menu.data.filter((row) => row.mode === 'item')
+
+  expect(items.length).toBe(6)
+  expect(items[0]!.conditions).not.toBe(false)
+  expect(items[1]!.conditions).toBe(false)
+  expect(items[2]!.conditions).not.toBe(false)
+  expect(items[3]!.conditions).not.toBe(false)
+  expect(items[4]!.conditions).not.toBe(false)
+  expect(items[5]!.conditions).not.toBe(false)
+})
+
+/**
+ * Tools menu
+ * Content presence dot follows appNoteboardHasContent on the app noteboard row.
+ */
+test('Test that buildToolsMenu sets showContentDot from appNoteboardHasContent', () => {
+  const withoutDot = buildToolsMenu({
+    appNoteboardHasContent: false,
+    hasActiveProject: false
+  })
+  const withDot = buildToolsMenu({
+    appNoteboardHasContent: true,
+    hasActiveProject: false
+  })
+  const withoutItems = withoutDot.data.filter((row) => row.mode === 'item')
+  const withItems = withDot.data.filter((row) => row.mode === 'item')
+  expect(withoutItems[0]!.showContentDot).toBe(false)
+  expect(withItems[0]!.showContentDot).toBe(true)
+})

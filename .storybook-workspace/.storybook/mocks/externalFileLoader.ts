@@ -1,0 +1,250 @@
+import L_documents from 'app/i18n/en-US/components/globals/AppControlMenus/L_documents'
+import L_FaColorPickerInput from 'app/i18n/en-US/components/elements/FaColorPickerInput/L_FaColorPickerInput'
+import L_FaIconPickerInput from 'app/i18n/en-US/components/elements/FaIconPickerInput/L_FaIconPickerInput'
+import L_FaLocaleTranslationsInput from 'app/i18n/en-US/components/elements/FaLocaleTranslationsInput/L_FaLocaleTranslationsInput'
+import L_FantasiaMascotImage from 'app/i18n/en-US/components/elements/FantasiaMascotImage/L_FantasiaMascotImage'
+import L_GlobalLanguageSelector from 'app/i18n/en-US/components/globals/GlobalLanguageSelector/L_GlobalLanguageSelector'
+import L_GlobalWindowButtons from 'app/i18n/en-US/components/globals/GlobalWindowButtons/L_GlobalWindowButtons'
+import L_helpInfo from 'app/i18n/en-US/components/globals/AppControlMenus/L_helpInfo'
+import L_project from 'app/i18n/en-US/components/globals/AppControlMenus/L_project'
+import L_tools from 'app/i18n/en-US/components/globals/AppControlMenus/L_tools'
+import L_socialContactButtons from 'app/i18n/en-US/components/other/SocialContactButtons/L_socialContactButtons'
+import L_deleteOpenedDocument from 'app/i18n/en-US/components/dialogs/L_deleteOpenedDocument'
+import L_discardOpenedDocumentTab from 'app/i18n/en-US/components/dialogs/L_discardOpenedDocumentTab'
+import L_aboutFantasiaArchive from 'app/i18n/en-US/dialogs/L_aboutFantasiaArchive'
+import L_DialogActionMonitor from 'app/i18n/en-US/dialogs/L_DialogActionMonitor'
+import L_dialogKeybindSettings from 'app/i18n/en-US/dialogs/L_dialogKeybindSettings'
+import L_importExportAppConfig from 'app/i18n/en-US/dialogs/L_importExportAppConfig'
+import L_markdownDocument from 'app/i18n/en-US/dialogs/L_markdownDocument'
+import L_newProject from 'app/i18n/en-US/dialogs/L_newProject'
+import L_dialogQuickAddDocument from 'app/i18n/en-US/dialogs/L_dialogQuickAddDocument'
+import L_dialogQuickSearchDocument from 'app/i18n/en-US/dialogs/L_dialogQuickSearchDocument'
+import L_projectMedia from 'app/i18n/en-US/dialogs/L_projectMedia'
+import L_appSettings from 'app/i18n/en-US/dialogs/L_appSettings'
+import L_projectSettings from 'app/i18n/en-US/dialogs/L_projectSettings'
+import L_appStylingFloating from 'app/i18n/en-US/floatingWindows/L_appStyling'
+import L_projectStylingFloating from 'app/i18n/en-US/floatingWindows/L_projectStyling'
+import L_appNoteboardFloating from 'app/i18n/en-US/floatingWindows/L_appNoteboard'
+import L_projectNoteboardFloating from 'app/i18n/en-US/floatingWindows/L_projectNoteboard'
+import L_faKeybinds from 'app/i18n/en-US/globalFunctionality/L_faKeybinds'
+import L_faAppNoteboard from 'app/i18n/en-US/globalFunctionality/L_faAppNoteboard'
+import L_faProjectNoteboard from 'app/i18n/en-US/globalFunctionality/L_faProjectNoteboard'
+import L_faProjectStyling from 'app/i18n/en-US/globalFunctionality/L_faProjectStyling'
+import L_faProjectSettings from 'app/i18n/en-US/globalFunctionality/L_faProjectSettings'
+import L_faProjectSession from 'app/i18n/en-US/globalFunctionality/L_faProjectSession'
+import L_faUserSettings from 'app/i18n/en-US/globalFunctionality/L_faUserSettings'
+import L_unsortedAppTexts from 'app/i18n/en-US/globalFunctionality/L_unsortedAppTexts'
+import L_appUpdateCheck from 'app/i18n/en-US/globalFunctionality/L_appUpdateCheck'
+import L_mainLayout from 'app/i18n/en-US/layouts/L_mainLayout'
+import L_ErrorNotFound from 'app/i18n/en-US/pages/L_ErrorNotFound'
+import L_projectAppControlBar from 'app/i18n/en-US/components/projectUI/L_projectAppControlBar'
+import L_projectOverview from 'app/i18n/en-US/components/projectUI/ProjectOverview/L_projectOverview'
+import L_projectHierarchyTree from 'app/i18n/en-US/components/projectUI/ProjectHierarchyTree/L_projectHierarchyTree'
+import L_projectHierarchyTreeSearch from 'app/i18n/en-US/components/projectUI/ProjectHierarchyTreeSearch/L_projectHierarchyTreeSearch'
+import L_splashPage from 'app/i18n/en-US/pages/L_splashPage'
+import { specialCharacterFixer } from 'app/i18n/specialCharactersFixer'
+import { ref } from 'vue'
+
+import type { T_i18nScenario } from 'app/types/I_storybookWorkspaceHarness'
+
+/**
+ * Mirrors vue-i18n Composer 'locale' so components and helpers that read
+ * 'i18n.global.locale.value' (or assign locale via applyFaI18nLocaleFromLanguageCode from 'app/src/scripts/appInternals/appInternals_manager') do not throw.
+ * Story templates still use the separate 'createI18n' instance from preview setup for '$t'.
+ */
+const storybookExternalLoaderLocale = ref<string>('en-US')
+
+/**
+ * Bullet-list shape matches production tipsTricksTrivia.md so ProjectOverview and notify pickers resolve lines.
+ */
+const storybookDefaultTipsTricksTriviaMarkdown = specialCharacterFixer([
+  '# Tips, Tricks & Trivia',
+  '----------',
+  '',
+  '- Typing `@` while editing large text fields lets you link to other documents directly inside the text editor!',
+  '- `Ctrl+Shift+F` opens find in the current document when you need a particular word on the page!',
+  '- The settings menu contains a whole assortment of both big and small tweaks to tailor the app to your needs!',
+  '- FA has a Dark Mode that is no mere afterthought and is fully serviceable!',
+  '- If these tips annoy you, there is a switch to turn them off in the app settings.'
+].join('\n'))
+
+/**
+ * Curated en-US tree for Storybook preview + Pinia mocks. Keep **structural parity** with
+ * `i18n/en-US/index.ts` for every namespace stories use: adding a dialog or `globalFunctionality`
+ * module to the app registry without a matching entry here surfaces raw i18n keys in the canvas.
+ */
+const defaultMessages: Record<string, unknown> = {
+  errorNotFound: L_ErrorNotFound,
+  mainLayout: L_mainLayout,
+  splashPage: L_splashPage,
+  dialogs: {
+    aboutFantasiaArchive: L_aboutFantasiaArchive,
+    actionMonitor: L_DialogActionMonitor,
+    deleteOpenedDocument: L_deleteOpenedDocument,
+    discardOpenedDocumentTab: L_discardOpenedDocumentTab,
+    keybindSettings: L_dialogKeybindSettings,
+    importExportAppConfig: L_importExportAppConfig,
+    markdownDocument: L_markdownDocument,
+    newProject: L_newProject,
+    quickAddDocument: L_dialogQuickAddDocument,
+    quickSearchDocument: L_dialogQuickSearchDocument,
+    projectMedia: L_projectMedia,
+    appSettings: L_appSettings,
+    projectSettings: L_projectSettings
+  },
+  floatingWindows: {
+    appNoteboard: L_appNoteboardFloating,
+    appStyling: L_appStylingFloating,
+    projectNoteboard: L_projectNoteboardFloating,
+    projectStyling: L_projectStylingFloating
+  },
+  globalLanguageSelector: L_GlobalLanguageSelector,
+  globalWindowButtons: L_GlobalWindowButtons,
+  appControlMenus: {
+    project: L_project,
+    documents: L_documents,
+    tools: L_tools,
+    helpInfo: L_helpInfo
+  },
+  socialContactButtons: L_socialContactButtons,
+  fantasiaMascotImage: L_FantasiaMascotImage,
+  faColorPickerInput: L_FaColorPickerInput,
+  faIconPickerInput: L_FaIconPickerInput,
+  faLocaleTranslationsInput: L_FaLocaleTranslationsInput,
+  projectUI: {
+    projectAppControlBar: L_projectAppControlBar,
+    projectHierarchyTree: L_projectHierarchyTree,
+    projectHierarchyTreeSearch: L_projectHierarchyTreeSearch,
+    projectOverview: L_projectOverview
+  },
+  globalFunctionality: {
+    faKeybinds: L_faKeybinds,
+    faAppNoteboard: L_faAppNoteboard,
+    faProjectNoteboard: L_faProjectNoteboard,
+    faProjectStyling: L_faProjectStyling,
+    faProjectSettings: L_faProjectSettings,
+    faProjectSession: L_faProjectSession,
+    faUserSettings: L_faUserSettings,
+    unsortedAppTexts: L_unsortedAppTexts,
+    appUpdateCheck: L_appUpdateCheck
+  },
+  documents: {
+    advancedSearchCheatSheet: '# Advanced search cheat sheet\n\nIn the moonlit stacks beneath **Aurelion Citadel**, archivists index stories by sigil, era, and oath. Queries can chain together concepts like *kingdom*, *bloodline*, and *artifact* to narrow thousands of records into a single credible trail. Use precise terms first, then broaden with synonyms when the trail goes cold.\n\n> Lore note: most "missing" entries are filed under their pre-coronation names.\n\n## Quick patterns\n\n- `type:character AND faction:"Sunforged Court"`\n- `region:"North Reach" AND status:active`\n- `artifact:"Glass Compass" OR artifact:"Mirror Needle"`\n\n```text\ntitle:"Ashen Treaty" AND NOT status:archived\n```\n\n| Field | Use |\n| --- | --- |\n| `type` | Entity category |\n| `region` | Geographic filter |\n| `status` | Active/archived state |',
+    advancedSearchGuide: '# Advanced Search Guide\n\nThe Archive supports layered criteria, so you can trace a single rumor across continents, dynasties, and calamities. Start with one stable anchor (`type` or `region`), then add `AND` clauses until noise drops to a usable shortlist. If a query becomes too strict, replace one clause with `OR` to recover adjacent lore.\n\nWhen documenting discoveries, keep a reproducible query trail in your notes. This helps collaborators verify whether a contradiction is a data issue or a timeline split caused by retcons in newer chronicles.\n\n## Suggested workflow\n\n1. Begin broad: `type:location AND region:"Western Fjords"`\n2. Add intent: `AND tag:"trade-route"`\n3. Exclude stale lore: `AND NOT status:archived`\n\n- Prefer quoted phrases for multi-word names.\n- Keep aliases in parentheses when known.\n- Confirm date scopes before publishing summaries.',
+    changeLog: '# Changelog\n\n## 2.3.0\n\n### New features\n\n- Added Storybook-first component coverage with reusable mocks and docs-focused story taxonomy.\n- Introduced stress stories for long localization strings and markdown-heavy document rendering.\n\n### Bugfixes & Optimizations\n\n- Stabilized dialog previews in docs with iframe rendering to avoid overlay bleed.\n- Improved interaction assertions for Quasar menu rendering in Storybook.\n\n### Notes for worldbuilders\n\nThis release focuses on safer UI iteration loops, so lore-heavy interfaces can be validated before full Electron boot. Expect faster visual checks when polishing document dialogs and control menus.',
+    license: '# License\n\nThis Storybook entry is placeholder prose for layout validation only and does **not** represent legal terms. In the setting, the Scribes\' Accord grants free circulation of non-commercial chronicles while preserving attribution for original curators.\n\nRedistributions should retain provenance markers, revision lineage, and source seals. Derivative codices are welcome when they document divergences clearly and avoid claiming canonical status without council approval.\n\n---\n\n## Validation checklist\n\n- Heading hierarchy renders correctly.\n- Long paragraphs wrap without overflow.\n- Inline emphasis, lists, and separators remain legible.',
+    tipsTricksTrivia: storybookDefaultTipsTricksTriviaMarkdown,
+    test: '# Storybook Markdown Test\n\nThis document intentionally mixes formatting so dialog rendering can be verified in isolation. It simulates production-like lore paragraphs with headings, lists, quotes, code spans, and tables.\n\n> If this block is readable and wrapped correctly, markdown styling is likely healthy.\n\n- First paragraph checks spacing.\n- Second paragraph checks line-height.\n- Third paragraph checks nested formatting like **bold**, *italic*, and `inline code`.\n\n| Check | Expected |\n| --- | --- |\n| Wrapping | No horizontal overflow |\n| Typography | Consistent rhythm |\n| Emphasis | Clear visual contrast |'
+  }
+}
+
+const longStringsMessages: Record<string, unknown> = {
+  ...defaultMessages,
+  documents: {
+    advancedSearchCheatSheet: '# Advanced search cheat sheet\n\nThis line intentionally stretches layout width by combining placeholder fragments repeatedly: alpha-beta-gamma-delta-epsilon-zeta-eta-theta-iota-kappa-lambda-mu-nu-xi-omicron-pi-rho-sigma-tau-upsilon-phi-chi-psi-omega.',
+    advancedSearchGuide: '# Advanced Search Guide\n\nUse this story to validate wrapping with very long tokens:\n\n`PROJECT_REFERENCE__THE_CRYSTAL_ARCHIVES_OF_THE_SEVENTH_ASTRAL_REALM_WITH_EXTENDED_ANNOTATIONS_AND_CROSS_REFERENCES`',
+    changeLog: '# Changelog\n\n- Build notes include multiple extended lines to pressure overflow handling and line wrapping in markdown containers.\n- 2026-03-31: Added Storybook coverage and behavior stress documentation for localized renderer surfaces.',
+    license: '# License\n\nThe fictional lorem section here is intentionally verbose to represent legal text translations that can become significantly longer in some locales.',
+    tipsTricksTrivia: '# Tips, Tricks & Trivia\n\n- Keep labels concise.\n- Expect translated strings to expand by 20-40% in some languages.\n- Validate tooltips and button groups with screen zoom and large text settings.',
+    test: '# Long text test\n\nThis document exists to stress the dialog with oversized paragraph content for localization QA.'
+  }
+}
+
+const markdownHeavyMessages: Record<string, unknown> = {
+  ...defaultMessages,
+  documents: {
+    advancedSearchCheatSheet: '# Advanced search cheat sheet\n\n## Operators\n\n- `AND`\n- `OR`\n- `NOT`\n\n> Combine operators for precise filters.\n\n```text\nfaction:"Sunforged" AND status:active\n```',
+    advancedSearchGuide: '# Advanced Search Guide\n\n## Example Query\n\n- Open **advanced search**.\n- Use `type:character AND region:"North Reach"`.\n- Add `-status:archived`.\n\n### Keys\n\n- `type`: Object category\n- `region`: Scope filter\n- `status`: Lifecycle state\n\n```text\ntype:character AND region:"North Reach" AND -status:archived\n```',
+    changeLog: '# Changelog\n\n## 2.3.0\n\n### New features\n\n- Storybook coverage plan published.\n\n### Bugfixes & Optimizations\n\n- Added reusable providers and mock scenarios.',
+    license: '# License\n\n## Terms\n\nThis is placeholder markdown content used by Storybook only.\n\n---\n\n### Notes\n\n1. Not a legal document.\n2. Suitable for renderer layout checks.',
+    tipsTricksTrivia: '# Tips, Tricks & Trivia\n\n## Practical checklist for dense markdown rendering\n\nUse this document to verify heading rhythm, list indentation, and long-token wrapping without relying on complex table syntax.\n\n### Core stress cases\n\n- Heading rhythm with multiple levels (`h2`, `h3`, `h4`).\n- Mixed emphasis in one line: **bold**, *italic*, and `inline-code`.\n- Long tokens that normally overflow: `ANCIENT_CHRONICLE_REFERENCE_WITH_EXTENDED_NAMESPACE_AND_VARIANT_SUFFIX_00042`.\n- Nested lists where indentation and bullets stay legible.\n\n#### Nested list sample\n\n- Archive operations\n  - Intake\n    - Validate contributor metadata\n    - Normalize naming and aliases\n  - Review\n    - Cross-check continuity markers\n    - Flag unresolved timeline forks\n\n### Quoted design note\n\n> Dialog markdown should remain readable at high zoom levels and with long localization strings.\n\n### Example snippet\n\n```text\ntype:character AND region:"Storm Coast" AND tag:"sky-harbormaster"\n```\n\nFinal reminder: combine long paragraph copy with list-heavy sections in one document to stress both vertical rhythm and line wrapping under realistic lore-writing conditions.',
+    test: '# Markdown stress test\n\n## Heading levels\n\n### H3\n\n#### H4\n\n##### H5\n\n###### H6\n\n## Emphasis and inline formatting\n\nPlain text with **bold**, *italic*, ***bold italic***, ~~strikethrough~~, and `inline code` in one sentence.\n\nEscaped characters: \\*literal asterisks\\*, \\_literal underscore\\_, and \\`literal backticks\\`.\n\n## Links and references\n\n- Inline link: [Fantasia Archive](https://example.invalid/fantasia-archive)\n- Autolink: <https://example.invalid/docs>\n\n## Lists\n\n- Unordered item A\n  - Nested unordered A.1\n  - Nested unordered A.2\n    - Deep nested unordered A.2.a\n- Unordered item B\n\n1. Ordered item one\n2. Ordered item two\n   1. Nested ordered two.one\n   2. Nested ordered two.two\n\n- [x] Task list done\n- [ ] Task list pending\n\n## Blockquotes\n\n> Single-level quote.\n>\n> - Quote list item\n> - Another quote list item\n>\n> > Nested quote level two.\n\n## Code blocks\n\n```text\nSELECT title, region FROM chronicles WHERE status = "active";\n```\n\n```ts\ntype CharacterRecord =\n  id: string\n  aliases: string[]\n  region: string\n\nconst normalizeAlias = (value: string): string => value.trim().toLowerCase()\n```\n\n## Table-like coverage without pipes\n\n- Feature: Alignment; Sample: centered; Expected behavior: right-aligned text\n- Feature: Inline code; Sample: `token`; Expected behavior: monospace rendering\n- Feature: Emphasis; Sample: **bold** and *italic*; Expected behavior: readable contrast\n\n## Horizontal rule\n\n---\n\n## Image syntax\n\n![Placeholder asset alt text](./non-existent-image.png)\n\n## Mixed content paragraph\n\nWhen a paragraph includes **emphasis**, a [link](https://example.invalid/mixed), `inline code`, and a trailing list:\n\n- it should keep vertical rhythm,\n- wrapping should stay stable,\n- and no horizontal overflow should appear at 1920x1080.'
+  }
+}
+
+const scenarioMessages: Record<T_i18nScenario, Record<string, unknown>> = {
+  default: defaultMessages,
+  longStrings: longStringsMessages,
+  markdownHeavy: markdownHeavyMessages
+}
+
+let activeScenario: T_i18nScenario = 'default'
+
+export const setI18nScenario = (scenario: T_i18nScenario = 'default') => {
+  activeScenario = scenario
+}
+
+export const getStorybookI18nMessages = (): Record<string, unknown> => scenarioMessages[activeScenario]
+
+const deepMergeLocaleTree = (target: Record<string, unknown>, source: Record<string, unknown>): void => {
+  for (const key of Object.keys(source)) {
+    const sourceValue = source[key]
+    const targetValue = target[key]
+
+    if (
+      sourceValue !== null &&
+      typeof sourceValue === 'object' &&
+      !Array.isArray(sourceValue) &&
+      targetValue !== null &&
+      typeof targetValue === 'object' &&
+      !Array.isArray(targetValue)
+    ) {
+      deepMergeLocaleTree(targetValue as Record<string, unknown>, sourceValue as Record<string, unknown>)
+    } else {
+      target[key] = sourceValue
+    }
+  }
+}
+
+const resolveTranslation = (key: string): string => {
+  const fragments = key.split('.')
+  let current: unknown = storybookI18nMessages
+
+  for (const fragment of fragments) {
+    if (typeof current !== 'object' || current === null || !(fragment in current)) {
+      return key
+    }
+
+    current = (current as Record<string, unknown>)[fragment]
+  }
+
+  return typeof current === 'string' ? current : key
+}
+
+const storybookI18nMessages = new Proxy(defaultMessages, {
+  get (_target, property: string) {
+    return scenarioMessages[activeScenario][property]
+  },
+  has (_target, property: string) {
+    return property in scenarioMessages[activeScenario]
+  }
+}) as Record<string, unknown>
+
+export const i18n = {
+  global: {
+    locale: storybookExternalLoaderLocale,
+    t: (key: string): string => resolveTranslation(key),
+    te: (key: string): boolean => {
+      const fragments = key.split('.')
+      let current: unknown = storybookI18nMessages
+
+      for (const fragment of fragments) {
+        if (typeof current !== 'object' || current === null || !(fragment in current)) {
+          return false
+        }
+
+        current = (current as Record<string, unknown>)[fragment]
+      }
+
+      return typeof current === 'string'
+    },
+    mergeLocaleMessage: (locale: string, message: Record<string, unknown>): void => {
+      if (locale !== 'en-US') {
+        return
+      }
+
+      const root = scenarioMessages[activeScenario] as Record<string, unknown>
+      deepMergeLocaleTree(root, message)
+    }
+  }
+}

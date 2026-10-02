@@ -1,0 +1,68 @@
+---
+description: Mandatory file and function size limits; return object literal shape; Vue SFC splitting; ESLint enforcement
+globs: "**/*"
+alwaysApply: true
+---
+
+# Code size and decomposition (project-wide)
+
+Limits **enforced in CI** via ESLint (`max-lines`, `max-lines-per-function`) in `eslint.config.mjs` with exemptions below. Agents/contributors follow for new/edited production code.
+
+**Return object shape** (below) **mandatory project-wide** for human/agent edits; **not** separate ESLint rule — follow in **every** path (tests, Storybook, helpers) like production unless review documents narrow exception.
+
+## Vue single-file components (`.vue`)
+
+- **Hard limit:** `.vue` **≤250 lines** (ESLint `max-lines`, `skipBlankLines` + `skipComments`).
+- Approaching/over limit → split via:
+  1. **Extract logic** → colocated **`scripts/*.ts`** (or shared `src/scripts/`), thin `<script setup>`.
+  2. **Extract UI** → **subcomponents** same feature folder (template, scoped styles, focused script).
+- **Separate stylesheets:** SFC over limit + **`<style>`** extract → **`src/components/<bucket>/<Feature>/styles/`** only (never loose **`*.scss`** sibling of **`.vue`**). [component-styles-folder.mdc](component-styles-folder.mdc).
+
+## Functions (JavaScript, TypeScript, and Vue `<script>`)
+
+- **Hard limit:** single function **≤100 lines** (ESLint `max-lines-per-function`, `skipBlankLines`, `skipComments`, `IIFEs: true`).
+- Growing function → smaller named functions; avoid god helpers/mega-callbacks.
+
+## Return object literals (`return { ... }`, project-wide)
+
+**`return { ... }`** (or object literal return) must scan easy: **table of names** wired to work **above** return.
+
+- **Do:** **`const`** bindings first (functions, refs, primitives, precomputed), then **`return { foo, bar, baz }`** — every property value **simple identifier** (or literal `0`, `true`, `'static'`).
+- **Do not:** inline arrow functions, **`function`** expressions, ternaries, **`||` / `&&`** inline branching, **IIFEs**, other non-trivial expressions on return properties. Assign to **`const`** / `function` **before** return; reference by name.
+- **Applies to:** Pinia **`defineStore`** setup returns, factory helpers, **`return { ...handlers }`**, similar API surfaces — **everywhere**, not only `src/`.
+
+## TypeScript modules (`.ts`, `.mts`, `.cts`)
+
+- **Hard limit:** single TS file **≤250 lines** (ESLint `max-lines`, `skipBlankLines`, `skipComments`).
+- Growing module → smaller files by concern; barrel re-export only when simplifies imports.
+
+## Module count: prefer logical grouping
+
+Limits = **maximums**, not maximize file count. Prefer **fewer modules** with **related** functions until file nears **250 lines** or function nears **100 lines**, then split on clear boundary.
+
+- **Avoid** many **10–20 line** one-export files from mechanical splits — harder navigation/review, no linter benefit.
+- **Split by logical batch**, not one-function-per-file: new file = **coherent concern** (e.g. chord equality + default expansion + effective chord resolve) or **real boundary** (test mock seam, circular import, deliberately small public API). Naming files after single helpers at scale = smell unless ESLint forces.
+- **Component `scripts/`** under `src/components/<bucket>/<Feature>/scripts/`: e.g. one module table+rows+columns, one dialog wiring+suspend, one capture pipeline — not separate file per tiny wrapper ([vue-quasar.mdc](vue-quasar.mdc)).
+- **`src/scripts/`**: group by **domain** + file size ([typescript-scripts.mdc](typescript-scripts.mdc)).
+- **Tests** colocated with `scripts/`: merge into fewer **`scripts/_tests/*.vitest.test.ts`** when exercising merged module; keep coverage on moved behaviors.
+
+## Exemptions (no `max-lines` / `max-lines-per-function`)
+
+Match **`codeSizeRuleIgnores`** in **`eslint.config.mjs`**:
+
+- **Tests:** `**/*.vitest.test.ts`, `**/*playwright*.ts`, `**/*.playwright.spec.ts`
+- **Storybook:** `**/*.stories.ts`
+- **Config:** `**/*.config.mjs`, `**/*.config.mts`, `**/*.config.ts`, `**/eslint.config.mjs`, `**/commitlint.config.mjs`, `**/quasar.config.ts`, `**/quasar.config.js`, `.utility-scripts/**/*.mjs`, `**/testRunner_*.mjs`
+- **Translations:** `i18n/**/*.ts`
+- **Type-only modules:** `types/**/*.ts`
+- **Declarations:** `**/*.d.ts`
+- **Vitest workspace:** `vitest/**/*.mts`
+- **Storybook workspace:** `.storybook-workspace/**`
+- **Two-level wiring:** `**/*_manager.ts`, `src/stores/S_*.ts`, `**/_data/**/*.ts`
+- **ESLint plugins:** `eslint-rules/**`
+
+## Related
+
+- Vue: [vue-quasar.mdc](vue-quasar.mdc), [vue-bem-scss.mdc](vue-bem-scss.mdc), [component-styles-folder.mdc](component-styles-folder.mdc)
+- `src/scripts/`: [typescript-scripts.mdc](typescript-scripts.mdc)
+- ESLint: [eslint-typescript.mdc](eslint-typescript.mdc)

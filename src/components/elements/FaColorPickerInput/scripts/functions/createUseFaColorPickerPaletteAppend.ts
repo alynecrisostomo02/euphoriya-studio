@@ -1,0 +1,87 @@
+import type {
+  I_faColorPickerPaletteAppendConfig,
+  T_createUseFaColorPickerPaletteAppendDeps
+} from 'app/types/I_faColorPickerInput'
+import type { I_computedRef } from 'app/types/I_vueCompositionShims'
+
+export function createUseFaColorPickerPaletteAppend (
+  deps: T_createUseFaColorPickerPaletteAppendDeps
+): (props: {
+    modelValue: string
+    paletteAppend?: I_faColorPickerPaletteAppendConfig | undefined
+  }, emitAppendToWorldPalette: (colorPalette: string) => void, resolveLiveColorString: () => string, refreshProjectColorPalette?: () => Promise<void>) => {
+    isPaletteAppendDisabled: I_computedRef<boolean>
+    isPaletteAppendDuplicate: I_computedRef<boolean>
+    isPaletteAppendInvalidHex: I_computedRef<boolean>
+    onPaletteAppendClick: () => Promise<void>
+    showPaletteAppendButton: I_computedRef<boolean>
+  } {
+  return function useFaColorPickerPaletteAppend (
+    props: {
+      modelValue: string
+      paletteAppend?: I_faColorPickerPaletteAppendConfig | undefined
+    },
+    emitAppendToWorldPalette: (colorPalette: string) => void,
+    resolveLiveColorString: () => string,
+    refreshProjectColorPalette?: () => Promise<void>
+  ) {
+    const showPaletteAppendButton = deps.computed(() => props.paletteAppend !== undefined)
+
+    const appendHexCandidate = deps.computed(() => resolveLiveColorString().trim())
+
+    const isPaletteAppendDuplicate = deps.computed(() => {
+      return deps.isFaColorPickerPaletteAppendDuplicate(
+        props.paletteAppend,
+        appendHexCandidate.value,
+        deps.faProjectWorldColorPaletteContainsHex,
+        deps.isFaProjectWorldStorageHexColor
+      )
+    })
+
+    const isPaletteAppendInvalidHex = deps.computed(() => {
+      const hex = appendHexCandidate.value
+      if (hex.length === 0) {
+        return true
+      }
+      return !deps.isFaProjectWorldStorageHexColor(hex)
+    })
+
+    const isPaletteAppendDisabled = deps.computed(() => {
+      return deps.isFaColorPickerPaletteAppendDisabled(
+        props.paletteAppend,
+        appendHexCandidate.value,
+        deps.appendFaProjectWorldColorPaletteHex,
+        deps.faProjectWorldColorPaletteContainsHex,
+        deps.isFaProjectWorldStorageHexColor,
+        deps.paletteMaxLength,
+        deps.readFaColorPickerPaletteAppendWorldId
+      )
+    })
+
+    async function onPaletteAppendClick (): Promise<void> {
+      const config = props.paletteAppend
+      if (config === undefined || isPaletteAppendDisabled.value) {
+        return
+      }
+      await deps.runFaColorPickerPaletteAppendClick(
+        config,
+        appendHexCandidate.value,
+        deps.appendFaProjectWorldColorPaletteHex,
+        deps.paletteMaxLength,
+        deps.persistWorldColorPalette,
+        deps.readFaColorPickerPaletteAppendWorldId,
+        deps.refreshProjectWorldColorPalette,
+        emitAppendToWorldPalette,
+        refreshProjectColorPalette
+      )
+    }
+
+    return {
+      isPaletteAppendDisabled,
+      isPaletteAppendDuplicate,
+      isPaletteAppendInvalidHex,
+      onPaletteAppendClick,
+      showPaletteAppendButton
+    }
+  }
+}

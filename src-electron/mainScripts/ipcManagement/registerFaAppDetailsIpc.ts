@@ -1,0 +1,24 @@
+import { app, ipcMain } from 'electron'
+import { Result } from 'neverthrow'
+
+import { FA_APP_DETAILS_IPC } from 'app/src-electron/electron-ipc-bridge'
+
+let registered = false
+
+/**
+ * Registers async IPC handlers for read-only app metadata (version from main 'app.getVersion()').
+ * Safe to call once from 'startApp'; subsequent calls no-op.
+ */
+export function registerFaAppDetailsIpc (): void {
+  if (registered) {
+    return
+  }
+  registered = true
+
+  ipcMain.handle(FA_APP_DETAILS_IPC.getVersionAsync, () => {
+    return Result.fromThrowable(
+      (): string => app.getVersion(),
+      (): '' => ''
+    )().unwrapOr('')
+  })
+}

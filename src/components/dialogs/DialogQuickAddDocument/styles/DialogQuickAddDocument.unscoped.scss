@@ -1,0 +1,28 @@
+.q-dialog.dialogComponent.dialogQuickAddDocument > .q-dialog__inner {
+  align-self: flex-start;
+  margin-top: $dialogQuickAddDocument-marginTop;
+}
+
+.q-dialog.dialogComponent.dialogQuickAddDocument > .q-dialog__inner > .q-card.dialogComponent__wrapper {
+  width: $dialogQuickAddDocument-wrapper-width;
+
+  .dialogComponent__content {
+    max-height: calc(100vh - #{$dialogQuickAddDocument-content-maxHeightSubtract});
+    /* Keep visible so q-select menus are not clipped inside the card. */
+    overflow: visible;
+  }
+}
+
+/*
+ * Flat: solid world color from --fa-color-glyph-base (inline style).
+ * Fantasy: global body.fa-appTheme--fantasy .fa-color-glyph adds shading.
+ */
+.dialogQuickAddDocument__worldSelect .fa-color-glyph,
+.dialogQuickAddDocument__selectMenu .fa-color-glyph {
+  color: var(--fa-color-glyph-base);
+}
+
+/* Teleported FaSelectInput menu; stack above modal QDialog chrome. */
+.dialogQuickAddDocument__selectMenu.q-menu {
+  z-index: $dialogQuickAddDocument-selectMenu-zIndex !important;
+}

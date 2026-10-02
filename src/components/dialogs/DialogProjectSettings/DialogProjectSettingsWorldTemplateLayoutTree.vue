@@ -1,0 +1,193 @@
+<template>
+  <div
+    ref="treeScrollRef"
+    class="dialogProjectSettingsWorldTemplateLayoutTreeHost hasScrollbar"
+  >
+    <Draggable
+      :model-value="treeData"
+      class="dialogProjectSettingsWorldTemplateLayoutTree hasScrollbar"
+      :class="treeRootClassList"
+      :each-draggable="eachDraggableHandler"
+      :each-droppable="eachDroppableHandler"
+      data-test-locator="dialogProjectSettings-worldTemplateLayoutTree"
+      :indent="DIALOG_PROJECT_SETTINGS_WORLD_TEMPLATE_LAYOUT_TREE_INDENT_PX"
+      :max-level="2"
+      :root-droppable="rootDroppableHandler"
+      :style="treeStyle"
+      virtualization
+      @after-drop="treeWiring.onTreeAfterDrop"
+      @before-drag-start="treeWiring.onBeforeDragStart"
+      @dragend="treeWiring.onTreeDragEndCleanup"
+      @update:model-value="treeWiring.onTreeDataUpdate"
+    >
+      <template #default="{ node }">
+        <DialogProjectSettingsWorldTemplateLayoutTreeNode
+          :blank-group-ids="props.blankGroupIds"
+          :current-language-code="props.currentLanguageCode"
+          :document-templates="props.documentTemplates"
+          :duplicate-document-template-ids="props.duplicateDocumentTemplateIds"
+          :invalid-document-template-ids="props.invalidDocumentTemplateIds"
+          :node="node"
+          @delete-group="emitDeleteGroup"
+          @remove-placement="emitRemovePlacement"
+          @rename-placement-nickname="emitRenamePlacementNickname"
+          @rename-group="emitRenameGroup"
+        />
+      </template>
+    </Draggable>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue'
+import { Draggable, dragContext } from '@he-tree/vue'
+import '@he-tree/vue/style/default.css'
+
+import DialogProjectSettingsWorldTemplateLayoutTreeNode from './DialogProjectSettingsWorldTemplateLayoutTreeNode.vue'
+import type { I_dialogProjectSettingsDocumentTemplateDraft } from 'app/types/I_dialogProjectSettingsDocumentTemplates'
+import type { I_faLocaleSingularPluralTranslations } from 'app/types/I_faLocaleSingularPluralTranslations'
+import type { I_faLocaleStringTranslations } from 'app/types/I_faLocaleStringTranslations'
+import type { T_faUserSettingsLanguageCode } from 'app/types/faUserSettingsLanguageRegistry'
+import type {
+  I_dialogProjectSettingsWorldTemplateLayoutDraft,
+  I_dialogProjectSettingsWorldTemplateLayoutHeTreeNode
+} from 'app/types/I_dialogProjectSettingsWorlds'
+import {
+  DIALOG_PROJECT_SETTINGS_WORLD_TEMPLATE_LAYOUT_TREE_INDENT_PX,
+  DIALOG_PROJECT_SETTINGS_WORLD_TEMPLATE_LAYOUT_TREE_NODE_ITEM_SELECTOR,
+  countDialogProjectSettingsWorldTemplateLayoutDraftNodes,
+  resolveDialogProjectSettingsWorldTemplateLayoutTreeScrollContainer
+} from './scripts/functions/dialogProjectSettingsWorldTemplateLayoutTreeData'
+import { createDialogProjectSettingsWorldTemplateLayoutTreeWiring } from './scripts/dialogProjectSettingsWorldTemplateLayoutTreeWiring'
+import { createDialogProjectSettingsWorldTemplateLayoutTreeSyncWiring } from './scripts/dialogProjectSettingsWorldTemplateLayoutTreeSyncWiring'
+import { createDialogProjectSettingsScrollOnAppendWatch } from './scripts/dialogProjectSettingsScrollOnAppendWiring'
+import {
+  isDialogProjectSettingsWorldTemplateLayoutNodeDraggable,
+  isDialogProjectSettingsWorldTemplateLayoutNodeDroppable,
+  isDialogProjectSettingsWorldTemplateLayoutRootDroppable
+} from './scripts/functions/dialogProjectSettingsWorldTemplateLayoutDnD'
+import {
+  dialogProjectSettingsWorldTemplateLayoutOpenRenameMenuTargetKey
+} from './scripts/dialogProjectSettingsWorldTemplateLayoutRenameMenuProvide'
+
+defineOptions({
+  name: 'DialogProjectSettingsWorldTemplateLayoutTree'
+})
+
+const props = defineProps<{
+  blankGroupIds?: ReadonlySet<string> | undefined
+  currentLanguageCode: T_faUserSettingsLanguageCode
+  documentTemplates: I_dialogProjectSettingsDocumentTemplateDraft[]
+  duplicateDocumentTemplateIds?: ReadonlySet<string> | undefined
+  invalidDocumentTemplateIds?: ReadonlySet<string> | undefined
+  templateLayout: I_dialogProjectSettingsWorldTemplateLayoutDraft
+}>()
+
+const emit = defineEmits<{
+  deleteGroup: [groupId: string]
+  removePlacement: [placementId: string]
+  renamePlacementNickname: [placementId: string, nicknameTranslations: I_faLocaleSingularPluralTranslations]
+  renameGroup: [groupId: string, displayNameTranslations: I_faLocaleStringTranslations]
+  'update:templateLayout': [layout: I_dialogProjectSettingsWorldTemplateLayoutDraft]
+}>()
+
+const treeData = ref<I_dialogProjectSettingsWorldTemplateLayoutHeTreeNode[]>([])
+const treeScrollRef = ref<HTMLElement | null>(null)
+const suppressTreeEmit = ref(false)
+const isTreeDragActive = ref(false)
+const dragCommitPending = ref(false)
+const dragCommitScheduled = ref(false)
+const dragDropCommitted = ref(false)
+
+const openRenameMenuTarget = ref<string | null>(null)
+provide(dialogProjectSettingsWorldTemplateLayoutOpenRenameMenuTargetKey, openRenameMenuTarget)
+
+const treeSyncWiring = createDialogProjectSettingsWorldTemplateLayoutTreeSyncWiring({
+  emitTemplateLayout: (layout) => emit('update:templateLayout', layout),
+  getCurrentLanguageCode: () => props.currentLanguageCode,
+  getTemplateLayout: () => props.templateLayout,
+  nextTick,
+  suppressTreeEmit,
+  treeData
+})
+
+const treeWiring = createDialogProjectSettingsWorldTemplateLayoutTreeWiring({
+  dragCommitPending,
+  dragCommitScheduled,
+  dragDropCommitted,
+  emitLayoutFromTreeDataIfChanged: treeSyncWiring.emitLayoutFromTreeDataIfChanged,
+  isTreeDragActive,
+  nextTick,
+  resyncTreeDataFromProps: treeSyncWiring.resyncTreeDataFromProps,
+  suppressTreeEmit,
+  treeData
+})
+
+const treeRootClassList = computed(() => {
+  return {
+    'dialogProjectSettingsWorldTemplateLayoutTree--listDragging': isTreeDragActive.value
+  }
+})
+
+const treeStyle = computed(() => {
+  return {
+    height: '100%'
+  }
+})
+
+watch(() => [props.templateLayout, props.currentLanguageCode], () => {
+  treeWiring.resyncTreeDataFromProps()
+}, {
+  deep: true,
+  immediate: true
+})
+
+createDialogProjectSettingsScrollOnAppendWatch({
+  getCount: () => countDialogProjectSettingsWorldTemplateLayoutDraftNodes(props.templateLayout),
+  getScrollContainer: () => resolveDialogProjectSettingsWorldTemplateLayoutTreeScrollContainer(treeScrollRef.value),
+  itemSelector: DIALOG_PROJECT_SETTINGS_WORLD_TEMPLATE_LAYOUT_TREE_NODE_ITEM_SELECTOR,
+  nextTick,
+  requestAnimationFrame: (callback) => window.requestAnimationFrame(callback),
+  watch
+})
+
+function eachDraggableHandler (stat: { data: I_dialogProjectSettingsWorldTemplateLayoutHeTreeNode }): boolean {
+  return isDialogProjectSettingsWorldTemplateLayoutNodeDraggable(stat.data)
+}
+
+function eachDroppableHandler (stat: { data: I_dialogProjectSettingsWorldTemplateLayoutHeTreeNode }): boolean {
+  return isDialogProjectSettingsWorldTemplateLayoutNodeDroppable(stat.data, dragContext)
+}
+
+function rootDroppableHandler (): boolean {
+  return isDialogProjectSettingsWorldTemplateLayoutRootDroppable(dragContext)
+}
+
+onUnmounted(() => {
+  treeWiring.onUnmountedCleanup()
+})
+
+function emitDeleteGroup (groupId: string): void {
+  emit('deleteGroup', groupId)
+}
+
+function emitRenameGroup (
+  groupId: string,
+  displayNameTranslations: I_faLocaleStringTranslations
+): void {
+  emit('renameGroup', groupId, displayNameTranslations)
+}
+
+function emitRenamePlacementNickname (
+  placementId: string,
+  nicknameTranslations: I_faLocaleSingularPluralTranslations
+): void {
+  emit('renamePlacementNickname', placementId, nicknameTranslations)
+}
+
+function emitRemovePlacement (placementId: string): void {
+  emit('removePlacement', placementId)
+}
+</script>
+
+<style lang="scss" src="./styles/DialogProjectSettings.worldTemplateLayoutTree.unscoped.scss"></style>

@@ -1,0 +1,328 @@
+import type {
+  I_faActionDefinition,
+  T_faActionId
+} from 'app/types/I_faActionManagerDomain'
+
+import {
+  handleOpenAboutFantasiaArchiveDialog,
+  handleOpenAdvancedSearchGuideDialog,
+  handleOpenChangelogDialog,
+  handleOpenKeybindSettingsDialog,
+  handleOpenLicenseDialog,
+  handleOpenAppSettingsDialog,
+  handleOpenProjectSettingsDialog,
+  handleOpenQuickAddDocumentDialog,
+  handleOpenProjectMediaDialog,
+  handleOpenQuickSearchDocumentDialog,
+  handleShowProjectDashboard,
+  handleEditActiveDocument,
+  handleCreateTemporaryOpenedDocument,
+  handleSaveOpenedDocumentDisplayName,
+  handleCopyOpenedDocumentTabName,
+  handleCopyOpenedDocumentTabTextColor,
+  handleCopyOpenedDocumentTabBackgroundColor,
+  handleCopyOpenedDocumentTabDocument,
+  handleAddOpenedDocumentTabChildDocument,
+  handleCopyHierarchyTreeDocumentName,
+  handleCopyHierarchyTreeDocumentTextColor,
+  handleCopyHierarchyTreeDocumentBackgroundColor,
+  handleOpenHierarchyTreeDocument,
+  handleEditHierarchyTreeDocument,
+  handleCopyHierarchyTreeDocument,
+  handleAddHierarchyTreeChildDocument,
+  handleDeleteHierarchyTreeDocument,
+  handleSortHierarchyTreeDocuments,
+  handleFocusPreviousOpenedDocumentTab,
+  handleFocusNextOpenedDocumentTab,
+  handleMoveActiveOpenedDocumentTabLeft,
+  handleMoveActiveOpenedDocumentTabRight,
+  handleOpenAppStylingWindow,
+  handleOpenProjectStylingWindow,
+  handleOpenTipsTricksTriviaDialog,
+  handleReportAppNoteboardSaveFailure,
+  handleReportAppStylingPersistFailure,
+  handleReportProjectStylingSaveFailure,
+  handleReportBridgeLoadFailure,
+  handleSaveKeybindSettings,
+  handleSaveAppSettings,
+  handleSaveProjectSettings,
+  handleSaveProjectMedia,
+  handleSaveAppStyling,
+  handleSaveProjectStyling,
+  handleToggleDeveloperTools,
+  handleToggleAppNoteboardWindow,
+  handleToggleHierarchicalTree,
+  handleToggleProjectNoteboardWindow,
+  handleReportProjectNoteboardSaveFailure
+} from './faActionDefinitionHandlers_manager'
+
+export const FA_ACTION_DEFINITIONS_HEAD: ReadonlyArray<I_faActionDefinition<T_faActionId>> = [
+  {
+    dedup: true,
+    handler: handleToggleAppNoteboardWindow as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'toggleAppNoteboardWindow',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleToggleProjectNoteboardWindow as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'toggleProjectNoteboardWindow',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleToggleHierarchicalTree as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'toggleHierarchicalTree',
+    kind: 'async'
+  },
+  {
+    handler: handleToggleDeveloperTools as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'toggleDeveloperTools',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenKeybindSettingsDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openKeybindSettingsDialog',
+    kind: 'async'
+  },
+  {
+    handler: handleSaveKeybindSettings as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'saveKeybindSettings',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenAppSettingsDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openAppSettingsDialog',
+    kind: 'async'
+  },
+  {
+    handler: handleSaveAppSettings as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'saveAppSettings',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenProjectSettingsDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openProjectSettingsDialog',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenQuickAddDocumentDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openQuickAddDocumentDialog',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenQuickSearchDocumentDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openQuickSearchDocumentDialog',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenProjectMediaDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openProjectMediaDialog',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleShowProjectDashboard as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'showProjectDashboard',
+    kind: 'async'
+  },
+  {
+    handler: handleEditActiveDocument as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'editActiveDocument',
+    kind: 'async'
+  },
+  {
+    handler: handleCreateTemporaryOpenedDocument as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'createTemporaryOpenedDocument',
+    kind: 'async'
+  },
+  {
+    handler: handleSaveOpenedDocumentDisplayName as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'saveOpenedDocumentDisplayName',
+    kind: 'sync'
+  },
+  {
+    handler: handleCopyOpenedDocumentTabName as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'copyOpenedDocumentTabName',
+    kind: 'async'
+  },
+  {
+    handler: handleCopyOpenedDocumentTabTextColor as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'copyOpenedDocumentTabTextColor',
+    kind: 'async'
+  },
+  {
+    handler: handleCopyOpenedDocumentTabBackgroundColor as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'copyOpenedDocumentTabBackgroundColor',
+    kind: 'async'
+  },
+  {
+    handler: handleCopyOpenedDocumentTabDocument as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'copyOpenedDocumentTabDocument',
+    kind: 'async'
+  },
+  {
+    handler: handleAddOpenedDocumentTabChildDocument as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'addOpenedDocumentTabChildDocument',
+    kind: 'async'
+  },
+  {
+    handler: handleCopyHierarchyTreeDocumentName as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'copyHierarchyTreeDocumentName',
+    kind: 'async'
+  },
+  {
+    handler: handleCopyHierarchyTreeDocumentTextColor as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'copyHierarchyTreeDocumentTextColor',
+    kind: 'async'
+  },
+  {
+    handler: handleCopyHierarchyTreeDocumentBackgroundColor as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'copyHierarchyTreeDocumentBackgroundColor',
+    kind: 'async'
+  },
+  {
+    handler: handleOpenHierarchyTreeDocument as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openHierarchyTreeDocument',
+    kind: 'async'
+  },
+  {
+    handler: handleEditHierarchyTreeDocument as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'editHierarchyTreeDocument',
+    kind: 'async'
+  },
+  {
+    handler: handleCopyHierarchyTreeDocument as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'copyHierarchyTreeDocument',
+    kind: 'async'
+  },
+  {
+    handler: handleAddHierarchyTreeChildDocument as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'addHierarchyTreeChildDocument',
+    kind: 'async'
+  },
+  {
+    handler: handleDeleteHierarchyTreeDocument as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'deleteHierarchyTreeDocument',
+    kind: 'async'
+  },
+  {
+    handler: handleSortHierarchyTreeDocuments as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'sortHierarchyTreeDocuments',
+    kind: 'async'
+  },
+  {
+    handler: handleFocusPreviousOpenedDocumentTab as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'focusPreviousOpenedDocumentTab',
+    kind: 'async'
+  },
+  {
+    handler: handleFocusNextOpenedDocumentTab as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'focusNextOpenedDocumentTab',
+    kind: 'async'
+  },
+  {
+    handler: handleMoveActiveOpenedDocumentTabLeft as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'moveActiveOpenedDocumentTabLeft',
+    kind: 'async'
+  },
+  {
+    handler: handleMoveActiveOpenedDocumentTabRight as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'moveActiveOpenedDocumentTabRight',
+    kind: 'async'
+  },
+  {
+    handler: handleSaveProjectSettings as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'saveProjectSettings',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleSaveProjectMedia as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'saveProjectMedia',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenAppStylingWindow as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openAppStylingWindow',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenProjectStylingWindow as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openProjectStylingDialog',
+    kind: 'async'
+  },
+  {
+    handler: handleSaveAppStyling as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'saveAppStyling',
+    kind: 'async'
+  },
+  {
+    handler: handleSaveProjectStyling as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'saveProjectStyling',
+    kind: 'async'
+  },
+  {
+    handler: handleReportAppNoteboardSaveFailure as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'reportAppNoteboardSaveFailure',
+    kind: 'async'
+  },
+  {
+    handler: handleReportProjectNoteboardSaveFailure as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'reportProjectNoteboardSaveFailure',
+    kind: 'async'
+  },
+  {
+    handler: handleReportAppStylingPersistFailure as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'reportAppStylingPersistFailure',
+    kind: 'async'
+  },
+  {
+    handler: handleReportProjectStylingSaveFailure as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'reportProjectStylingSaveFailure',
+    kind: 'async'
+  },
+  {
+    handler: handleReportBridgeLoadFailure as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'reportBridgeLoadFailure',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenAdvancedSearchGuideDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openAdvancedSearchGuideDialog',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenChangelogDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openChangelogDialog',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenLicenseDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openLicenseDialog',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenAboutFantasiaArchiveDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openAboutFantasiaArchiveDialog',
+    kind: 'async'
+  },
+  {
+    dedup: true,
+    handler: handleOpenTipsTricksTriviaDialog as I_faActionDefinition<T_faActionId>['handler'],
+    id: 'openTipsTricksTriviaDialog',
+    kind: 'async'
+  }
+]

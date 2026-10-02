@@ -1,0 +1,22 @@
+---
+description: Shared TypeScript types live under repository-root types/
+alwaysApply: true
+---
+
+# TypeScript interfaces and types (`types/`)
+
+- Shared `export interface` / `export type` → repo-root **`types/`**; import **`app/types/...`**
+- One domain module per feature; brief JSDoc (see **`types/I_appMenusDataList.ts`**)
+- No colocated **`<filename>.types.ts`** under **`src/`**, **`src-electron/`**, **`.storybook-workspace/`**, **`helpers/`**
+- Ambient augmentations → **`types/`**; side-effect import from owning boot or **`src/stores/index.ts`** (see **`types/piniaModuleAugmentation.ts`**)
+- No shim modules that only re-export types from **`app/types/...`**
+- Managers/stores/barrels export values only; consumers import types from **`app/types/...`**
+- ESLint **`types-folder/no-exported-types-outside-types`** on **`**/*.{ts,vue}`** outside **`types/**`**, **`**/*.d.ts`**, **`i18n/**`**
+
+## Naming
+
+- **`I_`** interfaces, **`T_`** type aliases; **`i18n/`** uses **`L_`**
+
+## Level-1 `functions/`
+
+- **`import type`** from **`app/types/**`** only ([fa-two-level-architecture.mdc](fa-two-level-architecture.mdc))

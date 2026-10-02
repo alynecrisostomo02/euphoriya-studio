@@ -1,0 +1,5 @@
+/* QUASAR COMPONENT - Q-PAGE */
+/* Keep in sync with $mainLayout-appHeader-heightPx (header only; no app control bar). */
+$qPage-maxHeightSubtract: 36px;
+/* Tighter cap when Project App Control Bar flow spacer is present (user-tuned). */
+$qPage-maxHeightSubtractWithAppControlBar: 58px;

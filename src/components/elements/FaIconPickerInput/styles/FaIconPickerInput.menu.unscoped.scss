@@ -1,0 +1,86 @@
+@use './variables' as *;
+@use '../../../../css/globals/faColorGlyph.mixin.scss' as colorGlyph;
+@use '../../../../css/globals/faQIconDisplay.mixin.scss' as faQIconDisplay;
+
+.faIconPickerInput__pickerMenu.q-menu {
+  z-index: $faIconPickerInput-menu-zIndex;
+}
+
+.faIconPickerInput__menuPanel {
+  background-color: $faIconPickerInput-menu-backgroundColor;
+  display: flex;
+  flex-direction: column;
+  max-height: $faIconPickerInput-menu-maxHeight;
+  width: $faIconPickerInput-menu-width;
+}
+
+.faIconPickerInput__menuHeader {
+  flex: 0 0 auto;
+  padding: $faIconPickerInput-list-paddingInline;
+}
+
+.faIconPickerInput__virtualScroll {
+  flex: 1 1 auto;
+  min-height: $faIconPickerInput-virtualScroll-minHeight;
+  padding-bottom: $faIconPickerInput-list-paddingBottom;
+  padding-left: $faIconPickerInput-list-paddingInline;
+  padding-right: $faIconPickerInput-list-paddingInline;
+}
+
+.faIconPickerInput__iconRow {
+  column-gap: $faIconPickerInput-iconRow-gap;
+  display: grid;
+  grid-template-columns: repeat($faIconPickerInput-iconsPerRow, minmax(0, 1fr));
+  height: $faIconPickerInput-virtualRow-height;
+  overflow: visible;
+  place-items: center;
+}
+
+.faIconPickerInput__iconCell.q-btn {
+  height: $faIconPickerInput-iconCell-size;
+  min-height: $faIconPickerInput-iconCell-size;
+  min-width: $faIconPickerInput-iconCell-size;
+  overflow: visible;
+  width: $faIconPickerInput-iconCell-size;
+
+  > .q-focus-helper {
+    transition: $qMenu-item-hover-focusHelperTransition;
+  }
+
+  .q-icon {
+    @include faQIconDisplay.fa-q-icon-display-constrain-glyph-in-box;
+
+    --fa-color-glyph-base: #{$faIconPickerInput-menuIcon-color};
+
+    color: var(--fa-color-glyph-base);
+    flex: 0 0 auto;
+    font-size: $faQIconDisplay-iconFontSize;
+    height: $faQIconDisplay-iconFontSize;
+    max-height: $faQIconDisplay-iconFontSize;
+    max-width: $faQIconDisplay-iconFontSize;
+    transition: $qMenu-item-hover-colorTransition;
+    width: $faQIconDisplay-iconFontSize;
+  }
+}
+
+.faIconPickerInput__iconCell--selected.q-btn {
+  background-color: transparent;
+
+  .q-icon {
+    --fa-color-glyph-base: #{$faIconPickerInput-selected-iconColor};
+
+    color: var(--fa-color-glyph-base);
+  }
+}
+
+/* QBtn icon prop cannot take fa-color-glyph class; shade via mixin under fantasy. */
+body.fa-appTheme--fantasy .faIconPickerInput__iconCell.q-btn .q-icon {
+  @include colorGlyph.fa-color-glyph-shading;
+}
+
+.faIconPickerInput__statusMessage {
+  padding:
+    $faIconPickerInput-statusMessage-paddingBlock
+    $faIconPickerInput-list-paddingInline;
+  text-align: center;
+}

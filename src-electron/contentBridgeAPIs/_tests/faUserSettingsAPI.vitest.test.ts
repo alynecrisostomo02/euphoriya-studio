@@ -1,0 +1,66 @@
+import { vi, expect, test, beforeEach } from 'vitest'
+
+const { invokeMock } = vi.hoisted(() => {
+  return {
+    invokeMock: vi.fn()
+  }
+})
+
+vi.mock('electron', () => {
+  return {
+    ipcRenderer: {
+      invoke: invokeMock
+    }
+  }
+})
+
+import { FA_USER_SETTINGS_IPC } from 'app/src-electron/electron-ipc-bridge'
+import { FA_USER_SETTINGS_DEFAULTS } from 'app/src-electron/mainScripts/userSettings/faUserSettingsDefaults'
+
+import { faUserSettingsAPI } from '../faUserSettingsAPI'
+
+beforeEach(() => {
+  invokeMock.mockReset()
+})
+
+/**
+ * faUserSettingsAPI
+ * 'getSettings' delegates to 'ipcRenderer.invoke' with the get channel.
+ */
+test('faUserSettingsAPI getSettings invokes IPC get channel', async () => {
+  const snapshot = {
+    ...FA_USER_SETTINGS_DEFAULTS,
+    appTheme: 'darkThemeFantasy'
+  }
+  invokeMock.mockResolvedValueOnce(snapshot)
+  await expect(faUserSettingsAPI.getSettings()).resolves.toEqual(snapshot)
+  expect(invokeMock).toHaveBeenCalledWith(FA_USER_SETTINGS_IPC.getAsync)
+})
+
+/**
+ * faUserSettingsAPI
+ * 'setSettings' delegates to 'ipcRenderer.invoke' with the set channel and patch.
+ */
+test('faUserSettingsAPI setSettings invokes IPC set channel with patch', async () => {
+  invokeMock.mockResolvedValueOnce(undefined)
+  await faUserSettingsAPI.setSettings({ appTheme: 'lightThemeFlat' })
+  expect(invokeMock).toHaveBeenCalledWith(FA_USER_SETTINGS_IPC.setAsync, { appTheme: 'lightThemeFlat' })
+})
+
+/**
+ * faUserSettingsAPI
+ * getSettings propagates ipcRenderer.invoke rejection.
+ */
+test('faUserSettingsAPI getSettings rejects when invoke rejects', async () => {
+  invokeMock.mockRejectedValueOnce(new Error('ipc failed'))
+  await expect(faUserSettingsAPI.getSettings()).rejects.toThrow('ipc failed')
+})
+
+/**
+ * faUserSettingsAPI
+ * setSettings propagates ipcRenderer.invoke rejection.
+ */
+test('faUserSettingsAPI setSettings rejects when invoke rejects', async () => {
+  invokeMock.mockRejectedValueOnce(new Error('ipc failed'))
+  await expect(faUserSettingsAPI.setSettings({})).rejects.toThrow('ipc failed')
+})

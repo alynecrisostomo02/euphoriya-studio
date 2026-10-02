@@ -1,0 +1,25 @@
+---
+description: >-
+  When the user asks for final cleanup (or similar), run the ordered
+  fantasia-final-cleanup workflow — verify gate, docs/changelog sync, commits, push.
+alwaysApply: true
+---
+
+# Final cleanup trigger
+
+User message mentions **final cleanup** or equivalent → explicit end-of-batch directive. **Read and follow** [.cursor/skills/fantasia-final-cleanup/SKILL.md](../skills/fantasia-final-cleanup/SKILL.md); execute **all steps in order** without skip/reorder.
+
+## Trigger phrases (non-exhaustive)
+
+- final cleanup / doing final cleanup / do a final cleanup / run final cleanup
+- wrap up / ship it (when clearly commit + changelog + push)
+
+## Mandatory order (summary)
+
+1. **Full** **`yarn testbatch:verify`** — fix until green (not dev scoped gate — [dev-scoped-verify.mdc](dev-scoped-verify.mdc)).
+2. **Docs** — sync `README.md`, `AGENTS.md`, `.cursor/rules/`, `.cursor/skills/` from Git diff.
+3. **Changelog** — update `i18n/*/documents/changeLog.md` from shipped product ([changelog-en-us.mdc](changelog-en-us.mdc)).
+4. **Commits** — logical conventional batches (final cleanup may commit without per-commit approval unless user interrupts).
+5. **`git push`** — after all commits succeed.
+
+Do **not** substitute `testbatch:ensure:nochange` or `testbatch:ensure:change` for step 1 unless user explicitly asks full ensure gate in same message.

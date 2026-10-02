@@ -1,0 +1,377 @@
+export default {
+  title: 'Fantasia Archive सेटिंग्स',
+  saveButton: 'सेटिंग्स सेव करें',
+  closeButton: 'बिना सहेजे बंद करें',
+  settingsSearchPlaceholder: 'सेटिंग्स खोजें...',
+  settingsSearchClearAriaLabel: 'सेटिंग्स खोज साफ़ करें',
+  searchNoResultsTitle: 'कोई खोज मिलान नहीं',
+  searchNoResultsDescription: 'दुख की बात है कि फंतासिया को कोई भी सेटिंग नहीं मिली जिसे आप ढूंढ रहे थे। शायद कोई भिन्न खोज शब्द आज़माएँ?',
+  appOptionsCategories: {
+    accessibility: {
+      title: 'सरल उपयोग',
+      tags: 'a11y, पठनीयता, दृश्यता, सहायक',
+      accessibility: {
+        subtitle: 'सरल उपयोग',
+        tags: 'a11y, पठनीयता, दृश्यता, सहायक',
+      }
+    },
+    developerSettings: {
+      title: 'डेवलपर सेटिंग्स',
+      tags: 'डेवलपर, डिबग, डायग्नोस्टिक्स, आंतरिक',
+      documentBody: {
+        subtitle: 'दस्तावेज़ का मुख्य भाग',
+        tags: 'दस्तावेज़ आईडी, डीबग मेटाडेटा, आंतरिक फ़ील्ड',
+      }
+    },
+    documentViewEdit: {
+      title: 'पृष्ठ: दस्तावेज़ देखें/संपादित करें',
+      tags: 'दस्तावेज़ पृष्ठ, दृश्य मोड, संपादन मोड, रीडर',
+      documentBody: {
+        subtitle: 'दस्तावेज़ का मुख्य भाग',
+        tags: 'सामग्री क्षेत्र, फ़ील्ड, पढ़ना, संपादक क्षेत्र',
+      },
+    },
+    hierarchicalTree: {
+      title: 'श्रेणीबद्ध वृक्ष',
+      tags: 'साइडबार, रूपरेखा, नेविगेटर, प्रोजेक्ट ट्री',
+      iconSettings: {
+        subtitle: 'चिह्न सेटिंग्स',
+        tags: 'एक्शन आइकन, ट्री बटन, पंक्ति आइकन',
+      },
+      informationDisplaySettings: {
+        subtitle: 'सूचना प्रदर्शन सेटिंग्स',
+        tags: 'गिनती, संख्याएं, ऑर्डर इंडेक्स, मेटाडेटा डिस्प्ले',
+      },
+      tagSettings: {
+        subtitle: 'टैग सेटिंग',
+        tags: 'लेबल, टैग प्रदर्शन, टैग समूहन',
+      },
+      treeBehavior: {
+        subtitle: 'वृक्ष व्यवहार',
+        tags: 'विस्तार करें, पतन करें, सभी का विस्तार करें, अंतःक्रिया',
+      },
+    },
+
+    popupsFloatingWindows: {
+      title: 'पॉपअप और फ्लोटिंग विंडो',
+      tags: 'संवाद, ओवरले, मोडल, विंडोज़',
+      floatingWindows: {
+        subtitle: 'तैरती खिड़कियाँ',
+        tags: 'डिटैच, सेकेंडरी विंडो, मल्टी विंडो',
+      },
+      quickSearchDialog: {
+        subtitle: 'Quick-search/Quick-add dialog',
+        tags: 'quick search, quick add, keyboard search, finder, popup close'
+      }
+    },
+    visualAccessibility: {
+      title: 'दृश्य और ऐप-व्यापी कार्यक्षमता',
+      tags: 'उपस्थिति, इंटरफ़ेस, वैश्विक, यूआई, रूप और अनुभव',
+      applicationExtras: {
+        subtitle: 'आवेदन अतिरिक्त',
+        tags: 'शुभंकर, आलीशान, फैंटासिया, अतिरिक्त',
+      },
+      appControlBar: {
+        subtitle: 'ऐप नियंत्रण बार',
+        tags: 'टूलबार, टॉप बार, हेडर, दस्तावेज़ क्रोम',
+      },
+      tabBehavior: {
+        subtitle: 'टैब व्यवहार',
+        tags: 'स्विच टैब, टैब स्ट्रिप, होवर व्यवहार',
+      },
+      visualsAppwideFunctionality: {
+        subtitle: 'दृश्य और ऐप-व्यापी कार्यक्षमता',
+        tags: 'थीम, क्रोम, लेआउट, सामान्य विकल्प',
+      }
+    },
+    projectOverview: {
+      title: 'पृष्ठ: परियोजना अवलोकन',
+      tags: 'परियोजना होम, डैशबोर्ड, अवलोकन, कार्यक्षेत्र',
+      projectOverviewBehavior: {
+        subtitle: 'परियोजना अवलोकन व्यवहार',
+        tags: 'युक्तियाँ, ट्रिक्स, क्या आप जानते हैं, अवलोकन कार्ड, auto open, last document',
+      }
+    },
+    welcomeScreen: {
+      title: 'स्वागत स्क्रीन',
+      tags: 'स्पलैश, स्टार्ट स्क्रीन, स्वागत, पहला लॉन्च, होम',
+      welcomeScreenBehavior: {
+        subtitle: 'स्वागत स्क्रीन व्यवहार',
+        tags: 'स्टार्टअप युक्तियाँ, सामाजिक लिंक, ऑनबोर्डिंग, स्प्लैश',
+      }
+    }
+  },
+  appOptions: {
+    aggressiveRelationshipFilter: {
+      title: 'आक्रामक रिश्तों का चयन',
+      description: 'दस्तावेज़ संपादन मोड में ऐप में सभी संबंध खोजों के लिए आक्रामक ऑटोसुझाव मोड चालू करता है। इसे चालू किए बिना, फ़िल्टर करने के बाद, सूची में पहला आइटम स्वचालित रूप से चयनित नहीं होता है। इसे चालू करने से यह कार्यक्षमता जुड़ जाती है—मौजूदा दस्तावेज़ों के अधिक सुविधाजनक चयन की अनुमति मिलती है, जबकि तुरंत नए दस्तावेज़ बनाते समय थोड़ी सुविधा का त्याग करना पड़ता है।',
+      tags: 'स्वत: सुझाव, स्वत: पूर्ण, पहला मिलान, फ़िल्टर सूची, मौजूदा चुनें, संबंध खोज',
+    },
+    allowQuickPopupSameKeyClose: {
+      title: 'उसी कुंजी से त्वरित पॉपअप बंद करें',
+      description: 'त्वरित-खोज और त्वरित-जोड़ पॉपअप को उसी कुंजी संयोजन के साथ बंद करने की अनुमति देता है जिसका उपयोग उन्हें खोलने के लिए किया गया था।',
+      tags: 'शॉर्टकट टॉगल करें, वही हॉटकी, त्वरित जोड़ें, पॉपअप ख़ारिज करें',
+    },
+    allowWiderScrollbars: {
+      title: 'व्यापक स्क्रॉलबार',
+      description: 'यह सेटिंग FA के स्क्रॉलबार को व्यापक बनाती है और इसलिए उन उपकरणों के लिए सीधे मैन्युअल क्लिक-स्क्रॉलिंग की अनुमति देती है जो मानक स्क्रॉलिंग का समर्थन नहीं करते हैं (उदाहरण के लिए स्क्रॉल व्हील के बिना चूहे)।',
+      tags: 'स्क्रॉलबार की चौड़ाई, स्क्रॉल पर क्लिक करें, व्हील के बिना माउस, ट्रैकबॉल, स्पर्श',
+    },
+    autoOpenLastDocument: {
+      title: 'Auto-open last document',
+      description: 'When opening a project, automatically open the last active document tab instead of showing the Project overview first.',
+      tags: 'auto open, last document, project open, restore tab, skip overview, workspace home, resume session'
+    },
+
+    disableCategoryCount: {
+      title: 'श्रेणी गणना छिपाएँ',
+      description: 'पदानुक्रमित वृक्ष में श्रेणी संख्या छिपाएँ',
+      tags: 'सरलीकृत गिनती, एकल संख्या, कम अव्यवस्था',
+    },
+    compactTags: {
+      title: 'कॉम्पैक्ट टैग',
+      description: 'यह निर्धारित करता है कि टैग को अलग-अलग श्रेणियों के रूप में दिखाया गया है या प्रत्येक टैग को उपश्रेणी के रूप में एक श्रेणी के रूप में दिखाया गया है।',
+      tags: 'टैग समूहन, एकल टैग फ़ोल्डर, नेस्टेड टैग, टैग पदानुक्रम',
+    },
+    appTheme: {
+      title: 'App theme',
+      description: 'Choose a visual theme for the app to use.',
+      tags: 'dark, light, theme, theming, color, colors',
+      values: {
+        lightThemeFlat: 'Flat theme, Light',
+        darkThemeFlat: 'Flat theme, Dark',
+        lightThemeFantasy: 'Fantasy theme, Light',
+        darkThemeFantasy: 'Fantasy theme, Dark'
+      }
+    },
+    disableCloseAfterSelectQuickSearch: {
+      title: 'चयन के बाद बंद करना बंद करें',
+      description: 'आम तौर पर किसी आइटम का चयन करने के बाद त्वरित-खोज बंद हो जाती है। इस सुविधा को चालू करने से वह व्यवहार रुक जाता है, जिससे आप एक के बाद एक कई खोज परिणाम खोल सकते हैं।',
+      tags: 'खुला रखें, एकाधिक परिणाम, बैच खुला, त्वरित खोज खुला रहता है',
+    },
+    disableAppControlBar: {
+      title: 'ऐप नियंत्रण बार अक्षम करें',
+      description: 'यदि आप दस्तावेज़ पर अपने कार्य स्थान को अधिकतम करना चाहते हैं, तो आप इस सेटिंग के साथ शीर्ष बटन बार को अक्षम कर सकते हैं। आवश्यक नियंत्रण बटन मुख्य दस्तावेज़ निकाय के शीर्ष पर ले जाया जाएगा, जबकि बाकी कार्यक्षमता कीबाइंड के माध्यम से या ऊपर बाईं ओर ऐप मेनू के माध्यम से पहुंच योग्य होगी।',
+      tags: 'टूलबार छुपाएं, स्थान अधिकतम करें, पूरी चौड़ाई, दस्तावेज़ शीर्षलेख',
+    },
+    disableAppControlBarContentButtons: {
+      title: 'Disable app control bar content buttons',
+      description: 'Toggles the project contents (document search, document creation, etc.) on the app control bar on or off.',
+      tags: 'quick search, quick add, document create, content tools, control bar buttons'
+    },
+    disableAppControlBarFunctionButtons: {
+      title: 'Disable app control bar function buttons',
+      description: 'Toggles the app functional buttons (noteboards, hierarchical tree toggling, etc.) on the app control bar on or off.',
+      tags: 'noteboard, tree toggle, sidebar hide, function tools, control bar buttons'
+    },
+    disableAppControlBarGuides: {
+      title: 'ऐप नियंत्रण बार मार्गदर्शिकाएँ अक्षम करें',
+      description: 'ऐप नियंत्रण बार पर नौसिखिया-अनुकूल गाइडों को चालू या बंद टॉगल करता है।',
+      tags: 'शुरुआती संकेत, ट्यूटोरियल बैनर, कोच चिह्न, नियंत्रण बार सहायता',
+    },
+    disableDocumentCounts: {
+      title: 'दस्तावेज़ संख्या छिपाएँ',
+      description: 'पदानुक्रमित वृक्ष में दस्तावेज़ संख्या छिपाएँ',
+      tags: 'कुल योग, कोई गिनती नहीं, आँकड़े छिपाए जाते हैं',
+    },
+    disableDocumentToolTips: {
+      title: 'दस्तावेज़ टूलटिप्स अक्षम करें',
+      description: 'यदि आपको दस्तावेज़-दृश्य टूलटिप्स नापसंद हैं, तो आप उन्हें यहां वैश्विक स्तर पर बंद कर सकते हैं।',
+      tags: 'होवर टेक्स्ट, फ़ील्ड सहायता, पॉपओवर, दस्तावेज़ दृश्य संकेत',
+    },
+    disableSpellCheck: {
+      title: 'वर्तनी जांच अक्षम करें',
+      description: 'दस्तावेज़ संपादन मोड में वर्तनी-, व्याकरण- और शब्द-जाँच अक्षम करता है।',
+      tags: 'वर्तनी, व्याकरण, प्रमाणन, लाल रेखांकन, लेखन, शब्दकोश'
+    },
+
+    disableStartUpdateCheckMessage: {
+      title: 'Disable start update check message',
+      description: 'Disables the app version check message at the start of the app. You will still be able to trigger it manually from the menu should you want to check for updates.',
+      tags: 'update, version check, startup, github releases, notify, toast, check for updates'
+    },
+    doubleDashDocCount: {
+      title: 'उच्चारण विभक्त',
+      description: 'यह सेटिंग पदानुक्रमित वृक्ष में श्रेणी और दस्तावेज़ गणना के बीच एक और \\\\| वर्ण जोड़ती है।',
+      tags: 'पाइप, सीमांकक, विभाजक, गणना प्रारूप, वृक्ष गणना',
+    },
+
+    extraTreePadding: {
+      title: 'Add extra tree padding',
+      description: 'Toggling this on adds extra padding on the left to the tree. This can be useful for example when using tags with long order numbers.',
+      tags: 'padding, indent, left margin, order numbers, tags, hierarchical tree'
+    },
+    forceSublevelCollapseInTree: {
+      title: 'Force sublevel collapse in the tree',
+      description: 'Forces sublevels of the closed node in the hierarchical tree to close as well when a parent node is closed. Normally, they remember the pre-close state and will reopen as they were when closed.',
+      tags: 'force collapse, close children, parent node, nested tree, remember expand'
+    },
+    hideAdvSearchCheatsheetButton: {
+      title: 'रिश्ते छिपाएँ सहायता बटन',
+      description: 'संबंध प्रकार फ़ील्ड में उन्नत खोज चीटशीट सहायता बटन छुपाता है।',
+      tags: 'संबंध फ़ील्ड, चीटशीट, सहायता आइकन, लिंक पिकर, उन्नत खोज',
+    },
+    hideDeadCrossThrough: {
+      title: 'स्ट्राइक-थ्रू छिपाएँ',
+      description: 'यह सेटिंग दृश्यता बढ़ाने के लिए मृत, गायब या नष्ट किए गए दस्तावेज़ों पर स्ट्राइक-थ्रू प्रभाव को छुपाती है।',
+      tags: 'स्ट्राइकथ्रू, मृत, नष्ट, चला गया, दस्तावेज़ की स्थिति, काट दिया गया',
+    },
+    hideDocumentTitles: {
+      title: 'दस्तावेज़ शीर्षक छिपाएँ',
+      description: 'दस्तावेज़ दृश्य में बड़े अनुभाग शीर्षक छुपाता है। कृपया ध्यान दें कि इसके परिणामस्वरूप अपेक्षाकृत बेतहाशा लेआउट बदलाव हो सकता है, जो कुछ मामलों में दस्तावेज़ को अनियंत्रित बना सकता है।',
+      tags: 'अनुभाग शीर्षक, फ़ील्ड समूह, दस्तावेज़ संरचना लेबल',
+    },
+    hideEmptyFields: {
+      title: 'खाली फ़ील्ड छिपाएँ',
+      description: 'दृश्य (गैर-संपादन) मोड में, बिना कोई मान भरे फ़ील्ड छुपाता है। कृपया ध्यान दें कि इसके परिणामस्वरूप अपेक्षाकृत बेतहाशा लेआउट बदलाव हो सकता है, जो कुछ मामलों में दस्तावेज़ को अनियंत्रित बना सकता है।',
+      tags: 'रिक्त फ़ील्ड, केवल पढ़ने योग्य दृश्य, कॉम्पैक्ट दस्तावेज़, लेआउट बदलाव',
+    },
+    hideHierarchyTree: {
+      title: 'Hide hierarchical tree',
+      description: 'Controls whether the hierarchical tree is shown.',
+      tags: 'sidebar off, navigator hidden, tree panel, outline hide'
+    },
+    hidePlushes: {
+      title: 'फैंटासिया शुभंकर छिपाएँ',
+      description: 'आश्चर्यजनक रूप से मनमोहक और विस्मयकारी फैंटासिया, छोटे रहस्यमय ड्रैगन को छुपाता है। आप कैसे कर सकते हैं! :(',
+      tags: 'ड्रैगन, शुभंकर, आलीशान, चरित्र, सजावट, ईस्टर अंडा',
+    },
+    hideTooltipsProject: {
+      title: 'प्रोजेक्ट अवलोकन पर युक्तियाँ छिपाएँ',
+      description: 'प्रोजेक्ट अवलोकन टिप्स और ट्रिक्स जानकारी कार्ड छुपाता है।',
+      tags: 'प्रोजेक्ट होम, डैशबोर्ड कार्ड, अवलोकन संकेत',
+    },
+    hideTooltipsStart: {
+      title: 'स्टार्ट स्क्रीन पर टिप्स पॉपअप छुपाएं',
+      description: 'स्टार्ट स्क्रीन टिप्स और ट्रिक्स पॉपअप को छुपाता है।',
+      tags: 'पहला लॉन्च, ऑनबोर्डिंग, स्प्लैश, स्टार्टअप टिप्स, ट्रिक्स',
+    },
+    hideTreeIconAddUnder: {
+      title: '"नीचे जोड़ें" आइकन छुपाएं',
+      description: 'यह विकल्प "चयनित पैरेंट के अंतर्गत एक नया दस्तावेज़ जोड़ें" आइकन को छिपा देता है।',
+      tags: 'बच्चा जोड़ें, नया नीचे, प्लस नीचे, नीचे बनाएं',
+    },
+    hideTreeIconEdit: {
+      title: '"संपादित करें" आइकन छुपाएं',
+      description: 'यह विकल्प पंक्ति संपादन आइकन को छिपा देता है।',
+      tags: 'पेंसिल आइकन, पंक्ति संपादित करें, त्वरित संपादन वृक्ष',
+    },
+    hideTreeIconView: {
+      title: '"खोलें" आइकन छिपाएँ',
+      description: 'यह विकल्प पंक्ति ओपन आइकन को छिपा देता है।',
+      tags: 'आइकन खोलें, दस्तावेज़ पर जाएं, पंक्ति खोलें बटन',
+    },
+    hideTreeLines: {
+      title: 'Hide tree lines',
+      description: 'Hides the structural help-lines in the hierarchy tree.',
+      tags: 'lines, helplines, structure, tree, hierarchical, hierarchical tree'
+    },
+    hideTreeOrderNumbers: {
+      title: 'ऑर्डर नंबर छुपाएं',
+      description: 'नामों के बाईं ओर कस्टम ऑर्डर नंबर छुपाता है।',
+      tags: 'अनुक्रम सूचकांक, मैनुअल ऑर्डर, रैंक उपसर्ग, बायां गटर',
+    },
+    hideRecentProjectTooltip: {
+      title: '"नवीनतम प्रोजेक्ट ब्राउज़ करें" टूलटिप छुपाएं',
+      description: 'स्वागत स्क्रीन पर नवीनतम प्रोजेक्ट को फिर से शुरू करने के बगल में ब्राउज़-नवीनतम-प्रोजेक्ट कैरेट पर टूलटिप छुपाता है।',
+      tags: 'प्रोजेक्ट, लोड, लोडिंग, नवीनतम, हालिया, परिचय, प्रारंभ, स्वागत, टूलटिप, पॉप-अप, टूलटिप्स, पॉप अप',
+    },
+    hideTabCloseButton: {
+      title: 'Hide tab close button',
+      description: 'Determines whether the tab close buttons in the opened document list will be shown or not. Please note that this will make the tabs closeable only via middle click or right click and then clicking on the menu.',
+      tags: 'tab close, close button, X button, hide close, middle click, context menu, tab strip'
+    },
+    hideWelcomeScreenSocials: {
+      title: 'स्वागत स्क्रीन सामाजिक लिंक छिपाएँ',
+      description: 'स्वागत स्क्रीन पर सभी सामाजिक लिंक छुपाता है।',
+      tags: 'कलह, ट्विटर, सामुदायिक लिंक, सोशल मीडिया, स्वागत है',
+    },
+    skipWelcomeScreen: {
+      title: 'स्वागत स्क्रीन छोड़ें',
+      description: 'स्वागत स्क्रीन को छोड़ देता है और ऐप लॉन्च करते समय सीधे नवीनतम प्रोजेक्ट को लोड करने का प्रयास करता है।',
+      tags: 'प्रोजेक्ट, लोड, लोडिंग, नवीनतम, हालिया, परिचय, प्रारंभ, स्वागत है',
+    },
+    invertCategoryPosition: {
+      title: 'उलटा श्रेणी स्थिति',
+      description: 'श्रेणी और दस्तावेज़ संख्याओं की स्थिति बदलता है।',
+      tags: 'स्वैप नंबर, गिनती क्रम, श्रेणी बनाम दस्तावेज़ गिनती',
+    },
+    limitEditorHeight: {
+      title: 'टेक्स्ट एडिटर की ऊंचाई सीमित करें',
+      description: 'यह निर्धारित करता है कि फुल-स्क्रीन मोड में नहीं होने पर टेक्स्ट एडिटर की ऊंचाई सीमित है या नहीं।',
+      tags: 'टेक्स्ट क्षेत्र ऊंचाई, लंबा टेक्स्ट, विस्तृत संपादक, स्क्रॉल संपादक',
+    },
+    logFullActivityPayload: {
+      title: 'पूर्ण गतिविधि पेलोड लॉग करें',
+      description: 'यदि यह सक्षम है, तो गतिविधि सभी स्थितियों में पूर्ण पेलोड लॉग करेगी (आमतौर पर यह केवल गैर-त्रुटि और गैर-चेतावनी स्थितियों में लॉग होती है)। यह गहरी डिबगिंग करते समय उपयोगी हो सकता है जिसके लिए परिणामों की सटीक लॉगिंग की आवश्यकता होती है।',
+      tags: 'डिबग, समस्या निवारण, DevTools, पेलोड, गतिविधि, लॉगिंग',
+    },
+    noProjectName: {
+      title: 'प्रोजेक्ट का नाम पेड़ में छिपाएँ',
+      description: 'यह निर्धारित करता है कि प्रोजेक्ट का नाम पदानुक्रमित वृक्ष में दिखाया गया है या नहीं।',
+      tags: 'रूट लेबल, प्रोजेक्ट शीर्षक ट्री, हेडर छिपाएँ',
+    },
+    noTags: {
+      title: 'पेड़ में टैग छिपाएँ',
+      description: 'निर्धारित करता है कि टैग पदानुक्रमित वृक्ष में दिखाए गए हैं या नहीं।',
+      tags: 'लेबल बंद करें, टैग स्ट्रिप, ट्री लेबल, लेबल छुपाएं',
+    },
+    preventAutoScroll: {
+      title: 'ऑटो-स्क्रॉलिंग रोकें',
+      description: 'यह निर्धारित करता है कि क्या दस्तावेज़ अपनी स्क्रॉल स्थिति को याद करते हैं और उनके बीच स्विच करते समय ऑटो-स्क्रॉल करते हैं।',
+      tags: 'स्क्रॉल स्थिति, स्क्रॉल याद रखें, शीर्ष पर जाएं, टैब स्विच',
+    },
+    preventFilledAppNoteBoardPopup: {
+      title: 'Prevent filled app noteboard from showing',
+      description: 'When enabled, the app noteboard will not open automatically at app start when it still contains notes from previous FA sessions.',
+      tags: 'app noteboard, sticky notes, startup, auto open, reminders'
+    },
+    preventFilledProjectNoteBoardPopup: {
+      title: 'Prevent filled project noteboard from showing',
+      description: 'When enabled, the project noteboard will not open automatically when a project loads if it still contains notes from previous project sessions.',
+      tags: 'project noteboard, sticky notes, project open, auto open, reminders'
+    },
+
+    preventPreviewsDocuments: {
+      title: 'दस्तावेज़ पूर्वावलोकन रोकें',
+      description: 'नियंत्रित करता है कि होवर पर त्वरित-पूर्वावलोकन दस्तावेज़ दृश्य और संबंध फ़ील्ड में दिखाए जाते हैं या नहीं।',
+      tags: 'होवर कार्ड, झलक, संबंध पॉपअप, इनलाइन पूर्वावलोकन',
+    },
+    preventPreviewsPopups: {
+      title: 'संवादों में दस्तावेज़ पूर्वावलोकन रोकें',
+      description: 'यह नियंत्रित करता है कि संवादों में दस्तावेज़ों का चयन करते समय होवर पर त्वरित-पूर्वावलोकन दिखाए जाते हैं या नहीं (उदाहरण के लिए मौजूदा-दस्तावेज़ पिकर)।',
+      tags: 'मौजूदा दस्तावेज़ संवाद, पिकर होवर, दस्तावेज़ चयनकर्ता, मोडल पूर्वावलोकन',
+    },
+    preventPreviewsTabs: {
+      title: 'टैब पर दस्तावेज़ पूर्वावलोकन रोकें',
+      description: 'नियंत्रित करता है कि होवर पर त्वरित-पूर्वावलोकन टैब बार में दस्तावेज़ टैब पर दिखाए जाते हैं या नहीं।',
+      tags: 'टैब होवर, टैब स्ट्रिप पूर्वावलोकन, शीर्षक बार झलक',
+    },
+    preventPreviewsTree: {
+      title: 'होवर पर दस्तावेज़ पूर्वावलोकन रोकें',
+      description: 'नियंत्रित करता है कि होवर पर त्वरित-पूर्वावलोकन पदानुक्रमित वृक्ष में दिखाए गए हैं या नहीं। जब होवर पूर्वावलोकन सक्षम रहते हैं, तो वे ऐप के प्रदर्शन पर बड़ा प्रभाव डाल सकते हैं।',
+      tags: 'ट्री होवर, लैग, धीमा, एफपीएस, प्रदर्शन, साइडबार पूर्वावलोकन',
+      note: 'ऐप के प्रदर्शन पर बड़ा प्रभाव पड़ सकता है!',
+    },
+    showDocumentID: {
+      title: 'दस्तावेज़ आईडी दिखाएँ',
+      description: 'यदि यह सक्षम है, तो दस्तावेज़ का मुख्य भाग आंतरिक दस्तावेज़ आईडी मान भी दिखाएगा।',
+      tags: 'डिबग, आंतरिक आईडी, पहचानकर्ता, विकास उपकरण, समस्या निवारण',
+    },
+    showTabBarScrollButtons: {
+      title: 'Show tab bar scroll buttons',
+      description: 'Determines whether the top tab list scroll buttons should show. Please note that without them, the user is able to scroll on the bar only using the mousewheel.',
+      tags: 'tab scroll, scroll arrows, chevron, overflow, mousewheel, tab strip'
+    },
+    tagsAtTop: {
+      title: 'पेड़ में शीर्ष टैग',
+      description: 'पदानुक्रमित वृक्ष के शीर्ष पर टैग दिखाता है।',
+      tags: 'टैग क्रम, टैग पहले, उपरोक्त श्रेणियाँ',
+    },
+    textShadow: {
+      title: 'पाठ छाया',
+      description: 'यह सेटिंग पदानुक्रमित वृक्ष, संबंध खोज पॉपअप और टैब में पाठ छाया को टॉगल करती है, जिससे पृष्ठभूमि के विरुद्ध पाठ को अधिक प्रमुख रूप से देखने की अनुमति मिलती है।',
+      tags: 'कंट्रास्ट, सुपाठ्यता, छाया, रूपरेखा, पठनीयता, पाठ स्पष्टता',
+    }
+  }
+}

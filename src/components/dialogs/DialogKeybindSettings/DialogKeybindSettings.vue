@@ -1,0 +1,237 @@
+<template>
+  <q-dialog
+    v-model="dialogModel"
+    :class="['dialogComponent', documentName]"
+    aria-labelledby="dialogKeybindSettings-title"
+    :persistent="isDirty"
+    @hide="onCloseMain"
+  >
+    <q-card :class="['dialogComponent__wrapper', documentName, 'dialogKeybindSettings__card']">
+      <h5
+        id="dialogKeybindSettings-title"
+        class="text-center text-h5 q-mb-sm"
+        data-test-locator="dialogKeybindSettings-title"
+      >
+        {{ $t('dialogs.keybindSettings.title') }}
+      </h5>
+
+      <q-card-section
+        ref="bodySectionRef"
+        class="q-pt-none dialogKeybindSettings__body"
+      >
+        <q-table
+          class="dialogKeybindSettings__table"
+          :style="dialogKeybindSettingsTableHeightStyle"
+          dark
+          flat
+          :virtual-scroll="tableRows.length > 0"
+          :columns="tableColumns"
+          :rows="tableRows"
+          :rows-per-page-options="[0]"
+          :title="$t('dialogs.keybindSettings.tableTitle')"
+          :virtual-scroll-sticky-size-start="48"
+          :hide-bottom="tableRows.length > 0"
+          row-key="rowKey"
+        >
+          <template #top-right>
+            <q-input
+              v-model="filter"
+              class="dialogKeybindSettings__filterInput"
+              dark
+              debounce="300"
+              dense
+              :placeholder="$t('dialogs.keybindSettings.filterPlaceholder')"
+            >
+              <template #prepend>
+                <q-icon name="search" />
+              </template>
+              <template
+                v-if="showsFilterClear"
+                #append
+              >
+                <q-btn
+                  color="secondary"
+                  dense
+                  flat
+                  icon="mdi-close"
+                  round
+                  size="sm"
+                  :aria-label="$t('dialogs.keybindSettings.filterClearAriaLabel')"
+                  data-test-locator="dialogKeybindSettings-filterClear"
+                  @click.stop="clearFilter"
+                />
+              </template>
+            </q-input>
+          </template>
+
+          <template #body="bodySlot">
+            <q-tr :props="bodySlot">
+              <q-td
+                key="name"
+                :props="bodySlot"
+              >
+                {{ bodySlot.row.nameLabel }}
+              </q-td>
+              <q-td
+                key="userKeybinds"
+                :props="bodySlot"
+              >
+                <template v-if="bodySlot.row.editable">
+                  <q-btn
+                    v-if="bodySlot.row.userShowsAddNewCombo"
+                    color="primary-bright"
+                    outline
+                    size="11px"
+                    data-test-locator="dialogKeybindSettings-userKeybind-button"
+                    @click="onOpenCapture(bodySlot.row)"
+                  >
+                    {{ userKeybindButtonLabel(bodySlot.row) }}
+                  </q-btn>
+                  <q-btn
+                    v-else
+                    class="fa-btn-keybind-dim--flat"
+                    flat
+                    size="11px"
+                    data-test-locator="dialogKeybindSettings-userKeybind-button"
+                    @click="onOpenCapture(bodySlot.row)"
+                  >
+                    {{ userKeybindButtonLabel(bodySlot.row) }}
+                  </q-btn>
+                </template>
+                <template v-else>
+                  <span class="text-secondary text-weight-bold">
+                    {{ $t('dialogs.keybindSettings.builtInUneditable') }}
+                  </span>
+                </template>
+              </q-td>
+              <q-td
+                key="defaultKeybinds"
+                :props="bodySlot"
+              >
+                {{ bodySlot.row.defaultLabel }}
+              </q-td>
+            </q-tr>
+          </template>
+
+          <template #no-data>
+            <div
+              v-if="noDataShowsFilterMiss"
+              class="dialogKeybindSettings__filterEmpty flex flex-center"
+              data-test-locator="dialogKeybindSettings-filterNoResults"
+            >
+              <ErrorCard
+                :title="$t('dialogs.keybindSettings.filterNoResultsTitle')"
+                :details="$t('dialogs.keybindSettings.filterNoResultsDescription')"
+                image-name="reading"
+                :width="650"
+              />
+            </div>
+            <div
+              v-else
+              class="dialogKeybindSettings__tableEmpty text-secondary q-pa-md text-center"
+              data-test-locator="dialogKeybindSettings-tableEmpty"
+            >
+              {{ $t('dialogs.keybindSettings.tableEmptyHint') }}
+            </div>
+          </template>
+        </q-table>
+      </q-card-section>
+
+      <q-card-actions
+        align="right"
+        class="q-mb-md q-px-md"
+      >
+        <q-btn
+          v-close-popup
+          flat
+          color="accent"
+          class="q-mr-xl"
+          :label="$t('dialogs.keybindSettings.closeWithoutSaving')"
+        />
+        <q-btn
+          color="primary-bright"
+          outline
+          :label="$t('dialogs.keybindSettings.saveButton')"
+          data-test-locator="dialogKeybindSettings-save"
+          @click="saveMain"
+        />
+      </q-card-actions>
+
+      <DialogKeybindSettingsCaptureDialog
+        v-model="captureOpen"
+        :action-name="captureActionName"
+        :capture-error="captureError"
+        :capture-error-message="captureErrorMessage"
+        :capture-info-message="captureInfoMessage"
+        :capture-label="captureLabel"
+        :has-pending-chord="pendingChord !== null"
+        @capture-clear="onCaptureClear"
+        @capture-set="onCaptureSet"
+      />
+    </q-card>
+  </q-dialog>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+
+import type { T_dialogName } from 'app/types/T_appDialogsAndDocuments'
+
+import DialogKeybindSettingsCaptureDialog from './DialogKeybindSettingsCaptureDialog.vue'
+import ErrorCard from 'app/src/components/elements/ErrorCard/ErrorCard.vue'
+
+import { useDialogKeybindSettingsView } from './scripts/dialogKeybindSettings_manager'
+
+const props = defineProps<{
+  directInput?: T_dialogName | undefined
+}>()
+
+const {
+  bodySectionRef,
+  captureActionName,
+  captureError,
+  captureErrorMessage,
+  captureInfoMessage,
+  captureLabel,
+  captureOpen,
+  dialogKeybindSettingsTableHeightStyle,
+  dialogModel,
+  documentName,
+  filter,
+  isDirty,
+  noDataShowsFilterMiss,
+  onCaptureClear,
+  onCaptureSet,
+  onCloseMain,
+  onOpenCapture,
+  pendingChord,
+  saveMain,
+  tableColumns,
+  tableRows,
+  userKeybindButtonLabel
+} = useDialogKeybindSettingsView(props)
+
+const showsFilterClear = computed(() => (filter.value ?? '').length > 0)
+
+function clearFilter (): void {
+  filter.value = null
+}
+</script>
+<style lang="scss" scoped>
+@use '../../../css/quasar.variables.scss' as *;
+
+.dialogKeybindSettings__filterEmpty {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 100%;
+  padding: $dialogKeybindSettings-filterEmpty-padding;
+  width: 100%;
+}
+
+.dialogKeybindSettings__filterInput {
+  width: $dialogKeybindSettings-filterInput-width !important;
+}
+</style>
+
+<style lang="scss" src="./styles/DialogKeybindSettings.unscoped.scss"></style>

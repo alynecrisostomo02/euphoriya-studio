@@ -1,0 +1,23 @@
+---
+description: Keep docs/database in sync with .faproject schema and project persistence
+globs:
+  - docs/database/**
+  - src-electron/mainScripts/projectManagement/**
+  - src-electron/shared/faProject*Schema.ts
+  - src-electron/shared/faProjectContent*.ts
+  - src-electron/electron-ipc-bridge.ts
+  - src-electron/mainScripts/ipcManagement/registerFaProjectContentIpc.ts
+  - src-electron/contentBridgeAPIs/projectContentAPI.ts
+alwaysApply: false
+---
+
+# Database documentation (`docs/database/`)
+
+Change **`.faproject`** migrations, **`project_data`** KV keys, **content** tables (incl. **`worlds.color`**, **`worlds.color_palette`**, **`world_template_groups`**, **`world_template_placements`**), **project content** persist modules, **`FA_PROJECT_CONTENT_IPC`**, **Project Settings** worlds snapshot/list handlers, related **Zod** schemas, or **`projectContent`** preload APIs → update matching doc **same commit**:
+
+- [docs/database/projectDB.md](../../docs/database/projectDB.md) — schema version ladder, tables, FK rules, module map, IPC table
+- [docs/database/templateCustomFields.md](../../docs/database/templateCustomFields.md) — approved custom-fields architecture; update when **design decisions change**; on **implementing**, migrate table detail into `projectDB.md`, trim duplicate DDL from design doc
+- [docs/database/README.md](../../docs/database/README.md) — index (only when file list or agent rules change)
+- [docs/database/appUserDataKv.md](../../docs/database/appUserDataKv.md) — when **`electron-store`** domains (user settings, keybinds, MRU, app styling/noteboard) change — **not** mixed into `projectDB.md`
+
+**Agents:** read [docs/database/projectDB.md](../../docs/database/projectDB.md) before editing project SQLite or **`runWithFaProjectDatabase*`** call sites. See [fa-project-database-access.mdc](fa-project-database-access.mdc), [fantasia-sqlite-main skill](../skills/fantasia-sqlite-main/SKILL.md), pre-release squash [fantasia-flatten-database-schemas skill](../skills/fantasia-flatten-database-schemas/SKILL.md).

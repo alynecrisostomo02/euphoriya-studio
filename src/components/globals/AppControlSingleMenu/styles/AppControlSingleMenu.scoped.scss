@@ -1,0 +1,55 @@
+.appControlSingleMenu {
+  flex-grow: 1;
+  transition: $appControlSingleMenu-title-colorTransition;
+
+  &:hover,
+  &:focus {
+    color: $appControlMenus-singleHover;
+  }
+
+  &__primaryLabel {
+    white-space: nowrap;
+  }
+
+  &__list {
+    background-color: $appControlMenus-bgColor;
+    color: $appControlMenus-color;
+  }
+
+  &__item {
+    transition: $appControlSingleMenu-item-colorTransition;
+
+    &--muted {
+      color: $appControlSingleMenu-item-muted-color;
+    }
+
+    &:hover:not([aria-disabled='true'], .text-secondary),
+    &:focus:not([aria-disabled='true'], .text-secondary) {
+      color: $appControlMenus-singleHover;
+    }
+  }
+
+  &__separator {
+    background-color: $appControlMenus-separatorColor;
+    height: $appControlSingleMenu-separator-height !important;
+  }
+
+  &__separatorAlt {
+    background-color: $appControlMenus-separatorAltColor;
+    height: $appControlSingleMenu-separator-height !important;
+    opacity: $appControlSingleMenu-separatorAlt-opacity;
+  }
+
+  &__keybindText {
+    font-size: $appControlSingleMenu-keybindText-fontSize;
+    font-weight: $appControlSingleMenu-keybindText-fontWeight;
+    text-shadow: none;
+  }
+
+  &__secondaryHint {
+    max-width: $appControlSingleMenu-secondaryHint-maxWidth;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

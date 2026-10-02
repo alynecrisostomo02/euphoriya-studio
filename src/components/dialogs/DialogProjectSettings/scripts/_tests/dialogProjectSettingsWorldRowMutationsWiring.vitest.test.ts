@@ -1,0 +1,189 @@
+import { ref } from 'vue'
+import { expect, test } from 'vitest'
+
+import type { I_dialogProjectSettingsWorldDraft } from 'app/types/I_dialogProjectSettingsWorlds'
+import {
+  addDialogProjectSettingsWorldDraftRow,
+  removeDialogProjectSettingsWorldDraftRow,
+  updateDialogProjectSettingsWorldDraftColor,
+  updateDialogProjectSettingsWorldDraftColorPalette,
+  updateDialogProjectSettingsWorldDraftDisplayNameTranslations,
+  updateDialogProjectSettingsWorldDraftTemplateLayout
+} from '../dialogProjectSettingsWorldRowMutationsWiring'
+
+const baseWorld: I_dialogProjectSettingsWorldDraft = {
+  color: '',
+  colorPalette: '',
+  displayNameTranslations: { 'en-US': 'Realm' },
+  documentCount: 0,
+  templateLayout: {
+    groups: [],
+    placements: []
+  },
+  id: '550e8400-e29b-41d4-a716-446655440000'
+}
+
+/**
+ * addDialogProjectSettingsWorldDraftRow
+ * Appends a draft row when localWorlds is hydrated.
+ */
+test('Test that addDialogProjectSettingsWorldDraftRow appends a new world draft', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>([baseWorld])
+  addDialogProjectSettingsWorldDraftRow(localWorlds, 'en-US', 'New World')
+  expect(localWorlds.value).toHaveLength(2)
+  expect(localWorlds.value?.[0]!.id).toBe(baseWorld.id)
+  expect(localWorlds.value?.[1]!.displayNameTranslations).toEqual({ 'en-US': 'New World' })
+})
+
+/**
+ * addDialogProjectSettingsWorldDraftRow
+ * No-ops when localWorlds is still null.
+ */
+test('Test that addDialogProjectSettingsWorldDraftRow no-ops when localWorlds is null', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>(null)
+  addDialogProjectSettingsWorldDraftRow(localWorlds, 'en-US', 'New World')
+  expect(localWorlds.value).toBeNull()
+})
+
+/**
+ * removeDialogProjectSettingsWorldDraftRow
+ * Filters out the matching world id.
+ */
+test('Test that removeDialogProjectSettingsWorldDraftRow removes the matching id', () => {
+  const otherWorld: I_dialogProjectSettingsWorldDraft = {
+    color: '',
+    colorPalette: '',
+    displayNameTranslations: { 'en-US': 'Other' },
+    documentCount: 0,
+    templateLayout: {
+      groups: [],
+      placements: []
+    },
+    id: '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+  }
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>([baseWorld, otherWorld])
+  removeDialogProjectSettingsWorldDraftRow(localWorlds, baseWorld.id)
+  expect(localWorlds.value?.map((world) => world.id)).toEqual([otherWorld.id])
+})
+
+/**
+ * removeDialogProjectSettingsWorldDraftRow
+ * No-ops when localWorlds is null.
+ */
+test('Test that removeDialogProjectSettingsWorldDraftRow no-ops when localWorlds is null', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>(null)
+  removeDialogProjectSettingsWorldDraftRow(localWorlds, baseWorld.id)
+  expect(localWorlds.value).toBeNull()
+})
+
+/**
+ * updateDialogProjectSettingsWorldDraftDisplayNameTranslations
+ * Updates the display name for the matching world id.
+ */
+test('Test that updateDialogProjectSettingsWorldDraftDisplayNameTranslations updates the matching row', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>([baseWorld])
+  updateDialogProjectSettingsWorldDraftDisplayNameTranslations(localWorlds, baseWorld.id, { 'en-US': 'Renamed' })
+  expect(localWorlds.value?.[0]!.displayNameTranslations).toEqual({ 'en-US': 'Renamed' })
+})
+
+/**
+ * updateDialogProjectSettingsWorldDraftDisplayNameTranslations
+ * No-ops when localWorlds is null.
+ */
+test('Test that updateDialogProjectSettingsWorldDraftDisplayNameTranslations no-ops when localWorlds is null', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>(null)
+  updateDialogProjectSettingsWorldDraftDisplayNameTranslations(localWorlds, baseWorld.id, { 'en-US': 'Renamed' })
+  expect(localWorlds.value).toBeNull()
+})
+
+/**
+ * updateDialogProjectSettingsWorldDraftColor
+ * Updates the color for the matching world id.
+ */
+test('Test that updateDialogProjectSettingsWorldDraftColor updates the matching row', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>([baseWorld])
+  updateDialogProjectSettingsWorldDraftColor(localWorlds, baseWorld.id, '#aabbcc')
+  expect(localWorlds.value?.[0]!.color).toBe('#aabbcc')
+})
+
+/**
+ * updateDialogProjectSettingsWorldDraftColor
+ * No-ops when localWorlds is null.
+ */
+test('Test that updateDialogProjectSettingsWorldDraftColor no-ops when localWorlds is null', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>(null)
+  updateDialogProjectSettingsWorldDraftColor(localWorlds, baseWorld.id, '#aabbcc')
+  expect(localWorlds.value).toBeNull()
+})
+
+/**
+ * updateDialogProjectSettingsWorldDraftColorPalette
+ * Updates the color palette for the matching world id.
+ */
+test('Test that updateDialogProjectSettingsWorldDraftColorPalette updates the matching row', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>([baseWorld])
+  updateDialogProjectSettingsWorldDraftColorPalette(localWorlds, baseWorld.id, '#112233;#445566')
+  expect(localWorlds.value?.[0]!.colorPalette).toBe('#112233;#445566')
+})
+
+/**
+ * updateDialogProjectSettingsWorldDraftColorPalette
+ * No-ops when localWorlds is null.
+ */
+test('Test that updateDialogProjectSettingsWorldDraftColorPalette no-ops when localWorlds is null', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>(null)
+  updateDialogProjectSettingsWorldDraftColorPalette(localWorlds, baseWorld.id, '#112233')
+  expect(localWorlds.value).toBeNull()
+})
+
+/**
+ * updateDialogProjectSettingsWorldDraftTemplateLayout
+ * Updates template layout for the matching world id.
+ */
+test('Test that updateDialogProjectSettingsWorldDraftTemplateLayout updates the matching row', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>([baseWorld])
+  const nextLayout = {
+    groups: [
+      {
+        displayNameTranslations: { 'en-US': 'Creatures' },
+        id: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+        rootSortOrder: 0
+      }
+    ],
+    placements: []
+  }
+  updateDialogProjectSettingsWorldDraftTemplateLayout(localWorlds, baseWorld.id, nextLayout)
+  expect(localWorlds.value?.[0]!.templateLayout.groups).toHaveLength(1)
+})
+
+/**
+ * updateDialogProjectSettingsWorldDraftTemplateLayout
+ * Leaves non-matching world rows unchanged.
+ */
+test('Test that updateDialogProjectSettingsWorldDraftTemplateLayout ignores unknown world ids', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>([baseWorld])
+  updateDialogProjectSettingsWorldDraftTemplateLayout(localWorlds, 'unknown-id', {
+    groups: [
+      {
+        displayNameTranslations: { 'en-US': 'Creatures' },
+        id: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+        rootSortOrder: 0
+      }
+    ],
+    placements: []
+  })
+  expect(localWorlds.value?.[0]!.templateLayout.groups).toHaveLength(0)
+})
+
+/**
+ * updateDialogProjectSettingsWorldDraftTemplateLayout
+ * No-ops when localWorlds is null.
+ */
+test('Test that updateDialogProjectSettingsWorldDraftTemplateLayout no-ops when localWorlds is null', () => {
+  const localWorlds = ref<I_dialogProjectSettingsWorldDraft[] | null>(null)
+  updateDialogProjectSettingsWorldDraftTemplateLayout(localWorlds, baseWorld.id, {
+    groups: [],
+    placements: []
+  })
+  expect(localWorlds.value).toBeNull()
+})

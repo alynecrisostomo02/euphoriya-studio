@@ -1,0 +1,101 @@
+---
+description: Two-level functions + managers architecture (level-1 pure functions, level-2 managers, thin Vue SFCs)
+alwaysApply: true
+---
+
+# Two-level functions + managers
+
+## Layers
+
+| Layer | Path | Imports |
+|-------|------|---------|
+| Level 1 | `**/functions/**/*.ts` | `import type` from `app/types/**` only. No NPM, no `i18n`, no other project files. Dependencies = function arguments (DI). |
+| Level 2 | `**/*_manager.ts`, `src/stores/S_*.ts`, `**/_data/**/*.ts`, IPC registrars | Full wiring: NPM, `src/`, `i18n`, level-1 `functions/`. |
+| Vue SFC | `src/components/**`, `src/layouts/**`, `src/pages/**`, `App.vue` | When `scripts/*_manager.ts` exists: only that manager, child `*.vue`, `import type` from `app/types/**`. Template + styles stay in SFC. |
+
+## Manager file naming
+
+Level-2 entry modules: suffix **`_manager.ts`** (underscore before `manager`), not `.manager.ts`. Examples: `dialogAppSettings_manager.ts`, `faKeybindsChordUiFormatting_manager.ts`. Grep `*_manager.ts` to list.
+
+## No re-export shim files
+
+Do **not** add module whose only job is `export { … } from './someOther_manager'` (or old `faFooStore.ts` re-exporting `foo_manager.ts`). Import **real** `*_manager.ts` or `functions/*.ts`. Same inside manager: avoid `export { helper } from './other_manager'` when callers can import `other_manager` / `functions/…` directly. Domain **barrel** files (`keybinds_manager.ts` `export *` from sibling managers) OK as single entry — not legacy alias duplicating one manager under old name.
+
+## Managers are wiring-only (`fa-two-level/manager-wiring-only`)
+
+`*_manager.ts` must **not** define functions (`export function`, inner `function`, top-level `const`/`let` with function expressions, **`class`**). Only **imports** deps, **invokes** factories from `functions/` (or sibling wiring when level-1 cannot import shared deps), **exports `const` bindings** to returned API (e.g. `export const getFaUserSettings = storeApi.get`).
+
+**Allowed:** `export const x = create…({ … })`, `const api = create…({ … })` when initializer is **call** to factory (not top-level arrow/function). **Arrow functions/lambdas inside factory argument object** (e.g. `getInnerHeight: () => window.innerHeight` into `createUseFeature`) OK — nested property values, not top-level manager bodies.
+
+**Not managers:** Stateful **classes**, long-lived sessions, multi-step wiring building `sessionDeps` from `window`/Electron APIs → **sibling modules without `_manager` suffix** (e.g. `faFloatingWindowTitleDragPointerSession.ts`, `faFloatingWindowResizePointerSessionWiring.ts`) or `functions/` when body pure + fully injected. Do **not** name implementation-only module `*_manager.ts` just because manager imports it.
+
+**Renderer wiring siblings:** Level-1 `functions/` cannot import `window`, Pinia, project modules → colocated `*Wiring.ts` (or `*Session.ts` / `*Bound.ts`) next to manager; same as Electron `*Surface.ts` / `*Api.ts` next to `*_manager.ts`.
+
+## `*Wiring.ts` vs `*_manager.ts`
+
+- **`*_manager.ts`** — wiring-only: factory calls + **`export const`** bindings; **no** top-level **`export function`**, arrow **`const`**, or **`class`** ([`manager-wiring-only`](../../eslint-rules/faTwoLevelPlugin.mjs)).
+- **`*Wiring.ts`** — when module must **`export function`** and touches **`document`**, **`window`**, **`fs`**, or other non-injectable globals. **Not** named **`*_manager.ts`**.
+- Examples: **`faInterfaceTextDirectionApplyWiring.ts`**, **`faDragDropDocumentDragCursorWiring.ts`**, **`faProjectFilePathHardeningWiring.ts`**; **`MainLayout`** injects **`attachWindowKeydownListener`** / **`detachWindowKeydownListener`** from **`mainLayout_manager.ts`** into **`createMainLayout`**.
+
+## Domain barrel managers (`src/scripts/<domain>/`)
+
+- **`faDragDrop_manager.ts`**, **`dom_manager.ts`** — re-export pure **`functions/`** + wiring; **Vue SFCs and managers import the barrel**, not **`functions/`** directly when barrel exists.
+- Barrel may re-export from **`*Wiring.ts`**; body still obeys **`manager-wiring-only`**.
+
+## Component `scripts/` vs `functions/` (level-2 colocated)
+
+- Modules under **`scripts/`** that value-import managers, **`i18n`**, or multi-file orchestration **stay in `scripts/`** — do not move into **`functions/`** for folder hygiene (**`fa-two-level/functions-only-type-imports`** fails).
+- Examples: **`dialogProjectSettingsWorldTemplateLayoutDraft.ts`**, **`filterDialogProjectSettingsWorldsByQuery.ts`**, **`faActionManagerRunApi.ts`** (sibling of **`actionManager/functions/`**).
+
+## Electron `functions/` + Node APIs
+
+- Pure logic + DI factory in **`functions/`** (e.g. **`createResolveHardenedFaProjectFilePath`**).
+- Bind **`fs`** / domain helpers in sibling **`*Wiring.ts`**; **`export const resolveHardened… = api.…`**.
+
+## Pinia stores (`S_*.ts`)
+
+- Expose session refs with **`readonly()`** on store return; mutate only inside store actions.
+- **`S_FaActiveProject`**: **`openGeneration`** mutex; stale open IPC → **`'superseded'`** (**`T_faActiveProjectOpenFlowOutcome`**); action handlers treat like cancel.
+
+Composable managers: `export const useFeature = createUseFeature({ ref, computed, i18n, … })` with `createUseFeature` under `functions/`.
+
+## Layout per feature
+
+```
+<Feature>/
+  Feature.vue
+  scripts/
+    <feature>_manager.ts
+    functions/
+      <concern>.ts
+```
+
+Shared domains: `src/scripts/<domain>/functions/` + `<domain>/*_manager.ts` (optional `<domain>_manager.ts` barrel). Electron: `src-electron/mainScripts/<area>/functions/` + `*_manager.ts` (public entry) + allowed siblings: `*_managerDefaults.ts`, `*Wiring.ts`, `*Surface.ts`, `*Session.ts`, `*Runtime.ts`, `*Api.ts`, `*Bound.ts`. `ipcManagement/`: `registerFa*Ipc.ts`, `revealElectronDevToolsConsoleBestEffort.ts` = level-2 IPC registrars. `appProtocol/`: `registerFaAppProtocolWiring.ts`. ESLint `fa-two-level/feature-scripts-layout` on `mainScripts/<area>/` like component `scripts/` when `functions/` exists.
+
+## ESLint rule ids (CI)
+
+| Rule | Role |
+|------|------|
+| `import/no-restricted-paths` (zones) | `functions/` import boundaries; who may import `functions/` |
+| `@typescript-eslint/no-restricted-imports` | NPM denylist on `functions/**` |
+| `@typescript-eslint/consistent-type-imports` | On `functions/**` |
+| `fa-two-level/functions-only-type-imports` | AST fallback for level 1 |
+| `fa-two-level/feature-scripts-layout` | If `scripts/functions/` exists, only `*_manager.ts` siblings |
+| `fa-two-level/require-manager-when-functions` | Requires `*_manager.ts` when `functions/` exists |
+| `fa-two-level/vue-script-import-allowlist` | Thin Vue script when manager exists |
+| `fa-two-level/no-functions-import-manager` | Level 1 must not import managers/stores |
+| `fa-two-level/stores-functions-layout` | Who may import `src/stores/functions/` |
+| `fa-two-level/manager-wiring-only` | `*_manager.ts` no local functions, top-level arrow/function `const`/`let`, or `class` bodies |
+
+Plugin: [eslint-rules/faTwoLevelPlugin.mjs](../../eslint-rules/faTwoLevelPlugin.mjs). Run `yarn lint:eslint` after each migration.
+
+## Exclusions
+
+No two-level rules on: `**/*playwright*`, `helpers/playwrightHelpers_*`, `e2e-tests/`, `i18n/**/*.ts`, `types/**`, configs, `*.vitest.test.ts`, `*.stories.ts`.
+
+## Related
+
+- [code-size-decomposition.mdc](code-size-decomposition.mdc) — `*_manager.ts`, `S_*.ts` exempt from max-lines
+- [fantasia-two-level-architecture skill](../skills/fantasia-two-level-architecture/SKILL.md) — migration
+- [fantasia-arbor](../skills/fantasia-arbor/SKILL.md) — callers across Vue / manager / **`functions/`**
+- [vue-quasar.mdc](vue-quasar.mdc), [typescript-scripts.mdc](typescript-scripts.mdc)

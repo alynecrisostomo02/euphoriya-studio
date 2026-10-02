@@ -1,0 +1,129 @@
+# Manually triggered release build. Packages the production Electron app for
+# Windows, macOS, and Linux with no CI test gate (testing runs in the separate
+# verify.yml and pr-full-suite-* workflows). Linux uses a matrix so each
+# installer format installs only the tooling it needs.
+
+name: Build App - FA Rewrite
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The version of the application being built'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    name: Windows package
+    runs-on: windows-latest
+    environment: production
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.22'
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Install Yarn 1.x
+        run: npm install -g yarn@1.22.19
+
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Production Electron build
+        run: yarn quasar:build:electron
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: Windows_FA ${{ github.event.inputs.version }}
+          path: dist/electron/Packaged/*.exe
+
+  build-linux:
+    name: Linux (${{ matrix.linux_pkg }})
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        linux_pkg:
+          - AppImage
+          - deb
+          - rpm
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.22'
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Install Yarn 1.x
+        run: npm install -g yarn@1.22.19
+
+      - name: Install base packaging tools (deb/rpm/AppImage)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            fakeroot \
+            rpm
+
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Production Electron build (${{ matrix.linux_pkg }})
+        env:
+          FA_ELECTRON_LINUX_TARGETS: ${{ matrix.linux_pkg }}
+        run: yarn quasar:build:electron
+
+      - name: Upload Linux artifact (${{ matrix.linux_pkg }})
+        uses: actions/upload-artifact@v5
+        with:
+          name: Linux_${{ matrix.linux_pkg }}_FA ${{ github.event.inputs.version }}
+          path: dist/electron/Packaged/
+
+  build-macos:
+    name: macOS package
+    runs-on: macOS-latest
+    environment: production
+    timeout-minutes: 120
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.22'
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Install Yarn 1.x
+        run: npm install -g yarn@1.22.19
+
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Production Electron build
+        run: yarn quasar:build:electron
+
+      - name: Upload MacOS Artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: Mac_FA ${{ github.event.inputs.version }}
+          path: dist/electron/Packaged/*.dmg

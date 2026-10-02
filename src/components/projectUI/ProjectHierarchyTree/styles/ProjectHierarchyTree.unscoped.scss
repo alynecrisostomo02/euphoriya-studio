@@ -1,0 +1,288 @@
+@use './variables' as *;
+@use '../../../../css/app.palette.scss' as *;
+@use '../../../../css/globals/faHeTreeSlotChrome.mixin.scss' as heTreeSlot;
+@use '../../../../css/globals/faHeTreeSlotChrome.variables.scss' as *;
+
+.projectHierarchyTreeRoot {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  width: 100%;
+}
+
+.projectHierarchyTree__projectName {
+  color: $projectHierarchyTree-projectName-color;
+  flex-shrink: 0;
+  padding: $projectHierarchyTree-projectName-padding;
+}
+
+.projectHierarchyTreeHost {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.projectHierarchyTree {
+  height: 100%;
+  overflow: auto;
+  scrollbar-gutter: inherit;
+  width: 100%;
+
+  &--extraPadding {
+    padding-left: $projectHierarchyTree-extraPadding-paddingLeft;
+
+    .projectHierarchyTree__nodeRow--world,
+    .projectHierarchyTree-treeNode--world {
+      margin-left: -$projectHierarchyTree-extraPadding-worldBleedPx;
+      width: calc(100% + #{$projectHierarchyTree-extraPadding-worldBleedPx}) !important;
+    }
+  }
+
+  &--listDragging {
+    user-select: none;
+  }
+
+  .tree-line {
+    background: $projectHierarchyTree-treeLine-color;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .tree-vline {
+    background: $projectHierarchyTree-treeLine-color;
+    margin-left: $projectHierarchyTree-treeVline-marginLeft;
+    pointer-events: none;
+    width: $projectHierarchyTree-treeVline-width;
+
+    &::before {
+      background: $projectHierarchyTree-treeLine-color;
+      bottom: $projectHierarchyTree-treeVline-before-bottom;
+      content: '';
+      height: $projectHierarchyTree-treeVline-before-height;
+      position: absolute;
+      width: $projectHierarchyTree-treeVline-width;
+    }
+
+    &[style*="bottom: 50%"] {
+      margin-bottom: $projectHierarchyTree-treeVline-midBranch-marginBottom;
+    }
+  }
+
+  .tree-hline {
+    margin-left: $projectHierarchyTree-treeHline-marginLeft;
+    pointer-events: none;
+  }
+}
+
+.projectHierarchyTreeHost .tree-node {
+  align-items: center;
+  display: flex;
+  margin-top: $projectHierarchyTree-node-marginTop;
+  outline: none;
+  width: 100%;
+}
+
+.projectHierarchyTreeHost .tree-node-inner {
+  flex-grow: 1;
+}
+
+.projectHierarchyTreeHost .vtlist-inner {
+  padding-bottom: $projectHierarchyTree-list-paddingBottom;
+  padding-left: 0;
+  padding-right: $projectHierarchyTree-list-paddingRight;
+}
+
+/* Row kind hooks: projectHierarchyTree__nodeRow--* (template) + tree-node--* (he-tree DOM hook). */
+
+.projectHierarchyTree__nodeRow {
+  min-height: $projectHierarchyTree-node-minHeight;
+  position: relative;
+  width: 100%;
+}
+
+.projectHierarchyTree__nodeContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.projectHierarchyTree__dragHandle {
+  /* he-tree trigger-class marker only; grab cursor uses leftPointerDown. */
+}
+
+.projectHierarchyTree__leftPointerDown {
+  cursor: grab;
+}
+
+.projectHierarchyTree--listDragging .projectHierarchyTree__dragHandle,
+.projectHierarchyTree--listDragging .projectHierarchyTree__leftPointerDown {
+  cursor: grabbing;
+}
+
+.projectHierarchyTreeHost .projectHierarchyTreeNode.q-hoverable {
+  /* Chrome on ::before inset by row padding so hover hugs icons/label, not padding box. */
+  &::before {
+    @include heTreeSlot.fa-he-tree-slot-chrome-idle;
+
+    content: '';
+    inset:
+      calc(var(--projectHierarchyTreeNode-chrome-inset-block, 0) - #{$projectHierarchyTree-nodeChrome-expandBlock})
+      calc(var(--projectHierarchyTreeNode-chrome-inset-inline-end, 0) - #{$projectHierarchyTree-nodeChrome-expandInlineEnd})
+      calc(var(--projectHierarchyTreeNode-chrome-inset-block, 0) - #{$projectHierarchyTree-nodeChrome-expandBlock})
+      calc(var(--projectHierarchyTreeNode-chrome-inset-inline-start, 0) - #{$projectHierarchyTree-nodeChrome-expandInlineStart});
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+  }
+}
+
+/* Keep chrome while hovered, pressed, press-hold armed for DnD, or active opened tab. */
+.projectHierarchyTreeHost .projectHierarchyTreeNode.q-hoverable:hover::before,
+.projectHierarchyTreeHost .projectHierarchyTreeNode.q-hoverable:active::before,
+.projectHierarchyTreeHost .projectHierarchyTree__leftPointerDown .projectHierarchyTreeNode.q-hoverable::before,
+.projectHierarchyTreeHost .projectHierarchyTreeNode--activeTabDocument.q-hoverable::before {
+  @include heTreeSlot.fa-he-tree-slot-chrome($faHeTreeSlotChrome-hoverStrength);
+}
+
+/*
+ * Document appearance fill on same inset ::before as hover chrome (not full row).
+ * Reassert after chrome mixin so hover/active gold wash does not wipe user color.
+ */
+.projectHierarchyTreeHost .projectHierarchyTreeNode--customDocumentBackground.q-hoverable::before,
+.projectHierarchyTreeHost .projectHierarchyTreeNode--customDocumentBackground.q-hoverable:hover::before,
+.projectHierarchyTreeHost .projectHierarchyTreeNode--customDocumentBackground.q-hoverable:active::before,
+.projectHierarchyTreeHost .projectHierarchyTree__leftPointerDown .projectHierarchyTreeNode--customDocumentBackground.q-hoverable::before,
+.projectHierarchyTreeHost .projectHierarchyTreeNode--customDocumentBackground.projectHierarchyTreeNode--activeTabDocument.q-hoverable::before {
+  background-color: var(--projectHierarchyTreeNode-backgroundColor);
+}
+
+.projectHierarchyTreeHost .projectHierarchyTreeNode.q-hoverable:hover,
+.projectHierarchyTreeHost .projectHierarchyTreeNode.q-hoverable:active,
+.projectHierarchyTreeHost .projectHierarchyTree__leftPointerDown .projectHierarchyTreeNode.q-hoverable,
+.projectHierarchyTreeHost .projectHierarchyTreeNode--activeTabDocument.q-hoverable {
+  > .q-focus-helper {
+    opacity: 0 !important;
+  }
+}
+
+.projectHierarchyTree--listDragging .projectHierarchyTreeNode > .q-focus-helper {
+  opacity: 0 !important;
+}
+
+.projectHierarchyTree__openIconWrapper {
+  flex-shrink: 0;
+  pointer-events: none;
+  z-index: $projectHierarchyTree-openIcon-zIndex;
+}
+
+.projectHierarchyTree__openIcon {
+  --fa-color-glyph-base: #{$projectHierarchyTree-openIcon-color};
+
+  box-sizing: content-box;
+  color: var(--fa-color-glyph-base);
+  font-size: $projectHierarchyTree-openIcon-boxSize;
+  height: $projectHierarchyTree-openIcon-boxSize;
+  padding: $projectHierarchyTree-openIcon-padding;
+  pointer-events: none;
+  transform: rotate($projectHierarchyTree-openIcon-rotateClosed);
+  transition: transform $projectHierarchyTree-openIcon-rotateTransitionDuration;
+  width: $projectHierarchyTree-openIcon-boxSize;
+}
+
+body.fa-appTheme--fantasy .projectHierarchyTree__openIcon {
+  --fa-color-glyph-highlight-base: #{$projectHierarchyTree-openIcon-glyphHighlightBase-fantasy};
+  --fa-color-glyph-shade-base: #{$projectHierarchyTree-openIcon-glyphShadeBase-fantasy};
+}
+
+.projectHierarchyTree__nodeRow--world,
+.projectHierarchyTree-treeNode--world {
+  cursor: pointer;
+  font-size: $projectHierarchyTree-worldNodeRow-fontSize;
+  font-weight: $projectHierarchyTree-worldNodeRow-fontWeight;
+  letter-spacing: $projectHierarchyTree-worldNodeRow-letterSpacing;
+  line-height: $projectHierarchyTree-worldNodeRow-lineHeight;
+  margin: 0;
+  padding: $projectHierarchyTree-worldNodeRow-paddingBlockStart 0 0 $projectHierarchyTree-worldNodeRow-paddingInlineStart !important;
+
+  .projectHierarchyTree__openIconWrapper {
+    position: absolute;
+    right: $projectHierarchyTree-openIcon-world-positionRight;
+    top: $projectHierarchyTree-openIcon-world-positionTop;
+  }
+
+  .projectHierarchyTree__openIcon {
+    &.projectHierarchyTree__openIcon--open {
+      transform: rotate($projectHierarchyTree-openIcon-rotateOpen);
+    }
+  }
+
+  .projectHierarchyTreeNode--world {
+    --projectHierarchyTreeNode-chrome-inset-block: 0;
+    --projectHierarchyTreeNode-chrome-inset-inline-end: #{$projectHierarchyTree-worldNode-paddingInlineEnd};
+    --projectHierarchyTreeNode-chrome-inset-inline-start: #{$projectHierarchyTree-worldNode-paddingInlineStart};
+
+    border-radius: $projectHierarchyTree-node-borderRadius;
+    padding: 0 $projectHierarchyTree-worldNode-paddingInlineEnd 0 $projectHierarchyTree-worldNode-paddingInlineStart !important;
+  }
+}
+
+.projectHierarchyTree-treeNode--world {
+  margin: 0 0 0 $projectHierarchyTree-worldTreeNode-marginInlineStart;
+  padding: 0 0 0 $projectHierarchyTree-worldTreeNode-paddingInlineStart !important;
+  width: calc(100% + #{$projectHierarchyTree-worldTreeNode-widthExpandPx}) !important;
+}
+
+.projectHierarchyTree__nodeRow--group,
+.projectHierarchyTree__nodeRow--documentTemplate,
+.projectHierarchyTree__nodeRow--document,
+.projectHierarchyTree__nodeRow--addNewDocument,
+.projectHierarchyTree__nodeRow--tag,
+.projectHierarchyTree__nodeRow--tagWrapper,
+.projectHierarchyTree-treeNode--group,
+.projectHierarchyTree-treeNode--documentTemplate,
+.projectHierarchyTree-treeNode--document,
+.projectHierarchyTree-treeNode--addNewDocument,
+.projectHierarchyTree-treeNode--tag,
+.projectHierarchyTree-treeNode--tagWrapper {
+  cursor: pointer;
+
+  &.projectHierarchyTree__leftPointerDown {
+    cursor: grab;
+  }
+
+  .projectHierarchyTree__nodeRow.projectHierarchyTree__leftPointerDown {
+    cursor: grab;
+  }
+
+  .projectHierarchyTreeNode {
+    --projectHierarchyTreeNode-chrome-inset-block: #{$projectHierarchyTree-nodeRowContent-paddingBlock};
+    --projectHierarchyTreeNode-chrome-inset-inline-end: #{$projectHierarchyTree-nodeRowContent-paddingInlineEnd};
+    --projectHierarchyTreeNode-chrome-inset-inline-start: #{$projectHierarchyTree-nodeRowContent-paddingInlineStart};
+
+    border-radius: $projectHierarchyTree-node-borderRadius;
+    margin-left: $projectHierarchyTree-nodeRowIndent-offsetPx;
+    padding: $projectHierarchyTree-nodeRowContent-paddingBlock $projectHierarchyTree-nodeRowContent-paddingInlineEnd $projectHierarchyTree-nodeRowContent-paddingBlock $projectHierarchyTree-nodeRowContent-paddingInlineStart;
+  }
+
+  .projectHierarchyTree__openIconWrapper {
+    left: $projectHierarchyTree-openIcon-nestedTreeNode-positionLeft;
+    position: absolute;
+    top: $projectHierarchyTree-openIcon-nestedTreeNode-positionTop;
+    transform: translateY($projectHierarchyTree-openIcon-nestedTreeNode-translateY);
+  }
+
+  .projectHierarchyTree__openIcon {
+    &.projectHierarchyTree__openIcon--open {
+      transform: rotate($projectHierarchyTree-openIcon-rotateOpen);
+    }
+  }
+}
+
+/* Drag placeholder: shared he-tree slot chrome; hierarchy row height. */
+.projectHierarchyTree .he-tree-drag-placeholder {
+  @include heTreeSlot.fa-he-tree-slot-chrome(1);
+
+  min-height: $projectHierarchyTree-node-minHeight;
+}

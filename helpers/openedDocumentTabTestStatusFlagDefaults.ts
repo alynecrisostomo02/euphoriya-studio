@@ -1,0 +1,65 @@
+import { FA_DOCUMENT_TREE_ORDER_NUMBER_EMPTY } from 'app/types/I_faDocumentTreeOrderNumber'
+
+/** Default opened-document tab status flag fields for tests and harness stubs. */
+export const FA_OPENED_DOCUMENT_TAB_STATUS_FLAG_DEFAULTS = {
+  isCategoryDraft: false,
+  isDeadDraft: false,
+  isFinishedDraft: false,
+  isMinorDraft: false,
+  savedIsCategory: false,
+  savedIsDead: false,
+  savedIsFinished: false,
+  savedIsMinor: false,
+  parentDocumentIdDraft: '',
+  savedParentDocumentId: '',
+  savedTreeOrderNumber: FA_DOCUMENT_TREE_ORDER_NUMBER_EMPTY,
+  treeOrderNumberDraft: '',
+  extraClassesDraft: '',
+  savedExtraClasses: '',
+  tagsDraft: [] as Array<{ id: string, name: string, isNew?: boolean }>,
+  savedTags: [] as Array<{ id: string, name: string }>
+} as const
+
+/** Default opened-document tab tree order fields for tests and harness stubs. */
+export const FA_OPENED_DOCUMENT_TAB_TREE_ORDER_NUMBER_DEFAULTS = {
+  savedTreeOrderNumber: FA_DOCUMENT_TREE_ORDER_NUMBER_EMPTY,
+  treeOrderNumberDraft: '',
+  extraClassesDraft: '',
+  savedExtraClasses: ''
+} as const
+
+/** Default opened-document tab extra HTML classes fields for tests and harness stubs. */
+export const FA_OPENED_DOCUMENT_TAB_EXTRA_CLASSES_DEFAULTS = {
+  extraClassesDraft: '',
+  savedExtraClasses: ''
+} as const
+
+/** Default persisted document status flag fields for tests and harness stubs. */
+export const FA_PROJECT_DOCUMENT_STATUS_FLAG_DEFAULTS = {
+  isCategory: false,
+  isDead: false,
+  isFinished: false,
+  isMinor: false,
+  treeOrderNumber: FA_DOCUMENT_TREE_ORDER_NUMBER_EMPTY,
+  extraClasses: ''
+} as const
+
+/** Default SQLite document row status flag columns for tests. */
+export const FA_SQL_PROJECT_DOCUMENT_STATUS_FLAG_DEFAULTS = {
+  is_category: 0,
+  is_dead: 0,
+  is_finished: 0,
+  is_minor: 0,
+  tree_order_number: FA_DOCUMENT_TREE_ORDER_NUMBER_EMPTY,
+  extra_classes: ''
+} as const
+
+/** Default SQLite document row extra_classes column for tests. */
+export const FA_SQL_PROJECT_DOCUMENT_EXTRA_CLASSES_DEFAULTS = {
+  extra_classes: ''
+} as const
+
+/** Default SQLite document row tree order column for tests. */
+export const FA_SQL_PROJECT_DOCUMENT_TREE_ORDER_NUMBER_DEFAULTS = {
+  tree_order_number: FA_DOCUMENT_TREE_ORDER_NUMBER_EMPTY
+} as const

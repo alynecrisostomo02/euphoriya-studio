@@ -1,0 +1,94 @@
+.dialogProjectMediaSingleEditSlide {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: auto;
+  position: absolute;
+  z-index: $dialogProjectMedia-singleEditSlide-zIndex;
+
+  &__backdrop {
+    background-color: $dialogProjectMedia-singleEditSlide-backdropColor;
+    inset: 0;
+    pointer-events: auto;
+    position: absolute;
+  }
+
+  &__panel {
+    background-color: var(--q-dark);
+    bottom: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    max-width: $dialogProjectMedia-singleEditSlide-maxWidth;
+    pointer-events: auto;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: $dialogProjectMedia-singleEditSlide-width;
+    z-index: 1;
+  }
+
+  &__bodyViewport {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  &__track {
+    display: flex;
+    flex-flow: row nowrap;
+    height: 100%;
+    width: 100%;
+
+    &--split {
+      pointer-events: none;
+      width: 200%;
+    }
+
+    &--previous {
+      transform: translateX(-50%);
+    }
+
+    &--previous.dialogProjectMediaSingleEditSlide__track--moving {
+      transform: translateX(0);
+      transition: transform $dialogProjectMedia-singleEditSlide-duration ease;
+    }
+
+    &--next {
+      transform: translateX(0);
+    }
+
+    &--next.dialogProjectMediaSingleEditSlide__track--moving {
+      transform: translateX(-50%);
+      transition: transform $dialogProjectMedia-singleEditSlide-duration ease;
+    }
+  }
+
+  &__pane {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 100%;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
+  }
+
+  &__track--split &__pane {
+    flex-basis: 50%;
+  }
+
+  &__footer {
+    flex: 0 0 auto;
+  }
+
+  &__nav,
+  &__actions {
+    align-items: center;
+    display: flex;
+    gap: $dialogProjectMedia-cardActions-gap;
+  }
+}

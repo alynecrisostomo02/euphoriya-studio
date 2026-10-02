@@ -1,0 +1,76 @@
+---
+description: ESLint, TypeScript compiler checks, and alignment with Vitest/Quasar tooling
+alwaysApply: true
+---
+
+# ESLint and TypeScript static checks
+
+## What this project uses (not TSLint)
+
+- **TSLint** deprecated, **not** used. TypeScript style + type-aware checks from **ESLint** (**flat config** root **`eslint.config.mjs`**) with **neostandard**, **typescript-eslint** (v8.x), **eslint-plugin-vue** (v10), **`@typescript-eslint`**, aligned **TypeScript ~6.0** in `package.json`.
+- **Standalone typecheck**: `yarn lint:typescript` → **`vue-tsc -p tsconfig.json --noEmit`** — **`.vue` SFCs`** + all TS same project as **`tsc`**. Plain **`tsc`** alone does not load `<script setup>` from SFCs — not sole check for renderer Vue. Use `yarn lint:typescript` in CI, before commits, config/broad typing changes.
+- **`import type`** for type-only imports in `.ts` + Vue `<script lang="ts">`; no value imports used only as types.
+- Prefer explicit type imports over inline `typeof import('...')` when named type import works.
+
+## Code comments
+
+Line/block comments + JSDoc above APIs/tests: no Markdown `**bold**` or `*italic*`; plain wording. Inline symbol/path/command refs: single-quoted text (e.g. 'yarn test:unit'), not grave accents. No mid-clause sentence breaks across ` * ` JSDoc lines for wrapping; full lines or baseline + ` * - ` bullets ([AGENTS.md](../../AGENTS.md) code comments).
+
+## Commands
+
+| Command | Role |
+|--------|------|
+| `yarn lint:eslint` | ESLint over `src/`, `src-electron/`, `e2e-tests/`, `types/`, Quasar/Vitest/Playwright configs, `.storybook-workspace/.storybook/` with **`--max-warnings 0`** (quality gate + `quasar dev` via `vite-plugin-checker`). |
+| `yarn lint:stylelint` | Stylelint on `src/**/*.{vue,css,scss,sass}` + `.storybook-workspace/.storybook/**/*.{vue,css,scss,sass}` (declaration blocks alphabetical via `stylelint-order`; `yarn lint:stylelint:fix` autofix). |
+| `yarn lint:typescript` | Full **`vue-tsc`** (Vue SFCs + `.ts`; Quasar paths via `tsconfig.json` → `.quasar/tsconfig.json`). |
+
+## File and function size (ESLint)
+
+- **`eslint.config.mjs`**: **`max-lines`**, **`max-lines-per-function`** on production **`**/*.{ts,mts,cts,vue,js,mjs,cjs}`**; exemptions per [code-size-decomposition.mdc](code-size-decomposition.mdc) / **`codeSizeRuleIgnores`** (tests, Storybook, configs, **`i18n/`**, **`types/`**, declarations, **`vitest/**/*.mts`**, **`.storybook-workspace/**`**, **`.utility-scripts/**/*.mjs`**, **`**/*_manager.ts`**, **`src/stores/S_*.ts`**, **`**/_data/**/*.ts`**, **`eslint-rules/**`**). Targets: **Vue ≤250**, **TS/JS module ≤250**, **function ≤100** (intent, split strategy, **Return object literals**).
+
+## Pre-commit / pre-changelog quality gate
+
+**During edits:** [dev-scoped-verify.mdc](dev-scoped-verify.mdc) — touched eslint, **`yarn lint:typescript`**, connected Vitest.
+
+**Before commits/changelog** tied to product/test work: full **`yarn testbatch:verify`** one terminal ([testing-terminal-isolation.mdc](testing-terminal-isolation.mdc) **changelog-only** exception, [git-conventional-commits.mdc](git-conventional-commits.mdc)). Vitest step: **`thresholds.perFile: true`** — each instrumented file **95%** statements/lines, **80%** branches, **100%** functions on **`src-electron`**, **`helpers/**/*.ts`** (**`helpers/playwrightHelpers_*`** excluded), **`src`** renderer **`.ts`**, scoped **`i18n/`**, and **`.ts`** / **`.vue`** under **`src/components`**, **`src/layouts`**, **`src/pages`** ([vitest-tests.mdc](vitest-tests.mdc)).
+
+Run `yarn lint:eslint`, `yarn lint:typescript`, `yarn lint:stylelint`, `yarn test:unit`, `yarn test:coverage:verify` individually only while debugging specific failure. **During edits:** dev scoped gate ([dev-scoped-verify.mdc](dev-scoped-verify.mdc)).
+
+**Dev server**: `vite-plugin-checker` ESLint during `quasar dev` uses same **`--max-warnings 0`**, narrower path set than **`yarn lint:eslint`** (`eslint .`) — see **`quasar.config.ts`** **`lintCommand`** (`src` / `i18n` / `src-electron` / `quasar.config.ts`). Keep `@typescript-eslint` major in sync with TypeScript — avoid unsupported-TS-version warnings from `typescript-estree`.
+
+## `tsconfig` and `.vue` / Quasar
+
+- Root **`tsconfig.json`** extends **`.quasar/tsconfig.json`** for Quasar path aliases; excludes other generated **`.quasar`** from typecheck. **`compilerOptions.types`**: **`["node"]`** — TS does not auto-load every transitive **`@types/*`** under **`node_modules/@types`** (e.g. **`connect`** from Express tooling); **`vite/client`**, **`@quasar/app-vite`**, ambient types via **`/// <reference types="…" />`** in **`src/env.d.ts`** + **`.quasar/quasar.d.ts`**. **`src/env.d.ts`**: **`*.vue`** modules + **`/// <reference types="vite/client" />`** for **`import.meta.env`** in IDE + **`vue-tsc`**.
+- Do **not** add top-level `compilerOptions.paths` in `tsconfig.json` unless merge with Quasar `paths`; replacing `paths` breaks `app/`, `src/`, `#q-app/*`, etc.
+
+## `quasar.config.ts` typing notes
+
+- **TypeScript strict**: **`build.typescript.strict: true`** — Quasar also enables **`exactOptionalPropertyTypes`**, **`noUncheckedIndexedAccess`**, etc. Optional props: omit keys or type as **`| undefined`**; avoid assigning explicit **`undefined`** where **`satisfies`** / exact optional rejects it. Gate: **`yarn lint:typescript`** (**`vue-tsc`**).
+- **PWA**: `pwa.workboxMode` matches Quasar types (**`GenerateSW`** | **`InjectManifest`**, PascalCase), not legacy lowercase.
+- **BEX**: **`QuasarBexConfiguration`** fields (e.g. `extraScripts`); no removed placeholders like `contentScripts` in `bex`.
+- **Vite plugins**: repo may carry **`@ts-expect-error`** on `defineConfig` when hoisted **`vite`** vs **`@quasar/app-vite`** nested **`vite`** disagree on `Plugin` types; config valid at runtime.
+
+## vue-i18n boot augmentation (`src/boot/i18n.ts`)
+
+- **`declare module 'vue-i18n'`** for `DefineLocaleMessage` / formats can trigger **TS2665** under `tsc` (package **`module`** → ESM bundle). Schema/augmentation in **`types/vueI18nModuleAugmentation.ts`**; **`src/boot/i18n.ts`** side-effect-imports, re-exports **`MessageLanguages`** / **`MessageSchema`**, may keep **`@ts-expect-error`** + **`eslint-disable @typescript-eslint/no-empty-object-type`** on boot block (rule name **typescript-eslint v8**).
+
+## Vitest env stubs
+
+- **Vitest 3+**: `vi.stubEnv(name, value)` types **`DEV`**, **`PROD`**, **`SSR`** as **boolean**; other keys **`string | undefined`**. Use **`vi.stubEnv('DEV', true)`** / **`false`**, not **`'true'`** / **`''`**, so `tsc` + runtime stubs stay correct.
+
+## Electron / monorepo-style imports in tests
+
+- Prefer **`app/src-electron/...`** (other **`app/`**-root paths) in Vitest when import must satisfy **`tsc`** + Vitest **`resolve.alias`**, e.g. [`tweaks.vitest.test.ts`](../../src-electron/mainScripts/nativeShell/_tests/tweaks.vitest.test.ts).
+
+## Dependency hygiene
+
+- **`npm install --ignore-scripts`** skips **`electron` postinstall** → breaks **`yarn quasar:dev:electron`** until Electron reinstalled ([fantasia-dev-setup skill](../skills/fantasia-dev-setup/SKILL.md)).
+
+## Node.js version
+
+- **22.22.0+** required (`package.json` `engines.node`). GitHub Actions **`22.22`** (`.github/workflows/build.yml`). Match locally with `nvm` / `fnm` for CI-only issues.
+
+## Related
+
+- [fantasia-dev-setup skill](../skills/fantasia-dev-setup/SKILL.md) — install, dev, troubleshooting
+- [vitest-tests.mdc](vitest-tests.mdc) — `vi.stubEnv`, test import patterns

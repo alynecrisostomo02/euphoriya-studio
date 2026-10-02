@@ -1,0 +1,68 @@
+@use './variables' as *;
+@use '../../../../css/globals/faColorBead.mixin.scss' as colorBead;
+
+/* Dialog Project Settings overrides for FaVerticalDraggableTabList hosts. */
+.faVerticalDraggableTabs.dialogProjectSettingsWorldsTabList,
+.faVerticalDraggableTabs.dialogProjectSettingsDocumentTemplatesTabList {
+  /* Gutter + negative margin so right-edge core line can sit on the painted separator.
+   * Y-scroll alone would force X clip and leave the highlight beside the border. */
+  margin-right: -$dialogProjectSettings-worldsTabList-edgeGlowGutter;
+
+  .faVerticalDraggableTabs__scroll {
+    padding-right: $dialogProjectSettings-worldsTabList-edgeGlowGutter;
+  }
+
+  .faVerticalDraggableTabs__filterRow {
+    padding-left: $dialogProjectSettings-verticalTabListFilterRow-paddingLeft;
+    padding-right: $dialogProjectSettings-verticalTabListFilterRow-paddingRight;
+  }
+}
+
+/* Flat: match left inset on filter row (fantasy keeps tighter right for edge glow). */
+body.fa-appTheme--flat {
+  .faVerticalDraggableTabs.dialogProjectSettingsWorldsTabList .faVerticalDraggableTabs__filterRow,
+  .faVerticalDraggableTabs.dialogProjectSettingsDocumentTemplatesTabList .faVerticalDraggableTabs__filterRow {
+    padding-right: $dialogProjectSettings-verticalTabListFilterRow-paddingRight-flat;
+  }
+}
+
+.faVerticalDraggableTabs.dialogProjectSettingsWorldsTabList {
+  --fa-tab-edge-glow-right-active-bloom-size: #{$dialogProjectSettings-worldsTabList-edgeGlow-right-active-bloomSize};
+  --fa-tab-edge-glow-right-hover-bloom-size: #{$dialogProjectSettings-worldsTabList-edgeGlow-right-hover-bloomSize};
+}
+
+.faVerticalDraggableTabs.dialogProjectSettingsDocumentTemplatesTabList {
+  --fa-tab-edge-glow-right-active-bloom-size: #{$dialogProjectSettings-documentTemplatesTabList-edgeGlow-right-active-bloomSize};
+  --fa-tab-edge-glow-right-hover-bloom-size: #{$dialogProjectSettings-documentTemplatesTabList-edgeGlow-right-hover-bloomSize};
+
+  flex-basis: var(--fa-vertical-draggable-tabs-column-width, #{$dialogProjectSettings-documentTemplatesTabList-width});
+  max-width: var(--fa-vertical-draggable-tabs-column-width, #{$dialogProjectSettings-documentTemplatesTabList-width});
+  min-width: var(--fa-vertical-draggable-tabs-column-width, #{$dialogProjectSettings-documentTemplatesTabList-width});
+  width: var(--fa-vertical-draggable-tabs-column-width, #{$dialogProjectSettings-documentTemplatesTabList-width});
+
+  .faVerticalDraggableTabs__filterRow {
+    padding-bottom: $dialogProjectSettings-documentTemplatesTabListFilterRow-paddingBottom;
+  }
+}
+
+.dialogProjectSettingsWorldsTabItem__colorSwatch {
+  /* Flat: plain circle + outline; fantasy adds bead shading below. */
+  border:
+    $dialogProjectSettings-worldsTabColorSwatch-borderWidth
+    solid
+    $dialogProjectSettings-worldsTabColorSwatch-borderColor;
+  border-radius: $dialogProjectSettings-worldsTabColorSwatch-borderRadius;
+  box-sizing: border-box;
+  height: $dialogProjectSettings-worldsTabColorSwatch-size;
+  pointer-events: none;
+  position: absolute;
+  right: $dialogProjectSettings-worldsTabColorSwatch-offsetRight;
+  top: 50%;
+  transform: translateY(-50%);
+  width: $dialogProjectSettings-worldsTabColorSwatch-size;
+  z-index: $dialogProjectSettings-worldsTabColorSwatch-zIndex;
+}
+
+body.fa-appTheme--fantasy .dialogProjectSettingsWorldsTabItem__colorSwatch {
+  @include colorBead.fa-color-bead-shading;
+}

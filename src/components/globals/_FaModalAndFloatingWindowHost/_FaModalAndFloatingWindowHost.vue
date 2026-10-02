@@ -1,0 +1,47 @@
+<template>
+  <div class="_faModalAndFloatingWindowHost">
+    <DialogMarkdownDocument />
+    <DialogAboutFantasiaArchive />
+    <DialogActionMonitor />
+    <DialogKeybindSettings />
+    <DialogAppSettings />
+    <DialogProjectMedia />
+    <DialogProjectSettings />
+    <WindowAppStyling />
+    <WindowProjectStyling />
+    <WindowAppNoteboard />
+    <WindowProjectNoteboard />
+    <DialogImportExportAppConfig />
+    <DialogNewProject />
+    <DialogQuickAddDocument />
+    <DialogQuickSearchDocument />
+  </div>
+</template>
+
+<script setup lang="ts">
+import DialogMarkdownDocument from 'app/src/components/dialogs/DialogMarkdownDocument/DialogMarkdownDocument.vue'
+import DialogNewProject from 'app/src/components/dialogs/DialogNewProject/DialogNewProject.vue'
+import DialogQuickAddDocument from 'app/src/components/dialogs/DialogQuickAddDocument/DialogQuickAddDocument.vue'
+import DialogQuickSearchDocument from 'app/src/components/dialogs/DialogQuickSearchDocument/DialogQuickSearchDocument.vue'
+import DialogAboutFantasiaArchive from 'app/src/components/dialogs/DialogAboutFantasiaArchive/DialogAboutFantasiaArchive.vue'
+import DialogActionMonitor from 'app/src/components/dialogs/DialogActionMonitor/DialogActionMonitor.vue'
+import DialogKeybindSettings from 'app/src/components/dialogs/DialogKeybindSettings/DialogKeybindSettings.vue'
+import DialogAppSettings from 'app/src/components/dialogs/DialogAppSettings/DialogAppSettings.vue'
+import DialogProjectMedia from 'app/src/components/dialogs/DialogProjectMedia/DialogProjectMedia.vue'
+import DialogProjectSettings from 'app/src/components/dialogs/DialogProjectSettings/DialogProjectSettings.vue'
+import DialogImportExportAppConfig from 'app/src/components/dialogs/DialogImportExportAppConfig/DialogImportExportAppConfig.vue'
+import WindowAppNoteboard from 'app/src/components/floatingWindows/WindowAppNoteboard/WindowAppNoteboard.vue'
+import WindowProjectNoteboard from 'app/src/components/floatingWindows/WindowProjectNoteboard/WindowProjectNoteboard.vue'
+import WindowAppStyling from 'app/src/components/floatingWindows/WindowAppStyling/WindowAppStyling.vue'
+import WindowProjectStyling from 'app/src/components/floatingWindows/WindowProjectStyling/WindowProjectStyling.vue'
+
+defineOptions({
+  name: '_FaModalAndFloatingWindowHost'
+})
+</script>
+
+<style lang="scss" scoped>
+._faModalAndFloatingWindowHost {
+  display: contents;
+}
+</style>

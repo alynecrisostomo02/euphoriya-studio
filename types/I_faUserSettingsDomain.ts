@@ -1,0 +1,103 @@
+import type { T_faUserSettingsAppTheme } from 'app/types/faUserSettingsAppThemeRegistry'
+import type { T_faUserSettingsLanguageCode } from 'app/types/faUserSettingsLanguageRegistry'
+
+export type {
+  T_faUserSettingsAppTheme
+} from 'app/types/faUserSettingsAppThemeRegistry'
+
+export type {
+  T_faUserSettingsLanguageCode,
+  T_faUserSettingsLanguageNamesKey,
+  T_faUserSettingsLanguageSelectorRow
+} from 'app/types/faUserSettingsLanguageRegistry'
+
+export {
+  FA_USER_SETTINGS_APP_THEME_DEFAULT,
+  FA_USER_SETTINGS_APP_THEME_VALUES,
+  isFaUserSettingsAppTheme
+} from 'app/types/faUserSettingsAppThemeRegistry'
+
+export {
+  FA_SPELL_CHECKER_CANDIDATES_BY_LANGUAGE_CODE,
+  FA_USER_SETTINGS_LANGUAGE_CODES,
+  buildFaUserSettingsLanguageSelectorLocales,
+  faUserSettingsLanguageCodeToNamesKey,
+  isFaUserSettingsLanguageCode,
+  resolveFaSpellCheckerLanguageFamilyPrefix
+} from 'app/types/faUserSettingsLanguageRegistry'
+
+/**
+ * Full persisted user preference surface mirrored with the main-process user settings store.
+ */
+export interface I_faUserSettings {
+  aggressiveRelationshipFilter: boolean
+  allowQuickPopupSameKeyClose: boolean
+  allowWiderScrollbars: boolean
+  appTheme: T_faUserSettingsAppTheme
+  autoOpenLastDocument: boolean
+  disableCategoryCount: boolean
+  compactTags: boolean
+  disableCloseAfterSelectQuickSearch: boolean
+  disableAppControlBar: boolean
+  disableAppControlBarContentButtons: boolean
+  disableAppControlBarFunctionButtons: boolean
+  disableAppControlBarGuides: boolean
+  disableDocumentCounts: boolean
+  disableDocumentToolTips: boolean
+  disableSpellCheck: boolean
+  disableStartUpdateCheckMessage: boolean
+  doubleDashDocCount: boolean
+  extraTreePadding: boolean
+  forceSublevelCollapseInTree: boolean
+  hideAdvSearchCheatsheetButton: boolean
+  hideDeadCrossThrough: boolean
+  hideDocumentTitles: boolean
+  hideEmptyFields: boolean
+  hideHierarchyTree: boolean
+  hidePlushes: boolean
+  hideRecentProjectTooltip: boolean
+  hideTabCloseButton: boolean
+  hideTooltipsProject: boolean
+  hideTooltipsStart: boolean
+  hideTreeIconAddUnder: boolean
+  hideTreeIconEdit: boolean
+  hideTreeIconView: boolean
+  hideTreeLines: boolean
+  hideTreeOrderNumbers: boolean
+  hideWelcomeScreenSocials: boolean
+  invertCategoryPosition: boolean
+  languageCode: T_faUserSettingsLanguageCode
+  limitEditorHeight: boolean
+  logFullActivityPayload: boolean
+  noProjectName: boolean
+  noTags: boolean
+  preventAutoScroll: boolean
+  preventFilledAppNoteBoardPopup: boolean
+  preventFilledProjectNoteBoardPopup: boolean
+  preventPreviewsDocuments: boolean
+  preventPreviewsPopups: boolean
+  preventPreviewsTabs: boolean
+  preventPreviewsTree: boolean
+  showDocumentID: boolean
+  showTabBarScrollButtons: boolean
+  skipWelcomeScreen: boolean
+  tagsAtTop: boolean
+  textShadow: boolean
+}
+
+/**
+ * Preload bridge for reading and patching persisted user settings in the main process.
+ */
+export interface I_faUserSettingsAPI {
+
+  /**
+   * Get the user settings
+   */
+  getSettings: () => Promise<I_faUserSettings>
+
+  /**
+   * Set the user settings
+   */
+  setSettings: (patch: Partial<I_faUserSettings>) => Promise<void>
+
+}

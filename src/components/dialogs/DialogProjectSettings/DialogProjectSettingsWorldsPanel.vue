@@ -1,0 +1,177 @@
+<template>
+  <div class="dialogProjectSettings__worldsPanel row no-wrap">
+    <DialogProjectSettingsWorldsTabList
+      :current-language-code="props.currentLanguageCode"
+      :document-templates="props.documentTemplates"
+      :selected-world-id="selectedWorldId"
+      :worlds="props.worlds"
+      @add-world="emit('addWorld')"
+      @select="onSelectWorld"
+      @update:worlds="emit('update:worlds', $event)"
+    />
+
+    <q-separator vertical />
+
+    <div class="dialogProjectSettings__worldsDetailHost col">
+      <Transition
+        v-bind="FA_DOCUMENT_WORKSPACE_PAGE_TRANSITION_BINDINGS"
+        mode="out-in"
+      >
+        <DialogProjectSettingsWorldsDetailPanel
+          v-if="selectedWorld !== null"
+          :key="selectedWorld.id"
+          :current-language-code="props.currentLanguageCode"
+          :document-templates="props.documentTemplates"
+          :name-has-error="isWorldNameInvalid(selectedWorld.displayNameTranslations)"
+          :remove-disabled="isWorldRemoveDisabled(selectedWorld)"
+          :remove-disabled-reason="resolveRemoveDisabledReason(selectedWorld)"
+          :world="selectedWorld"
+          @remove="emitRemove(selectedWorld.id)"
+          @update:color="emitUpdateColor(selectedWorld.id, $event)"
+          @update:color-palette="emitUpdateColorPalette(selectedWorld.id, $event)"
+          @update:display-name-translations="emitUpdateDisplayNameTranslations(selectedWorld.id, $event)"
+          @update:template-layout="emitUpdateTemplateLayout(selectedWorld.id, $event)"
+        />
+      </Transition>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+
+import type { I_dialogProjectSettingsDocumentTemplateDraft } from 'app/types/I_dialogProjectSettingsDocumentTemplates'
+import type { I_dialogProjectSettingsWorldTemplateLayoutDraft } from 'app/types/I_dialogProjectSettingsWorlds'
+import type { I_dialogProjectSettingsWorldDraft } from 'app/types/I_dialogProjectSettingsWorlds'
+import type { I_faProjectWorldDisplayNameTranslations } from 'app/types/I_faProjectWorldDisplayNameTranslations'
+import type { T_faUserSettingsLanguageCode } from 'app/types/faUserSettingsLanguageRegistry'
+import {
+  isDialogProjectSettingsWorldRemoveDisabled
+} from 'app/src/components/dialogs/DialogProjectSettings/scripts/functions/dialogProjectSettingsWorldsDraft'
+import {
+  isDialogProjectSettingsWorldNameInvalid
+} from 'app/src/components/dialogs/DialogProjectSettings/scripts/functions/dialogProjectSettingsWorldsSaveValidation'
+import { resolveDialogProjectSettingsWorldsPanelSelection } from 'app/src/components/dialogs/DialogProjectSettings/scripts/functions/dialogProjectSettingsWorldsSelection'
+import { FA_DOCUMENT_WORKSPACE_PAGE_TRANSITION_BINDINGS } from 'app/src/scripts/appRouting/faAppShellPageTransition_manager'
+import DialogProjectSettingsWorldsDetailPanel from 'app/src/components/dialogs/DialogProjectSettings/DialogProjectSettingsWorldsDetailPanel.vue'
+import DialogProjectSettingsWorldsTabList from 'app/src/components/dialogs/DialogProjectSettings/DialogProjectSettingsWorldsTabList.vue'
+
+defineOptions({
+  name: 'DialogProjectSettingsWorldsPanel'
+})
+
+const props = defineProps<{
+  currentLanguageCode: T_faUserSettingsLanguageCode
+  documentTemplates: I_dialogProjectSettingsDocumentTemplateDraft[] | null
+  worlds: I_dialogProjectSettingsWorldDraft[]
+}>()
+
+const emit = defineEmits<{
+  addWorld: []
+  removeWorld: [id: string]
+  'update:worlds': [worlds: I_dialogProjectSettingsWorldDraft[]]
+  updateWorldColor: [id: string, color: string]
+  updateWorldColorPalette: [id: string, colorPalette: string]
+  updateWorldDisplayNameTranslations: [id: string, displayNameTranslations: I_faProjectWorldDisplayNameTranslations]
+  updateWorldTemplateLayout: [id: string, layout: I_dialogProjectSettingsWorldTemplateLayoutDraft]
+}>()
+
+const selectedWorldId = ref<string | null>(null)
+const previousWorlds = ref<I_dialogProjectSettingsWorldDraft[]>([])
+
+const selectedWorld = computed(() => {
+  if (selectedWorldId.value === null) {
+    return null
+  }
+  return props.worlds.find((world) => world.id === selectedWorldId.value) ?? null
+})
+
+watch(() => props.worlds, (nextWorlds) => {
+  selectedWorldId.value = resolveDialogProjectSettingsWorldsPanelSelection(
+    nextWorlds,
+    previousWorlds.value,
+    selectedWorldId.value
+  )
+  previousWorlds.value = nextWorlds.map((world) => ({ ...world }))
+}, {
+  immediate: true
+})
+
+function isWorldNameInvalid (
+  displayNameTranslations: I_faProjectWorldDisplayNameTranslations
+): boolean {
+  return isDialogProjectSettingsWorldNameInvalid(displayNameTranslations)
+}
+
+function isWorldRemoveDisabled (world: I_dialogProjectSettingsWorldDraft): boolean {
+  return isDialogProjectSettingsWorldRemoveDisabled(props.worlds, world)
+}
+
+function resolveRemoveDisabledReason (
+  world: I_dialogProjectSettingsWorldDraft
+): 'hasDocuments' | 'lastWorld' | null {
+  if (!isWorldRemoveDisabled(world)) {
+    return null
+  }
+  if (world.documentCount > 0) {
+    return 'hasDocuments'
+  }
+  return 'lastWorld'
+}
+
+function onSelectWorld (id: string): void {
+  selectedWorldId.value = id
+}
+
+function emitRemove (id: string): void {
+  emit('removeWorld', id)
+}
+
+function emitUpdateDisplayNameTranslations (
+  id: string,
+  displayNameTranslations: I_faProjectWorldDisplayNameTranslations
+): void {
+  emit('updateWorldDisplayNameTranslations', id, displayNameTranslations)
+}
+
+function emitUpdateColor (id: string, color: string): void {
+  emit('updateWorldColor', id, color)
+}
+
+function emitUpdateColorPalette (id: string, colorPalette: string): void {
+  emit('updateWorldColorPalette', id, colorPalette)
+}
+
+function emitUpdateTemplateLayout (
+  id: string,
+  layout: I_dialogProjectSettingsWorldTemplateLayoutDraft
+): void {
+  emit('updateWorldTemplateLayout', id, layout)
+}
+</script>
+
+<style lang="scss" scoped>
+.dialogProjectSettings__worldsPanel {
+  align-self: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+
+  /* Keep painted separator under tab glow (z-index 2 on faVerticalDraggableTabs). */
+  > :deep(.q-separator) {
+    position: relative;
+    z-index: 0;
+  }
+}
+
+.dialogProjectSettings__worldsDetailHost {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden auto;
+}
+</style>
+
+<style lang="scss" src="./styles/DialogProjectSettings.detailPanelTransition.unscoped.scss"></style>

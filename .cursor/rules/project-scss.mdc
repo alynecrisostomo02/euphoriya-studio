@@ -1,0 +1,73 @@
+---
+description: Global and Quasar SCSS partials under src/css
+globs: "src/css/**/*.scss"
+alwaysApply: false
+---
+
+# Project-level SCSS (`src/css`)
+
+## Entry and variables
+
+- [app.scss](src/css/app.scss) first **`@use`s** [fa-theme.scss](src/css/fa-theme.scss) — **`:root`** default **`--fa-color-*` CSS custom properties** (direct color codes) from [app.palette.scss](src/css/app.palette.scss); end users (Custom app CSS) override for runtime theming. Distinct color **`--fa-content-fields-text-color`** = textarea ink (not **`--fa-color-*`** help list). Non-color runtime tokens (e.g. **`--fa-fw-resize`**) use different **`--fa-…`** prefix. [app.palette.scss](src/css/app.palette.scss): **`fa-v($token, $value)`** — SCSS-emitting color properties → `var(--fa-color-…, fallback)` at paint time; **`$value`** stays real color for **`color.*`** APIs. After [customColors.scss](src/css/globals/customColors.scss) (e.g. **`.text-primary-bright`**, **`.bg-primary-bright`**) entry **`@use`s** [faSemanticText.scss](src/css/globals/faSemanticText.scss) — Quasar **`.text-white` / `.text-black`** + shared **`fa-text-*` / `fa-icon-*` / `fa-separator-*`** use **`--fa-color-*`** (semantic roles, **`/* APP COLORS - SEMANTIC TEXT & ACCENTS */`**) not fixed Material **`.text-*`** or quasar **colors.sass** **#fff** for **`.text-white`**. Template utilities: class names in **`faSemanticText.scss`** (**`fa-icon-*`** for icon tints, not **`fa-color-*`** on class). Then [app.scss](src/css/app.scss) remaining [globals](src/css/globals/) via **`@use`**, last **`@use`s** [fa-quasar-public-vars-bridge.scss](src/css/fa-quasar-public-vars-bridge.scss) — Quasar :root **`--q-primary`** through **`--q-dark-page`** = **`var(--fa-color-…)`** — else Custom app CSS could change **`:root` `--fa-color-dark`** while **`.q-dark`** still reads static **`--q-dark`**. New global rules in appropriate `globals/` file, not inflating `app.scss`. Partials needing full theme: **`@use '../quasar.variables.scss' as *`** (or narrower: **`app.palette.scss`**, **`paletteGlobals.variables.scss`**, feature **`styles/_variables.scss`**, [theme/quasar-components](src/css/theme/quasar-components/)) — not deprecated **`@import`** chains.
+- **App skins** — body **`fa-appTheme--flat`** / **`fa-appTheme--fantasy`** from **`applyFaAppThemeToDocument`** (**`S_FaUserSettings.appTheme`**). Gate chrome by skin (tooltips, dialogs, tabs, help icon). Pair with Quasar **`body--dark`** / **`body--light`**. Storybook preview: fantasy + dark by default.
+- [quasar.variables.scss](src/css/quasar.variables.scss) **barrel** **`@forward`s** palette, Quasar component tokens, feature tokens — build + Storybook prepend **one** file. Sources elsewhere (below). **Quasar Vite** + **Storybook** ([`.storybook-workspace/.storybook/main.ts`](../../.storybook-workspace/.storybook/main.ts) **`scss.additionalData`**) prepend **`@use "…/src/css/quasar.variables.scss" as *`** to project SCSS (Vue `<style lang="scss">`, `src/**/*.scss` outside `node_modules`); [`app.scss`](src/css/app.scss) excluded in Storybook so barrel not doubled. Prefer variables over literals in `src/css/**/*.scss` + Vue `<style lang="scss">` under `src/` ([vue-bem-scss.mdc](vue-bem-scss.mdc)). Do **not** move template attributes, `:style`, prop strings (e.g. `width="300px"`) into token files unless policy expands.
+- **Drift checks**: **`yarn audit:quasar-component-tokens`** ([`.utility-scripts/auditQuasarComponentTokens.mjs`](../../.utility-scripts/auditQuasarComponentTokens.mjs)) errors if **`$qPascalCase…`** in `src/` or `.storybook-workspace/` has no definition under [`src/css/theme/quasar-components/`](src/css/theme/quasar-components/). **Do not truncate** partials or **`styles/_variables.scss`** while [quasarComponentsAdjustments.scss](src/css/globals/quasarComponentsAdjustments.scss) or SFC still uses name — Sass **undefined variable** at compile; Stylelint does not validate every **`$`** exists.
+
+## Theme token layout (barrel, palette, colocated files)
+
+1. **Palette** — [app.palette.scss](src/css/app.palette.scss): **`/* QUASAR COLORS - … */`**, **`/* APP COLORS - … */`** (shared hex/rgb e.g. **`$black`**, **`$brand-discord`**, selection/code-token bases). Banners: **`/* QUASAR COLORS - GENERAL */`**, **`/* APP COLORS - SHARED */`**. New literals here → reference from globals + feature **`_variables.scss`**.
+2. **Global partial tokens (`globals/`)** — **`/* GLOBALS - … */`** in **`*.variables.scss`**: [paletteGlobals.variables.scss](src/css/globals/paletteGlobals.variables.scss) **`/* GLOBALS - CUSTOM COLORS */`**, **`/* GLOBALS - GENERAL ICONS */`**; [htmlAdjustments.variables.scss](src/css/globals/htmlAdjustments.variables.scss); [scrollbar.variables.scss](src/css/globals/scrollbar.variables.scss). Each **`@use`s** [app.palette.scss](src/css/app.palette.scss) where needed; barrel re-exports.
+3. **Quasar component tokens** — one file per group under [src/css/theme/quasar-components/](src/css/theme/quasar-components/) (e.g. `_qCard.variables.scss`); feed [quasarComponentsAdjustments.scss](src/css/globals/quasarComponentsAdjustments.scss) + some SFCs. Banners: **`/* QUASAR COMPONENT - Q-… */`**.
+4. **Feature / layout / page tokens** — colocated **`styles/_variables.scss`** ([component-styles-folder.mdc](component-styles-folder.mdc)) next to **`src/components/<bucket>/<Feature>/`**, **`src/layouts/.../`**, **`src/pages/.../`**. Section banner **`COMPONENT`**, **`LAYOUT`**, or **`PAGE`** (see **Section banners**). **`src/pages/**`** SFC consumes **`$`** from file → matching **`@forward`** in [quasar.variables.scss](src/css/quasar.variables.scss) (**`SplashPage`** = reference). Each colocated file: **`@use` … `app.palette.scss` `as *`** when needed; **no** barrel **`@use`** (circular imports).
+
+Token in **palette** or **`globals/*.variables.scss`** when shared by global partials; else **Quasar** or **colocated** file owning primary consumer. [component-styles-folder.mdc](component-styles-folder.mdc) documents feature **`_variables.scss`** next to `*.unscoped.scss`.
+
+### Section banners and ordering inside a section
+
+- Banner: **`/* <KIND> - <NAME IN ALL CAPS> */`** — `<KIND>` = `QUASAR COLORS`, `GLOBALS`, `QUASAR COMPONENT`, `COMPONENT`, `PAGE`, `LAYOUT`.
+- **Within section**: **`$variable` declarations alphabetical** by full identifier. Stylelint sorts CSS declaration properties; not SCSS variables — maintain by hand.
+
+### Variable naming
+
+- **`$<blockCamelCase>-[<areaOrElement>-]<semanticOrProperty>[-<modifier>]`** — **hyphens (`-`) only** after leading camelCase block (e.g. `$errorCard`, `$qMarkdown`). **No underscores (`_`)** in theme `$` names; BEM `__` in templates unrelated.
+- Examples: `$qCard-boxShadow`, `$globalWindowButtons-close-hoverColor`, `$qMarkdown-code-borderRadius`.
+- **One variable** for multi-token value when single design decision (e.g. full `box-shadow` stack).
+
+### Colors
+
+- Reuse **`/* QUASAR COLORS - GENERAL */`** + **`/* GLOBALS - CUSTOM COLORS */`** in [paletteGlobals.variables.scss](src/css/globals/paletteGlobals.variables.scss) before new hex/rgb.
+- Third-party brand colors: literals on RHS of named semantic variable (e.g. `$socialContactButtons-backgroundColor-patreon: #ff424d`).
+
+### Palette variables vs semantic color tokens
+
+**Framework palette** Sass variables = raw hex in **consumer** stylesheets (global partials `src/css/globals/`, feature `styles/*.scss`, Vue **`<style lang="scss">`**).
+
+- **Palette** = shared Quasar/app colors under **`/* QUASAR COLORS - … */`** in [app.palette.scss](src/css/app.palette.scss): `$primary`, `$primary-bright`, `$secondary`, `$accent`, `$positive`, `$negative`, `$info`, `$warning`, `$dark`, `$dark-middle`, `$dark-lighter`, `$white`, `$grey`, `$grey-lighter`, other `$` naming palette not UI role.
+- **Consumer** uses **semantic** tokens (Globals, `theme/quasar-components/`, feature **`styles/_variables.scss`**) — values **may** bind palette on RHS in token file (e.g. `$qTooltip-color: $dark;`) — same as abstracting `8px` → `$qFoo-bar-width`.
+- **Palette names may appear**: defining under **`/* QUASAR COLORS - … */`**, RHS when assigning semantic token in Quasar/feature token file. **Not** as rule value in `quasarComponentsAdjustments.scss` or component stylesheet when semantic token expresses role.
+- **Already-semantic** Globals (`$aLinkColor`, **`$globals-codeToken-textColor`**) not “palette”; reuse or add semantic name in right token file.
+- **Stylelint** does not enforce; apply when authoring/reviewing (ripgrep consumer SCSS for `\$primary`, `\$grey`, `\$white` outside palette/QUASAR COLORS blocks).
+
+### What to extract into token files
+
+**`src/css/**/*.scss`**, colocated **`styles/_variables.scss`**, **`<style lang="scss">` in `src/**/*.vue`**:
+
+- Lengths: `px`, `rem`, `em`, `%`, `vh`, `vw`, etc.
+- Colors: hex, `rgb`/`rgba`, `hsl`/`hsla` (Sass `color.adjust`/`color.scale` may stay RHS), **direct palette** `$` in consumers — use semantic tokens (see **Palette variables vs semantic color tokens**).
+- Design tokens: meaningful **`z-index`**, **`opacity`** on focused layers, **`letter-spacing`**, repeated **`line-height`**, **`border-radius`** / **`border-width`** when not `0`.
+- Prefer variables inside **`calc(...)`**; whole `calc` or composed via interpolation.
+
+### Exceptions (leave inline)
+
+- **`0`**, **`none`**, **`inherit`**, **`auto`**, **`transparent`** when not shared scale.
+- Keyframes/one-off animation strings unless tokenizing repeated durations/easings.
+
+## Conventions
+
+- **Stylelint** sorts **declaration** properties alphabetically (`order/properties-alphabetical-order`, `order/custom-properties-alphabetical-order` via `stylelint-order`); autofix **`yarn lint:stylelint:fix`**. Shorthand-before-longhand + vendor-prefix per rule exceptions.
+- **Stylelint not whole policy**: does **not** enforce moving lengths/colors/palette `$` from feature **`*.scss`**, **`styles/_variables.scss`**, Vue **`<style>`** into token file as **semantic** names; does **not** catch bare **`$primary`** / **`$grey`** in consumers. After edits apply **What to extract** + **Palette variables vs semantic color tokens** by hand; run **`yarn audit:scss-literals`** (consumer **`*.unscoped.scss`**, SFC **`<style>`**, global partials — excludes **`_variables.scss`** / **`*.variables.scss`**). **Dev edits:** stylelint on touched style files ([dev-scoped-verify.mdc](dev-scoped-verify.mdc)). **Commit:** full **`yarn testbatch:verify`** runs repo **`yarn lint:stylelint`**.
+- **Partials** in `globals/`: scrollbar, html tweaks, component adjustments, custom colors — same separation for new cross-app styling.
+- **`hasScrollbar`**: [scrollbar.scss](src/css/globals/scrollbar.scss). Class on **scroll container** (`overflow: auto`/`scroll` or may show vertical scrollbar when content overflows) when area **may intermittently** show/hide vertical scrollbar → `scrollbar-gutter: stable`, consistent gutter, no **unwanted horizontal shifts**. Dialogs, panels, lists, content-dependent scrollbar regions.
+- **`code.code-token`**: [htmlAdjustments.scss](src/css/globals/htmlAdjustments.scss) using **`$globals-codeToken-*`** from [htmlAdjustments.variables.scss](src/css/globals/htmlAdjustments.variables.scss). Second class **`code-token`** on **`<code>`** (e.g. **`<code class="code-token">path/to/file</code>`**) for shared **inline code chip**. Loaded app-wide via [app.scss](src/css/app.scss); prefer over one-off inline-code in feature unless design differs.
+- Prefer **low-specificity** selectors; avoid deep nesting unless mirroring existing pattern in same file.
+- Component BEM + scoped styles in **Vue SFCs** or **`src/components/<bucket>/<Feature>/styles/`** when extracted ([vue-bem-scss.mdc](vue-bem-scss.mdc), [component-styles-folder.mdc](component-styles-folder.mdc)) — not `src/css/` unless global override file already used for concern.

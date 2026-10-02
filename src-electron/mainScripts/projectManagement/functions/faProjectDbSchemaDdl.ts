@@ -1,0 +1,395 @@
+import type { I_faProjectDbExec } from 'app/types/I_faProjectDbSchemaDdl'
+
+export const FA_PROJECT_DATA_TABLE_NAME = 'project_data'
+export const FA_PROJECT_TABLE_WORLDS = 'worlds'
+export const FA_PROJECT_TABLE_DOCUMENTS = 'documents'
+export const FA_PROJECT_TABLE_DOCUMENT_TEMPLATES = 'document_templates'
+export const FA_PROJECT_TABLE_MEDIA = 'media'
+
+/** media.type: external vs project-internal storage */
+export const FA_PROJECT_MEDIA_TYPE_COLUMN = 'type'
+
+/** media.internal_type: embedded, linked_outside, linked_in_project, or empty */
+export const FA_PROJECT_MEDIA_INTERNAL_TYPE_COLUMN = 'internal_type'
+
+/** media.external_type: linked, embed, or empty */
+export const FA_PROJECT_MEDIA_EXTERNAL_TYPE_COLUMN = 'external_type'
+
+/** media.external_link: path or URL, or empty */
+export const FA_PROJECT_MEDIA_EXTERNAL_LINK_COLUMN = 'external_link'
+
+/** media.external_embed: iframe / embed HTML body, or empty */
+export const FA_PROJECT_MEDIA_EXTERNAL_EMBED_COLUMN = 'external_embed'
+
+/** media.internal_link: path or URL, or empty */
+export const FA_PROJECT_MEDIA_INTERNAL_LINK_COLUMN = 'internal_link'
+
+/** media.internal_embed: BLOB bytes or NULL */
+export const FA_PROJECT_MEDIA_INTERNAL_EMBED_COLUMN = 'internal_embed'
+
+/** Legacy v9 media.internal_is_project_included; dropped in v10. */
+export const FA_PROJECT_MEDIA_INTERNAL_IS_PROJECT_INCLUDED_COLUMN =
+  'internal_is_project_included'
+
+/** Default media.type for new rows and v9 backfill */
+export const FA_PROJECT_MEDIA_DEFAULT_TYPE = 'external'
+
+/** media.internal_type CHECK (v10). */
+export const FA_PROJECT_MEDIA_INTERNAL_TYPE_CHECK_SQL =
+  `(${FA_PROJECT_MEDIA_INTERNAL_TYPE_COLUMN} IN ('', 'embedded', 'linked_outside', 'linked_in_project'))`
+
+/** media.external_type CHECK (v11). */
+export const FA_PROJECT_MEDIA_EXTERNAL_TYPE_CHECK_SQL =
+  `(${FA_PROJECT_MEDIA_EXTERNAL_TYPE_COLUMN} IN ('', 'linked', 'embed'))`
+
+/** SELECT list for full media rows (unaliased). */
+export const FA_PROJECT_MEDIA_SELECT_SQL =
+  'id, display_name, type, internal_type, external_type, external_link, ' +
+  'external_embed, internal_link, internal_embed, created_at_ms, updated_at_ms'
+
+/** SELECT list for full media rows aliased as m (document_media joins). */
+export const FA_PROJECT_MEDIA_SELECT_SQL_ALIASED_M =
+  'm.id, m.display_name, m.type, m.internal_type, m.external_type, m.external_link, ' +
+  'm.external_embed, m.internal_link, m.internal_embed, m.created_at_ms, m.updated_at_ms'
+
+export const FA_PROJECT_TABLE_DOCUMENT_MEDIA = 'document_media'
+export const FA_PROJECT_TABLE_TAGS = 'tags'
+export const FA_PROJECT_TABLE_DOCUMENT_TAGS = 'document_tags'
+export const FA_PROJECT_TABLE_WORLD_TEMPLATE_GROUPS = 'world_template_groups'
+export const FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS = 'world_template_placements'
+export const FA_PROJECT_TABLE_OPENED_DOCUMENTS = 'opened_documents'
+export const FA_PROJECT_TABLE_DOCUMENT_LAST_OPENED = 'document_last_opened'
+
+/** Max rows retained in document_last_opened (newest first), matching FA 1.0. */
+export const FA_PROJECT_DOCUMENT_LAST_OPENED_MAX = 50
+
+/** documents tree anchor FK to world_template_placements.id */
+export const FA_PROJECT_DOCUMENT_TREE_PLACEMENT_ID_COLUMN = 'tree_placement_id'
+
+/** documents tree parent FK to documents.id (NULL = top-level under placement) */
+export const FA_PROJECT_DOCUMENT_TREE_PARENT_DOCUMENT_ID_COLUMN = 'tree_parent_document_id'
+
+/** documents sibling order within placement + parent bucket */
+export const FA_PROJECT_DOCUMENT_TREE_CUSTOM_SORT_ORDER_COLUMN = 'tree_custom_sort_order'
+
+/** documents optional text color (#RRGGBB) */
+export const FA_PROJECT_DOCUMENT_TEXT_COLOR_COLUMN = 'document_text_color'
+
+/** documents optional background color (#RRGGBB) */
+export const FA_PROJECT_DOCUMENT_BACKGROUND_COLOR_COLUMN = 'document_background_color'
+
+/** documents category flag (folder icon + placement counts) */
+export const FA_PROJECT_DOCUMENT_IS_CATEGORY_COLUMN = 'is_category'
+
+/** documents finished flag (workspace toggle; no view-mode field hiding in this pass) */
+export const FA_PROJECT_DOCUMENT_IS_FINISHED_COLUMN = 'is_finished'
+
+/** documents minor flag (muted tree/tab label when no custom text color) */
+export const FA_PROJECT_DOCUMENT_IS_MINOR_COLUMN = 'is_minor'
+
+/** documents dead flag (dagger prefix + strikethrough on tree/tab label) */
+export const FA_PROJECT_DOCUMENT_IS_DEAD_COLUMN = 'is_dead'
+
+/** documents display-only custom order badge (empty sentinel = MIN_SAFE_INTEGER) */
+export const FA_PROJECT_DOCUMENT_TREE_ORDER_NUMBER_COLUMN = 'tree_order_number'
+
+/** documents optional space-separated HTML class list for Custom Project CSS targeting */
+export const FA_PROJECT_DOCUMENT_EXTRA_CLASSES_COLUMN = 'extra_classes'
+
+/** Max stored length for documents.extra_classes. */
+export const FA_PROJECT_DOCUMENT_EXTRA_CLASSES_MAX_LENGTH = 512
+
+/** Composite index on documents tree hierarchy columns */
+export const FA_PROJECT_DOCUMENT_TREE_PLACEMENT_PARENT_SORT_INDEX =
+  'idx_documents_tree_placement_parent_sort'
+
+/** Legacy documents hierarchy column names (pre tree_* rename) */
+export const FA_PROJECT_DOCUMENT_TREE_LEGACY_PLACEMENT_ID_COLUMN = 'placement_id'
+export const FA_PROJECT_DOCUMENT_TREE_LEGACY_PARENT_DOCUMENT_ID_COLUMN = 'parent_document_id'
+export const FA_PROJECT_DOCUMENT_TREE_LEGACY_SORT_ORDER_COLUMN = 'sort_order'
+
+/** Legacy composite index name before tree_* column rename */
+export const FA_PROJECT_DOCUMENT_TREE_LEGACY_PLACEMENT_PARENT_SORT_INDEX =
+  'idx_documents_placement_parent_sort'
+
+/** Default worlds.color when inserting worlds without an override (empty = optional). */
+export const FA_PROJECT_WORLD_DEFAULT_COLOR = ''
+
+/**
+ * worlds.color CHECK: empty string (optional color) or #RRGGBB.
+ * Keep in sync with faProjectWorldColorEmptyAllowedSchemaPatchWiring rebuild DDL.
+ */
+export const FA_PROJECT_WORLD_COLOR_CHECK_SQL =
+  '(color = \'\' OR (length(color) = 7 AND substr(color, 1, 1) = \'#\'))'
+
+/**
+ * documents.document_text_color CHECK: NULL, empty, or #RRGGBB.
+ * Keep in sync with document appearance empty-color rebuild patch.
+ */
+export const FA_PROJECT_DOCUMENT_TEXT_COLOR_CHECK_SQL =
+  `(${FA_PROJECT_DOCUMENT_TEXT_COLOR_COLUMN} IS NULL OR ` +
+  `${FA_PROJECT_DOCUMENT_TEXT_COLOR_COLUMN} = '' OR (` +
+  `length(${FA_PROJECT_DOCUMENT_TEXT_COLOR_COLUMN}) = 7 AND ` +
+  `substr(${FA_PROJECT_DOCUMENT_TEXT_COLOR_COLUMN}, 1, 1) = '#'))`
+
+/**
+ * documents.document_background_color CHECK: NULL, empty, or #RRGGBB.
+ * Keep in sync with document appearance empty-color rebuild patch.
+ */
+export const FA_PROJECT_DOCUMENT_BACKGROUND_COLOR_CHECK_SQL =
+  `(${FA_PROJECT_DOCUMENT_BACKGROUND_COLOR_COLUMN} IS NULL OR ` +
+  `${FA_PROJECT_DOCUMENT_BACKGROUND_COLOR_COLUMN} = '' OR (` +
+  `length(${FA_PROJECT_DOCUMENT_BACKGROUND_COLOR_COLUMN}) = 7 AND ` +
+  `substr(${FA_PROJECT_DOCUMENT_BACKGROUND_COLOR_COLUMN}, 1, 1) = '#'))`
+
+/** Max stored length for worlds.color_palette (semicolon-separated #RRGGBB list). */
+export const FA_PROJECT_WORLD_COLOR_PALETTE_MAX_LENGTH = 2000
+
+/** Default worlds.color_palette when inserting worlds without an override. */
+export const FA_PROJECT_WORLD_DEFAULT_COLOR_PALETTE = ''
+
+/** Max stored length for document_templates.world_appendix. */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_WORLD_APPENDIX_MAX_LENGTH = 500
+
+/** Max stored length for document_templates.icon (icon name string). */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_ICON_MAX_LENGTH = 128
+
+/** Max stored length for world_template_placements.nickname (matches FA_PROJECT_NAME_MAX_LEN). */
+export const FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_NICKNAME_MAX_LENGTH = 120
+
+/** Default document_templates.world_appendix when inserting without an override. */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_WORLD_APPENDIX = ''
+
+/** Default document_templates.icon when inserting without an override. */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_ICON = ''
+
+/** Default document_templates.title_singular_translations_json for fresh rows. */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_TITLE_SINGULAR_TRANSLATIONS_JSON = '{}'
+
+/** Max stored JSON length for document_templates.title_singular_translations_json. */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_TITLE_SINGULAR_TRANSLATIONS_JSON_MAX_LENGTH = 4096
+
+/** Default document_templates.title_translations_json for fresh rows. */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_TITLE_TRANSLATIONS_JSON = '{}'
+
+/** Max stored JSON length for document_templates.title_translations_json. */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_TITLE_TRANSLATIONS_JSON_MAX_LENGTH = 4096
+
+/** Default worlds.display_name_translations_json for fresh rows. */
+export const FA_PROJECT_WORLD_DEFAULT_DISPLAY_NAME_TRANSLATIONS_JSON = '{}'
+
+/** Max stored JSON length for worlds.display_name_translations_json. */
+export const FA_PROJECT_WORLD_DISPLAY_NAME_TRANSLATIONS_JSON_MAX_LENGTH = 4096
+
+/** Default document_templates.world_appendix_translations_json for fresh rows. */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_WORLD_APPENDIX_TRANSLATIONS_JSON = '{}'
+
+/** Max stored JSON length for document_templates.world_appendix_translations_json. */
+export const FA_PROJECT_DOCUMENT_TEMPLATE_WORLD_APPENDIX_TRANSLATIONS_JSON_MAX_LENGTH = 8192
+
+/** Default world_template_groups.display_name_translations_json for fresh rows. */
+export const FA_PROJECT_WORLD_TEMPLATE_GROUP_DEFAULT_DISPLAY_NAME_TRANSLATIONS_JSON = '{}'
+
+/** Max stored JSON length for world_template_groups.display_name_translations_json. */
+export const FA_PROJECT_WORLD_TEMPLATE_GROUP_DISPLAY_NAME_TRANSLATIONS_JSON_MAX_LENGTH = 4096
+
+/** Default world_template_placements.nickname_singular_translations_json for fresh rows. */
+export const FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_DEFAULT_NICKNAME_SINGULAR_TRANSLATIONS_JSON = '{}'
+
+/** Max stored JSON length for world_template_placements.nickname_singular_translations_json. */
+export const FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_NICKNAME_SINGULAR_TRANSLATIONS_JSON_MAX_LENGTH = 4096
+
+/** Default world_template_placements.nickname_translations_json for fresh rows. */
+export const FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_DEFAULT_NICKNAME_TRANSLATIONS_JSON = '{}'
+
+/** Max stored JSON length for world_template_placements.nickname_translations_json. */
+export const FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_NICKNAME_TRANSLATIONS_JSON_MAX_LENGTH = 4096
+
+/**
+ * Creates the project_data KV table (schema version 1). Idempotent when the table already exists.
+ */
+export function applyFaProjectProjectDataSchemaV1 (db: I_faProjectDbExec): void {
+  db.exec(`
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_DATA_TABLE_NAME} (
+  option_id INTEGER PRIMARY KEY,
+  option_name TEXT NOT NULL UNIQUE CHECK (length(option_name) BETWEEN 1 AND 255),
+  option_value TEXT NOT NULL
+);
+`)
+}
+
+/**
+ * Creates worldbuilding content tables through media (schema version 1).
+ */
+export function applyFaProjectContentSchemaV1CoreTables (db: I_faProjectDbExec): void {
+  db.exec(`
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_TABLE_WORLDS} (
+  id TEXT NOT NULL PRIMARY KEY,
+  display_name TEXT NOT NULL CHECK (length(display_name) > 0),
+  display_name_translations_json TEXT NOT NULL DEFAULT '${FA_PROJECT_WORLD_DEFAULT_DISPLAY_NAME_TRANSLATIONS_JSON}'
+  CHECK (length(display_name_translations_json) <= ${FA_PROJECT_WORLD_DISPLAY_NAME_TRANSLATIONS_JSON_MAX_LENGTH}),
+  color TEXT NOT NULL DEFAULT '${FA_PROJECT_WORLD_DEFAULT_COLOR}'
+  CHECK ${FA_PROJECT_WORLD_COLOR_CHECK_SQL},
+  color_palette TEXT NOT NULL DEFAULT '${FA_PROJECT_WORLD_DEFAULT_COLOR_PALETTE}'
+  CHECK (length(color_palette) <= ${FA_PROJECT_WORLD_COLOR_PALETTE_MAX_LENGTH}),
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_TABLE_DOCUMENT_TEMPLATES} (
+  id TEXT NOT NULL PRIMARY KEY,
+  display_name TEXT NOT NULL CHECK (length(display_name) > 0),
+  title_translations_json TEXT NOT NULL DEFAULT '${FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_TITLE_TRANSLATIONS_JSON}'
+  CHECK (length(title_translations_json) <= ${FA_PROJECT_DOCUMENT_TEMPLATE_TITLE_TRANSLATIONS_JSON_MAX_LENGTH}),
+  title_singular_translations_json TEXT NOT NULL DEFAULT '${FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_TITLE_SINGULAR_TRANSLATIONS_JSON}'
+  CHECK (length(title_singular_translations_json) <= ${FA_PROJECT_DOCUMENT_TEMPLATE_TITLE_SINGULAR_TRANSLATIONS_JSON_MAX_LENGTH}),
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  world_appendix TEXT NOT NULL DEFAULT '${FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_WORLD_APPENDIX}'
+  CHECK (length(world_appendix) <= ${FA_PROJECT_DOCUMENT_TEMPLATE_WORLD_APPENDIX_MAX_LENGTH}),
+  world_appendix_translations_json TEXT NOT NULL DEFAULT '${FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_WORLD_APPENDIX_TRANSLATIONS_JSON}'
+  CHECK (length(world_appendix_translations_json) <= ${FA_PROJECT_DOCUMENT_TEMPLATE_WORLD_APPENDIX_TRANSLATIONS_JSON_MAX_LENGTH}),
+  icon TEXT NOT NULL DEFAULT '${FA_PROJECT_DOCUMENT_TEMPLATE_DEFAULT_ICON}'
+  CHECK (length(icon) <= ${FA_PROJECT_DOCUMENT_TEMPLATE_ICON_MAX_LENGTH}),
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_TABLE_MEDIA} (
+  id TEXT NOT NULL PRIMARY KEY,
+  display_name TEXT NOT NULL CHECK (length(display_name) > 0),
+  ${FA_PROJECT_MEDIA_TYPE_COLUMN} TEXT NOT NULL DEFAULT '${FA_PROJECT_MEDIA_DEFAULT_TYPE}'
+  CHECK (${FA_PROJECT_MEDIA_TYPE_COLUMN} IN ('external', 'internal')),
+  ${FA_PROJECT_MEDIA_INTERNAL_TYPE_COLUMN} TEXT NOT NULL DEFAULT ''
+  CHECK ${FA_PROJECT_MEDIA_INTERNAL_TYPE_CHECK_SQL},
+  ${FA_PROJECT_MEDIA_EXTERNAL_TYPE_COLUMN} TEXT NOT NULL DEFAULT ''
+  CHECK ${FA_PROJECT_MEDIA_EXTERNAL_TYPE_CHECK_SQL},
+  ${FA_PROJECT_MEDIA_EXTERNAL_LINK_COLUMN} TEXT NOT NULL DEFAULT '',
+  ${FA_PROJECT_MEDIA_EXTERNAL_EMBED_COLUMN} TEXT NOT NULL DEFAULT '',
+  ${FA_PROJECT_MEDIA_INTERNAL_LINK_COLUMN} TEXT NOT NULL DEFAULT '',
+  ${FA_PROJECT_MEDIA_INTERNAL_EMBED_COLUMN} BLOB,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL
+);
+`)
+}
+
+/**
+ * Creates documents, layout, and content indexes for schema version 1.
+ */
+export function applyFaProjectContentSchemaV1DocumentsAndIndexes (db: I_faProjectDbExec): void {
+  db.exec(`
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_TABLE_DOCUMENTS} (
+  id TEXT NOT NULL PRIMARY KEY,
+  world_id TEXT NOT NULL REFERENCES ${FA_PROJECT_TABLE_WORLDS}(id) ON DELETE RESTRICT,
+  template_id TEXT REFERENCES ${FA_PROJECT_TABLE_DOCUMENT_TEMPLATES}(id) ON DELETE RESTRICT,
+  ${FA_PROJECT_DOCUMENT_TREE_PLACEMENT_ID_COLUMN} TEXT REFERENCES ${FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS}(id) ON DELETE RESTRICT,
+  ${FA_PROJECT_DOCUMENT_TREE_PARENT_DOCUMENT_ID_COLUMN} TEXT REFERENCES ${FA_PROJECT_TABLE_DOCUMENTS}(id) ON DELETE CASCADE,
+  ${FA_PROJECT_DOCUMENT_TREE_CUSTOM_SORT_ORDER_COLUMN} INTEGER NOT NULL DEFAULT 0,
+  display_name TEXT NOT NULL CHECK (length(display_name) > 0),
+  ${FA_PROJECT_DOCUMENT_TEXT_COLOR_COLUMN} TEXT
+  CHECK ${FA_PROJECT_DOCUMENT_TEXT_COLOR_CHECK_SQL},
+  ${FA_PROJECT_DOCUMENT_BACKGROUND_COLOR_COLUMN} TEXT
+  CHECK ${FA_PROJECT_DOCUMENT_BACKGROUND_COLOR_CHECK_SQL},
+  ${FA_PROJECT_DOCUMENT_IS_CATEGORY_COLUMN} INTEGER NOT NULL DEFAULT 0
+  CHECK (${FA_PROJECT_DOCUMENT_IS_CATEGORY_COLUMN} IN (0, 1)),
+  ${FA_PROJECT_DOCUMENT_IS_FINISHED_COLUMN} INTEGER NOT NULL DEFAULT 0
+  CHECK (${FA_PROJECT_DOCUMENT_IS_FINISHED_COLUMN} IN (0, 1)),
+  ${FA_PROJECT_DOCUMENT_IS_MINOR_COLUMN} INTEGER NOT NULL DEFAULT 0
+  CHECK (${FA_PROJECT_DOCUMENT_IS_MINOR_COLUMN} IN (0, 1)),
+  ${FA_PROJECT_DOCUMENT_IS_DEAD_COLUMN} INTEGER NOT NULL DEFAULT 0
+  CHECK (${FA_PROJECT_DOCUMENT_IS_DEAD_COLUMN} IN (0, 1)),
+  ${FA_PROJECT_DOCUMENT_TREE_ORDER_NUMBER_COLUMN} INTEGER NOT NULL DEFAULT ${Number.MIN_SAFE_INTEGER},
+  ${FA_PROJECT_DOCUMENT_EXTRA_CLASSES_COLUMN} TEXT NOT NULL DEFAULT ''
+  CHECK (length(${FA_PROJECT_DOCUMENT_EXTRA_CLASSES_COLUMN}) <= ${FA_PROJECT_DOCUMENT_EXTRA_CLASSES_MAX_LENGTH}),
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_TABLE_DOCUMENT_MEDIA} (
+  document_id TEXT NOT NULL REFERENCES ${FA_PROJECT_TABLE_DOCUMENTS}(id) ON DELETE CASCADE,
+  media_id TEXT NOT NULL REFERENCES ${FA_PROJECT_TABLE_MEDIA}(id) ON DELETE CASCADE,
+  PRIMARY KEY (document_id, media_id)
+);
+
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_TABLE_WORLD_TEMPLATE_GROUPS} (
+  id TEXT NOT NULL PRIMARY KEY,
+  world_id TEXT NOT NULL REFERENCES ${FA_PROJECT_TABLE_WORLDS}(id) ON DELETE CASCADE,
+  display_name TEXT NOT NULL CHECK (length(display_name) > 0),
+  display_name_translations_json TEXT NOT NULL DEFAULT '${FA_PROJECT_WORLD_TEMPLATE_GROUP_DEFAULT_DISPLAY_NAME_TRANSLATIONS_JSON}'
+  CHECK (length(display_name_translations_json) <= ${FA_PROJECT_WORLD_TEMPLATE_GROUP_DISPLAY_NAME_TRANSLATIONS_JSON_MAX_LENGTH}),
+  root_sort_order INTEGER NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS} (
+  id TEXT NOT NULL PRIMARY KEY,
+  world_id TEXT NOT NULL REFERENCES ${FA_PROJECT_TABLE_WORLDS}(id) ON DELETE CASCADE,
+  document_template_id TEXT NOT NULL REFERENCES ${FA_PROJECT_TABLE_DOCUMENT_TEMPLATES}(id) ON DELETE CASCADE,
+  group_id TEXT REFERENCES ${FA_PROJECT_TABLE_WORLD_TEMPLATE_GROUPS}(id) ON DELETE SET NULL,
+  root_sort_order INTEGER,
+  group_sort_order INTEGER,
+  nickname TEXT NOT NULL DEFAULT ''
+  CHECK (length(nickname) <= ${FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_NICKNAME_MAX_LENGTH}),
+  nickname_translations_json TEXT NOT NULL DEFAULT '${FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_DEFAULT_NICKNAME_TRANSLATIONS_JSON}'
+  CHECK (length(nickname_translations_json) <= ${FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_NICKNAME_TRANSLATIONS_JSON_MAX_LENGTH}),
+  nickname_singular_translations_json TEXT NOT NULL DEFAULT '${FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_DEFAULT_NICKNAME_SINGULAR_TRANSLATIONS_JSON}'
+  CHECK (length(nickname_singular_translations_json) <= ${FA_PROJECT_WORLD_TEMPLATE_PLACEMENT_NICKNAME_SINGULAR_TRANSLATIONS_JSON_MAX_LENGTH}),
+  created_at_ms INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL,
+  UNIQUE (world_id, document_template_id),
+  CHECK (
+    (group_id IS NULL AND root_sort_order IS NOT NULL AND group_sort_order IS NULL)
+    OR
+    (group_id IS NOT NULL AND group_sort_order IS NOT NULL AND root_sort_order IS NULL)
+  )
+);
+
+CREATE INDEX IF NOT EXISTS idx_world_template_groups_world_root_sort
+  ON ${FA_PROJECT_TABLE_WORLD_TEMPLATE_GROUPS}(world_id, root_sort_order);
+CREATE INDEX IF NOT EXISTS idx_world_template_placements_world_root_sort
+  ON ${FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS}(world_id, root_sort_order);
+CREATE INDEX IF NOT EXISTS idx_world_template_placements_group_sort
+  ON ${FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS}(group_id, group_sort_order);
+CREATE INDEX IF NOT EXISTS idx_world_template_placements_document_template_id
+  ON ${FA_PROJECT_TABLE_WORLD_TEMPLATE_PLACEMENTS}(document_template_id);
+CREATE INDEX IF NOT EXISTS idx_documents_world_id ON ${FA_PROJECT_TABLE_DOCUMENTS}(world_id);
+CREATE INDEX IF NOT EXISTS idx_documents_template_id ON ${FA_PROJECT_TABLE_DOCUMENTS}(template_id);
+CREATE INDEX IF NOT EXISTS ${FA_PROJECT_DOCUMENT_TREE_PLACEMENT_PARENT_SORT_INDEX}
+  ON ${FA_PROJECT_TABLE_DOCUMENTS}(${FA_PROJECT_DOCUMENT_TREE_PLACEMENT_ID_COLUMN}, ${FA_PROJECT_DOCUMENT_TREE_PARENT_DOCUMENT_ID_COLUMN}, ${FA_PROJECT_DOCUMENT_TREE_CUSTOM_SORT_ORDER_COLUMN});
+CREATE INDEX IF NOT EXISTS idx_document_media_media_id ON ${FA_PROJECT_TABLE_DOCUMENT_MEDIA}(media_id);
+CREATE INDEX IF NOT EXISTS idx_worlds_sort_order ON ${FA_PROJECT_TABLE_WORLDS}(sort_order);
+CREATE INDEX IF NOT EXISTS idx_document_templates_sort_order
+  ON ${FA_PROJECT_TABLE_DOCUMENT_TEMPLATES}(sort_order);
+`)
+}
+
+/**
+ * Creates the opened_documents singleton snapshot table (schema version 1).
+ */
+export function applyFaProjectOpenedDocumentsSchemaV1 (db: I_faProjectDbExec): void {
+  db.exec(`
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_TABLE_OPENED_DOCUMENTS} (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  snapshot_json TEXT NOT NULL,
+  updated_at_ms INTEGER NOT NULL
+);
+`)
+}
+
+/**
+ * Creates document_last_opened MRU table (schema version 8 / fresh bootstrap).
+ */
+export function applyFaProjectDocumentLastOpenedSchemaV1 (db: I_faProjectDbExec): void {
+  db.exec(`
+CREATE TABLE IF NOT EXISTS ${FA_PROJECT_TABLE_DOCUMENT_LAST_OPENED} (
+  document_id TEXT NOT NULL PRIMARY KEY
+    REFERENCES ${FA_PROJECT_TABLE_DOCUMENTS}(id) ON DELETE CASCADE,
+  opened_at_ms INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_document_last_opened_opened_at_ms
+  ON ${FA_PROJECT_TABLE_DOCUMENT_LAST_OPENED}(opened_at_ms DESC);
+`)
+}

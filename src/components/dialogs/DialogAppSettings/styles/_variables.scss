@@ -1,0 +1,38 @@
+@use '../../../../css/app.palette.scss' as *;
+
+/* COMPONENT - DIALOG APP SETTINGS */
+$dialogAppSettings-card-maxWidthViewportSubtract: 100px;
+$dialogAppSettings-card-width: 1400px;
+$dialogAppSettings-category-paddingTop: 16px;
+$dialogAppSettings-category-paddingX: 40px;
+$dialogAppSettings-categoryTitle-paddingBottom: 8px;
+$dialogAppSettings-categoryTitle-paddingInlineEndForSearch: 240px;
+$dialogAppSettings-categoryTitle-paddingTop: 8px;
+$dialogAppSettings-categoryTitle-zIndex: 5;
+$dialogAppSettings-searchEmpty-padding: 32px 40px;
+$dialogAppSettings-searchCategoryDivider-marginBlock: 24px;
+$dialogAppSettings-searchPanel-zIndex: 10;
+$dialogAppSettings-settingsSearchWrapper-right: 45px;
+$dialogAppSettings-settingsSearchWrapper-top: 4px;
+$dialogAppSettings-settingsSearchWrapper-width: 250px;
+$dialogAppSettings-settingsSearchWrapper-zIndex: 11;
+$dialogAppSettings-settingHelpIcon-marginTop: 3px;
+$dialogAppSettings-settingNote-textShadow: 0 0 2px fa-v('black', $black);
+$dialogAppSettings-settingTitle-marginBottom: 8px;
+$dialogAppSettings-settingTitle-marginLeft: 10px;
+$dialogAppSettings-settingTitle-marginTop: 16px;
+$dialogAppSettings-settingTitle-widthSubtract: 45px;
+$dialogAppSettings-settingLabel-fontWeight: 500;
+$dialogAppSettings-settingLabel-letterSpacing: 0.05em;
+$dialogAppSettings-settingSelectMenu-zIndex: 7002;
+$dialogAppSettings-settingSelect-maxWidth: 270px;
+$dialogAppSettings-settingSelect-paddingBlock: 12px;
+$dialogAppSettings-settingSelect-paddingInline: 10px;
+$dialogAppSettings-surface-backgroundColor: fa-v('fantasy-dark', $fantasy-dark);
+$dialogAppSettings-tabs-minWidth: 330px;
+$dialogAppSettings-tabsNonInteractive-grayscale: 1;
+$dialogAppSettings-tabsNonInteractive-opacity: 0.7;
+$dialogAppSettings-tabsNonInteractive-transitionDuration: 0.25s;
+$dialogAppSettings-tabsNonInteractive-transitionTiming: ease;
+$dialogAppSettings-title-zIndex: 11;
+$dialogAppSettings-verticalTab-paddingX: 16px;

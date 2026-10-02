@@ -1,0 +1,414 @@
+/* eslint-disable vue/one-component-per-file -- colocated Quasar stub components for Vue Test Utils mounts */
+
+import { flushPromises, mount } from '@vue/test-utils'
+import { defineComponent } from 'vue'
+import { ResultAsync } from 'neverthrow'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+
+vi.mock('quasar', () => ({
+  Notify: { create: vi.fn() },
+  copyToClipboard: vi.fn(async () => undefined)
+}))
+
+import type { I_dialogKeybindSettingsRow } from 'app/types/I_dialogKeybindSettings'
+import type { I_faChordSerialized } from 'app/types/I_faKeybindsDomain'
+
+import { FA_KEYBIND_COMMAND_DEFINITIONS } from 'app/src/scripts/keybinds/keybinds_manager'
+
+import DialogKeybindSettings from '../DialogKeybindSettings.vue'
+
+const syntheticNonEditableRow: I_dialogKeybindSettingsRow = {
+  commandId: 'toggleDeveloperTools',
+  defaultLabel: 'stub-default-label',
+  editable: false,
+  nameLabel: 'stub-non-editable-name',
+  rowKey: 'stub-non-editable-row',
+  userChord: null,
+  userShowsAddNewCombo: true
+}
+
+const syntheticEmptyChordRow: I_dialogKeybindSettingsRow = {
+  commandId: 'openAppSettings',
+  defaultLabel: 'stub-default-2',
+  editable: true,
+  nameLabel: 'stub-empty-chord-label',
+  rowKey: 'stub-empty-chord-row',
+  userChord: null,
+  userShowsAddNewCombo: false
+}
+
+const syntheticChordRow: I_dialogKeybindSettingsRow = {
+  commandId: 'openAppSettings',
+  defaultLabel: 'stub-default-3',
+  editable: true,
+  nameLabel: 'stub-chord-row',
+  rowKey: 'stub-chord-row',
+  userChord: {
+    code: 'KeyB',
+    mods: ['alt']
+  } as I_faChordSerialized,
+  userShowsAddNewCombo: false
+}
+
+const QTableStub = defineComponent({
+  name: 'QTable',
+  inheritAttrs: true,
+  props: {
+    rows: {
+      type: Array,
+      default: () => []
+    }
+  },
+  setup () {
+    return {
+      syntheticChordRow,
+      syntheticEmptyChordRow,
+      syntheticNonEditableRow
+    }
+  },
+  template: `
+    <div data-test-locator="dialogKeybindSettings-qtable-stub">
+      <slot name="top-right" />
+      <template v-if="rows.length === 0">
+        <slot name="no-data" />
+      </template>
+      <template v-else>
+        <template v-for="(row, idx) in rows" :key="row.rowKey || String(idx)">
+          <slot name="body" :row="row" />
+        </template>
+        <slot name="body" :row="syntheticNonEditableRow" />
+        <slot name="body" :row="syntheticEmptyChordRow" />
+        <slot name="body" :row="syntheticChordRow" />
+      </template>
+    </div>
+  `
+})
+
+const QTrStub = defineComponent({
+  name: 'QTr',
+  inheritAttrs: true,
+  template: '<div class="q-tr-stub"><slot /></div>'
+})
+
+const QTdStub = defineComponent({
+  name: 'QTd',
+  inheritAttrs: true,
+  template: '<div class="q-td-stub"><slot /></div>'
+})
+
+const dialogKeybindSettingsQInputStub = defineComponent({
+  name: 'QInput',
+  inheritAttrs: true,
+  props: {
+    modelValue: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: ['update:modelValue'],
+  methods: {
+    onInput (event: Event): void {
+      const target = event.target as HTMLInputElement
+      this.$emit('update:modelValue', target.value)
+    }
+  },
+  template: `
+    <div class="dialogKeybindSettings-qinput-stub">
+      <slot name="prepend" />
+      <input
+        v-bind="$attrs"
+        :value="modelValue"
+        @input="onInput"
+      />
+      <slot name="append" />
+    </div>
+  `
+})
+
+const dialogKeybindSettingsQBtnStub = defineComponent({
+  name: 'QBtn',
+  inheritAttrs: true,
+  emits: ['click'],
+  template: '<button type="button" v-bind="$attrs" @click="$emit(\'click\', $event)"><slot /></button>'
+})
+
+const dialogKeybindSettingsMountOptions = {
+  global: {
+    components: {
+      QBtn: dialogKeybindSettingsQBtnStub,
+      QIcon: defineComponent({
+        name: 'QIcon',
+        props: {
+          name: {
+            type: String,
+            default: ''
+          }
+        },
+        template: '<i class="q-icon-search-stub">{{ name }}</i>'
+      }),
+      QInput: dialogKeybindSettingsQInputStub,
+      QTd: QTdStub,
+      QTable: QTableStub,
+      QTr: QTrStub
+    },
+    config: {
+      compilerOptions: {
+        isCustomElement: (tag: string): boolean => {
+          const lower = tag.toLowerCase()
+          if (
+            [
+              'q-btn',
+              'q-card',
+              'q-card-actions',
+              'q-card-section',
+              'q-dialog',
+              'q-icon',
+              'q-input',
+              'q-table',
+              'q-td',
+              'q-tr'
+            ].includes(lower)
+          ) {
+            return false
+          }
+
+          return /^q-/i.test(tag)
+        }
+      }
+    },
+    mocks: { $t: (k: string) => k },
+    stubs: {
+      DialogKeybindSettingsCaptureDialog: defineComponent({
+        name: 'DialogKeybindSettingsCaptureDialogStub',
+        inheritAttrs: false,
+        props: {
+          modelValue: {
+            type: Boolean,
+            default: false
+          }
+        },
+        emits: ['update:modelValue'],
+        template: `
+          <div data-test-locator="dialogKeybindSettings-capture-dialog-stub" v-if="modelValue">
+            <button
+              type="button"
+              data-test-locator="dialogKeybindSettings-capture-close-stub"
+              @click="$emit('update:modelValue', false)"
+            >
+              close-capture
+            </button>
+          </div>
+        `
+      }),
+      QBtn: defineComponent({
+        name: 'QBtn',
+        inheritAttrs: true,
+        template: '<button type="button" v-bind="$attrs"><slot /></button>'
+      }),
+      QCard: { template: '<div><slot /></div>' },
+      QCardActions: { template: '<div><slot /></div>' },
+      QCardSection: { template: '<div><slot /></div>' },
+      QDialog: defineComponent({
+        name: 'QDialog',
+        inheritAttrs: false,
+        props: {
+          modelValue: {
+            type: Boolean,
+            default: false
+          }
+        },
+        emits: ['update:modelValue', 'hide'],
+        template: '<div class="q-dialog-stub" v-bind="$attrs"><slot /></div>'
+      })
+    }
+  }
+} as const
+
+beforeEach(() => {
+  vi.restoreAllMocks()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
+
+/**
+ * DialogKeybindSettings
+ * directInput should open the keybind dialog shell and surface i18n title key via mocked translator.
+ */
+test('Test that DialogKeybindSettings renders keybind dialog shell for KeybindSettings input', async () => {
+  const w = mount(DialogKeybindSettings, {
+    ...dialogKeybindSettingsMountOptions,
+    props: { directInput: 'KeybindSettings' }
+  })
+
+  await flushPromises()
+
+  const html = w.html()
+  expect(html).toContain('dialogComponent')
+  expect(html).toContain('KeybindSettings')
+  expect(w.text()).toContain('dialogs.keybindSettings.title')
+  w.unmount()
+})
+
+/**
+ * DialogKeybindSettings
+ * Table body should render default column, built-in label for non-editable rows, and capture sheet when a row opens capture.
+ */
+test('Test that DialogKeybindSettings table body covers default column, non-editable label, and capture dialog', async () => {
+  const w = mount(DialogKeybindSettings, {
+    ...dialogKeybindSettingsMountOptions,
+    props: { directInput: 'KeybindSettings' }
+  })
+
+  await flushPromises()
+
+  expect(w.text()).toContain('stub-non-editable-name')
+  expect(w.text()).toContain('stub-default-label')
+  expect(w.text()).toContain('dialogs.keybindSettings.builtInUneditable')
+
+  const userButtons = w.findAll('[data-test-locator="dialogKeybindSettings-userKeybind-button"]')
+  expect(userButtons.length).toBeGreaterThan(0)
+  await userButtons[0]!.trigger('click')
+  await flushPromises()
+
+  expect(w.find('[data-test-locator="dialogKeybindSettings-capture-dialog-stub"]').exists()).toBe(true)
+  expect(w.text()).toContain('stub-empty-chord-label')
+
+  await w.get('[data-test-locator="dialogKeybindSettings-capture-close-stub"]').trigger('click')
+  await flushPromises()
+
+  expect(w.find('[data-test-locator="dialogKeybindSettings-capture-dialog-stub"]').exists()).toBe(false)
+
+  const flatKeybindButtons = w.findAll('.fa-btn-keybind-dim--flat')
+  expect(flatKeybindButtons.length).toBeGreaterThan(0)
+  await flatKeybindButtons[0]!.trigger('click')
+  await flushPromises()
+  expect(w.find('[data-test-locator="dialogKeybindSettings-capture-dialog-stub"]').exists()).toBe(true)
+
+  w.unmount()
+})
+
+/**
+ * DialogKeybindSettings
+ * Save should call the keybind store update path when the save button is pressed.
+ */
+test('Test that DialogKeybindSettings save button triggers save wiring', async () => {
+  const w = mount(DialogKeybindSettings, {
+    ...dialogKeybindSettingsMountOptions,
+    props: { directInput: 'KeybindSettings' }
+  })
+
+  await flushPromises()
+
+  await w.get('[data-test-locator="dialogKeybindSettings-save"]').trigger('click')
+  await flushPromises()
+
+  w.unmount()
+})
+
+/**
+ * DialogKeybindSettings
+ * Root q-dialog should accept model updates and the table filter input should bind the filter ref.
+ */
+test('Test that DialogKeybindSettings forwards q-dialog v-model and filter input typing', async () => {
+  const w = mount(DialogKeybindSettings, {
+    ...dialogKeybindSettingsMountOptions,
+    props: { directInput: 'KeybindSettings' }
+  })
+
+  await flushPromises()
+
+  const dlg = w.findComponent({ name: 'QDialog' })
+  await dlg.vm.$emit('update:modelValue', false)
+  await flushPromises()
+
+  const filterInputs = w.findAll('input')
+  expect(filterInputs.length).toBeGreaterThan(0)
+  expect(w.get('.q-icon-search-stub').text()).toBe('search')
+  await filterInputs[0]!.setValue('app')
+  await flushPromises()
+
+  w.unmount()
+})
+
+/**
+ * Non-empty filter shows the flat secondary clear control; click clears the filter ref.
+ */
+test('Test that DialogKeybindSettings clears filter via flat clear control', async () => {
+  const w = mount(DialogKeybindSettings, {
+    ...dialogKeybindSettingsMountOptions,
+    props: { directInput: 'KeybindSettings' }
+  })
+
+  await flushPromises()
+
+  const filterInputs = w.findAll('input')
+  await filterInputs[0]!.setValue('app')
+  await flushPromises()
+
+  expect(w.find('[data-test-locator="dialogKeybindSettings-filterClear"]').exists()).toBe(true)
+  await w.get('[data-test-locator="dialogKeybindSettings-filterClear"]').trigger('click')
+  await flushPromises()
+
+  expect(filterInputs[0]!.element).toMatchObject({ value: '' })
+  expect(w.find('[data-test-locator="dialogKeybindSettings-filterClear"]').exists()).toBe(false)
+  w.unmount()
+})
+
+/**
+ * DialogKeybindSettings
+ * When the filter matches no action names, the table no-data slot shows ErrorCard copy from vue-i18n.
+ */
+test('Test that DialogKeybindSettings shows filter empty ErrorCard when filter matches no rows', async () => {
+  const w = mount(DialogKeybindSettings, {
+    ...dialogKeybindSettingsMountOptions,
+    props: { directInput: 'KeybindSettings' }
+  })
+
+  await flushPromises()
+
+  const filterInputs = w.findAll('input')
+  await filterInputs[0]!.setValue('zzzz-no-matching-keybind-label-zzzz')
+  await new Promise((resolve) => {
+    setTimeout(resolve, 350)
+  })
+  await flushPromises()
+
+  expect(w.find('[data-test-locator="dialogKeybindSettings-filterNoResults"]').exists()).toBe(true)
+  expect(w.find('[data-test-locator="errorCard"]').exists()).toBe(true)
+  expect(w.text()).toContain('dialogs.keybindSettings.filterNoResultsTitle')
+
+  w.unmount()
+})
+
+/**
+ * DialogKeybindSettings
+ * With an empty command-definition list the no-data slot should show the generic empty hint (not the filter ErrorCard).
+ */
+test('Test that DialogKeybindSettings shows table empty hint when the keybind definition list is empty', async () => {
+  const backup = FA_KEYBIND_COMMAND_DEFINITIONS.slice()
+  const body = await ResultAsync.fromPromise(
+    (async (): Promise<void> => {
+      FA_KEYBIND_COMMAND_DEFINITIONS.length = 0
+
+      const w = mount(DialogKeybindSettings, {
+        ...dialogKeybindSettingsMountOptions,
+        props: { directInput: 'KeybindSettings' }
+      })
+
+      await flushPromises()
+
+      expect(w.find('[data-test-locator="dialogKeybindSettings-tableEmpty"]').exists()).toBe(true)
+      expect(w.find('[data-test-locator="dialogKeybindSettings-filterNoResults"]').exists()).toBe(false)
+
+      w.unmount()
+    })(),
+    (e): unknown => e
+  )
+  FA_KEYBIND_COMMAND_DEFINITIONS.length = 0
+  FA_KEYBIND_COMMAND_DEFINITIONS.push(...backup)
+  if (body.isErr()) {
+    throw body.error
+  }
+})

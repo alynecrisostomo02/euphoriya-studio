@@ -1,0 +1,51 @@
+---
+name: fantasia-keybinds
+description: >-
+  Global keyboard shortcuts (faKeybinds): renderer matching, Pinia store,
+  main-process persistence over IPC, and Keybind settings UI. Use when adding
+  or changing app-wide shortcuts, capture validation, or bridge APIs for
+  keybind storage.
+---
+
+# Fantasia Archive — global keyboard shortcuts (faKeybinds)
+
+## What exists today
+
+- **Renderer** **`keydown`** listener (capture) — calls dialog/app helpers without widening preload beyond **`getKeybinds`** / **`setKeybinds`**
+- **Definitions**: **`faKeybindCommandDefinitions.ts`** (**`FA_KEYBIND_COMMAND_DEFINITIONS`**)
+- **Chord logic**: **`functions/faKeybindsChordEqualityAndResolve.ts`**, **`functions/createFaKeybindsChordFromEvent.ts`**, managers **`faKeybindsChordFromEvent_manager.ts`**, **`faKeybindsChordDisplayAndConflict_manager.ts`**
+- **UI formatting**: **`faKeybindsChordUiFormatting_manager.ts`** / **`functions/createFaKeybindsChordUiFormatting.ts`** — settings, menus, shortcut copy
+- **Dispatch**: **`faKeybindsGlobalDispatch_manager.ts`** → **`faKeybindRunCommand`** → **`runFaAction`** via **`FA_KEYBIND_COMMAND_TO_ACTION_ID`** ([fantasia-action-manager](../fantasia-action-manager/SKILL.md))
+- **Layout**: **`MainLayout.vue`** registers after **`refreshKeybinds()`**; skipped in Storybook canvas + non-Electron
+- **Chromium Ctrl+Shift suppress**: main **`registerFaChromiumCtrlShiftShortcutSuppress`** (takes **`BrowserWindow`**) → **`createFaChromiumCtrlShiftGlobalShortcutForwardController`** (`activate`/`deactivate`); **`globalShortcut`** accelerators register **only while main window focused** (activate on **`focus`**, release on **`blur`** + teardown on close) so backgrounded app never intercepts chords in other apps. **`before-input-event`** already focus-scoped. Boot **`faChromiumForwardedKeyChord`**
+- **Pinia**: **`S_FaKeybinds.ts`**
+- **Persistence**: **`src-electron/mainScripts/keybinds/`**; **`registerFaKeybindsIpc.ts`**; **`FA_KEYBINDS_IPC`**
+- **Preload**: **`faKeybindsAPI.ts`**; types **`types/I_faKeybindsDomain.ts`**
+- **Settings UI**: **`DialogKeybindSettings/`** — table from definitions; capture in **`dialogKeybindSettingsCapture*.ts`**
+- **Shipped**: **`openProjectSettings`** → **`openProjectSettingsDialog`** when active project
+
+## `src/scripts/keybinds/` — avoid fragmentation
+
+Few domain modules: chord parse, equality/resolve, display/conflict, dispatch wiring. **`faKeybindRunCommand.ts`** stays thin for **`vi.mock`** seam — [typescript-scripts.mdc](../../rules/typescript-scripts.mdc).
+
+## Adding a new global command (checklist)
+
+1. **`types/I_faKeybindsDomain.ts`** — append **`FA_KEYBIND_COMMAND_IDS`**
+2. **`faKeybindCommandDefinitions.ts`** — one definition row
+3. **`i18n/*/dialogs/L_dialogKeybindSettings.ts`** — **`commands.<camelCaseId>`**
+4. **`faKeybindRunCommand.ts`** — **`FA_KEYBIND_COMMAND_TO_ACTION_ID`** row; register action in **`faActionDefinitions.ts`**
+5. Tests — run command, dispatch integration, definitions, store, dialog, Electron IPC/preload
+
+Persisted schema changes → Zod in **`src-electron/shared/`** + **`keybinds_manager`** + bridge sync.
+
+## Playwright (`keyboard.press`)
+
+Use **`faPlaywrightKeyboardChords.ts`** — primary vs literal Control per **`faKeybindExpandDefaultChord`**. Docs: [playwright-tests.mdc](../../rules/playwright-tests.mdc), [fantasia-testing](../fantasia-testing/SKILL.md).
+
+## Related
+
+- [fantasia-action-manager](../fantasia-action-manager/SKILL.md), [fantasia-electron-preload](../fantasia-electron-preload/SKILL.md), [fantasia-electron-main](../fantasia-electron-main/SKILL.md), [fantasia-quasar-vue](../fantasia-quasar-vue/SKILL.md), [fantasia-i18n](../fantasia-i18n/SKILL.md)
+
+## Types
+
+Shared types → **`types/`**. See [types-folder.mdc](../../rules/types-folder.mdc).

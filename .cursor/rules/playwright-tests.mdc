@@ -1,0 +1,152 @@
+---
+description: Playwright component and E2E test structure matching Fantasia Archive conventions
+globs: "**/*playwright*.ts"
+alwaysApply: false
+---
+
+# Playwright tests (`*.playwright.test.ts` / `*.playwright.spec.ts`)
+
+JSDoc above tests + line comments: AGENTS.md code-comment rules (plain text, no Markdown bold/italic; single quotes not grave accents for inline refs).
+
+## Preconditions
+
+- **Production Electron build** after relevant source changes (`yarn quasar:build:electron` / `quasar build -m electron`). [README.md](README.md). Playwright imports packaged app **`dist/electron`**; failures look like **older** product after source changes → rebuild before blaming spec.
+- **Single E2E**: `yarn test:e2e:single --spec=<stem>` — **`<stem>`** = **`*.playwright.spec.ts`** basename **without** suffix; **`yarn test:e2e:single:ci`** expects **full** filename under **`e2e-tests/`** (README **E2E single test**, **Scripts reference**).
+
+## Renderer readiness (Electron + hash router)
+
+- **Do not probe `window.faContentBridgeAPIs` via `page.evaluate` / `waitForFunction`** for harness gates — Playwright isolated worlds do not see Electron **`contextBridge`** globals renderer sees.
+- **Component harness**: **`#/componentTesting/…`** → **`await waitForFaRendererContentBridgeApis(appWindow)`** from **`helpers/playwrightHelpers_universal/waitForFaRendererContentBridgeApis`** (polls **`page.url()`**; Vue Router hash updates rarely satisfy **`waitForURL`** defaults).
+- **E2E** on **`#/`**: typically **`await waitForFaE2eRendererDomReady(appWindow)`** (**`domcontentloaded`** timeout).
+
+## Connected specs
+
+- Change renderer UI, menus, **`i18n`** copy in assertions, **`data-test-locator`** → **search** **`src/components/**/_tests/*.playwright.test.ts`**, **`e2e-tests/*.playwright.spec.ts`** for locale imports, dialog titles, locators, **`COMPONENT_NAME`** / flow keywords → **run** each matching spec **after** rebuild when bundled app differs. [fantasia-testing](../skills/fantasia-testing/SKILL.md) **Connected tests for any feature change**.
+- [playwright.config.ts](playwright.config.ts): `workers: 1`, `fullyParallel: false`, unified `outputDir` `test-results/playwright-artifacts`, `testMatch` `src/components/**` + `e2e-tests/**`. Reporter: `list` + HTML `test-results/playwright-report`.
+- Storybook VRT: [`.storybook-workspace/playwright.storybook-visual.config.ts`](../../.storybook-workspace/playwright.storybook-visual.config.ts) same **`list`** + HTML **`test-results/storybook-visual-*`**. Screenshot mismatches: **Expected / Actual / Diff** on failing **`test.step`** (soft assertions). **`[storybook-visual]`** progress off unless **`FA_STORYBOOK_VISUAL_VERBOSE=1`** ([storybook-stories.mdc](storybook-stories.mdc), [storybook.visual.playwright.test.ts](../../.storybook-workspace/visual-tests/storybook.visual.playwright.test.ts)). Iframe **`waitForFunction`** evaluates **`#storybook-root`** + **`#root`** separately (+ visible portaled Quasar dialog/menu); **`querySelector('#storybook-root, #root')`** insufficient when idle **`#root`** ahead of **`#storybook-root`**.
+
+## Vitest for non-Playwright `helpers/` packages
+
+- **`helpers/playwrightHelpers_universal`**, **`_e2e`**, **`_component`**: Playwright-only — **no** **`*.vitest.test.ts`** ([vitest.helpers.config.mts](vitest/vitest.helpers.config.mts) excludes from **`unit-helpers`**). Prefer **`yarn test:components`** / **`yarn test:e2e`** after production build when changing launch, video, **`userData`**, readiness, keyboard helpers. Future Electron-free **`helpers/<package>/`** with real Node utilities → **`_tests/*.vitest.test.ts`**.
+
+## Isolated `userData` reset (per serial suite)
+
+- Default: **`launchFaPlaywrightComponentHarnessWindow`** (component) or **`launchFaPlaywrightE2eAppWindow`** (**`faPlaywrightSerialSuiteLifecycleLaunch.ts`**). Call **`resetFaPlaywrightIsolatedUserData()`** unless **`resetUserData: false`**; **`beforeIsolationReset`** / **`afterIsolationResetBeforeLaunch`**; merge env **`buildLaunchEnv`**; video; readiness; **`renderDelayMs`**; optional startup-tips dismiss; return **`{ electronApp, appWindow }`**. Teardown **`tearDownFaPlaywrightElectronSerialSuite`** (**`faPlaywrightSerialSuiteLifecycleTeardown.ts`**) in **`afterAll`** — WebM aligned with suite **`TestInfo`**. **No** **`test.beforeEach`** reset with one **`ElectronApplication`** open.
+- **Multiple serial groups** (different **`COMPONENT_PROPS`** / sessions): each own **`beforeAll` / `afterAll`**.
+- Path matches **`appIdentity/appIdentity_manager.ts`** (`fixAppName`) / **`app.getPath('appData')`**; folder **`PLAYWRIGHT_ISOLATED_USER_DATA_DIR_NAME`** in [playwrightIsolatedUserDataDirName.ts](src-electron/mainScripts/appIdentity/playwrightIsolatedUserDataDirName.ts). **Do not** import **`fixAppName`** from Node Playwright helpers — imports **`electron`**, breaks discovery; see [playwrightUserDataReset.ts](helpers/playwrightHelpers_universal/playwrightUserDataReset.ts).
+
+## HTML report and screen recordings
+
+- Each Electron test attaches **WebM** unless `FA_PLAYWRIGHT_NO_VIDEO` ([playwrightElectronRecordVideo.ts](helpers/playwrightHelpers_universal/playwrightElectronRecordVideo.ts)). **`test-results/playwright-report/index.html`** → test → **Attachments**; playable under **`test-results/playwright-report/data/`**.
+- **Every** run **replaces** HTML report — component then E2E (or reverse) **overwrites** prior; no merge.
+- Root **`yarn test:components`** / **`yarn test:e2e`** (**:single** / **:single:ci**) use **`.utility-scripts/playwrightWithArtifactTrim.mjs`** — deletes **`test-results/playwright-artifacts`** after run. Raw `recordVideo` temp under OS temp → attach + trim (**`playwrightElectronRecordVideo.ts`**).
+- Agents: point humans to **`test-results/playwright-report/index.html`**; do not assume reliable raw **`.webm`** analysis without specialized tooling.
+
+## Vue templates (hooks for locators)
+
+Primary: **`data-test-locator`**; additional hooks (`data-test-menu-test` / `data-test-menu-any`, `data-test-tooltip-text`) in **`.vue`** — [vue-template-test-hooks.mdc](vue-template-test-hooks.mdc) when adding/renaming. This rule = **TypeScript test files** only.
+
+## File locations
+
+| Kind | Path pattern |
+|------|----------------|
+| Component | `src/components/<bucket>/<Feature>/_tests/*.playwright.test.ts` (`<bucket>` = `dialogs`, `elements`, `globals`, `other` — `foundation/` Storybook-only, no Playwright) |
+| E2E | `e2e-tests/*.playwright.spec.ts` |
+
+## Import order (top of file)
+
+1. `import type { ElectronApplication, Page } from 'playwright'` (+ **`Locator`** when helpers type **`Locator`**)
+2. `import { test, expect } from '@playwright/test'`
+3. `import type { TestInfo } from '@playwright/test'` when **`suiteTestInfo`** for teardown/video
+4. **`launchFaPlaywrightComponentHarnessWindow`** from **`app/helpers/playwrightHelpers_component/faPlaywrightComponentHarnessLifecycle`** (component) **or** **`launchFaPlaywrightE2eAppWindow`** from **`app/helpers/playwrightHelpers_e2e/faPlaywrightE2eAppLifecycle`** (E2E), + **`tearDownFaPlaywrightElectronSerialSuite`** from **`app/helpers/playwrightHelpers_universal/faPlaywrightSerialSuiteLifecycleTeardown`**
+5. Shared constants (**`FA_FRONTEND_RENDER_TIMER`**, etc.) from **`app/helpers/playwrightHelpers_universal/faPlaywrightElectronLaunchConstants`** when spec reads explicitly (often **`renderDelayMs`** overrides)
+6. **`faPlaywrightKeyboardChords`** from **`app/helpers/playwrightHelpers_universal/faPlaywrightKeyboardChords`** when **`keyboard.press`** tracks **primary** vs literal **Control** (**Keyboard strings**)
+7. Optional mid-spec helpers (**`dismissStartupTipsNotifyIfPresent`**) from **`app/helpers/playwrightHelpers_universal/playwrightDismissStartupTipsNotify`**
+8. E2E seams from **`app/helpers/playwrightHelpers_e2e/...`**
+9. Types **`app/types/...`**, production **`_data/`**, **`src/scripts/...`** as needed — ESLint may reorder **`import type`** after value imports
+
+## File header — documented constants
+
+Every Playwright file ([GlobalWindowButtons.playwright.test.ts](src/components/globals/GlobalWindowButtons/_tests/GlobalWindowButtons.playwright.test.ts), [checkAppSplashScreen.playwright.spec.ts](e2e-tests/checkAppSplashScreen.playwright.spec.ts)):
+
+1. **`extraEnvSettings`** — JSDoc: `Extra env settings to trigger component testing via Playwright` **or** `...E2E...`.
+   - **Component**: `TEST_ENV: 'components'`, `COMPONENT_NAME: '<Name>'` (matches harness component), `COMPONENT_PROPS: JSON.stringify({})` or payload from **inline objects in this file**; **no** separate `_tests/*.ts` fixture-only imports. `TEST_ENV` → **`%APPDATA%/<package name>/playwright-user-data`** ([appIdentity_manager.ts](src-electron/mainScripts/appIdentity/appIdentity_manager.ts), [playwrightIsolatedUserDataDirName.ts](src-electron/mainScripts/appIdentity/playwrightIsolatedUserDataDirName.ts)) — not **`fantasia-archive-dev`** — **`electron-store`** does not overlap **`quasar dev`** / packaged profiles.
+   - **E2E**: `TEST_ENV: 'e2e'` only ([checkAppSplashScreen.playwright.spec.ts](e2e-tests/checkAppSplashScreen.playwright.spec.ts)); same isolated **`userData`** as component.
+
+2. **`renderDelayMs` / launcher overrides** — JSDoc render buffer + non-default **`electronMainJsPath`**; **`launchFaPlaywrightComponentHarnessWindow`** defaults **`renderDelayMs`** **`FA_FRONTEND_RENDER_TIMER`**; E2E commonly **`0`**, **`1000`**, **`FA_FRONTEND_RENDER_TIMER`** (**`checkDevToolsFunctionality`** vs splash). **`electronMainJsPath`** on launcher only when diverging from **`FA_ELECTRON_MAIN_JS_PATH`** (**`faPlaywrightElectronLaunchConstants`**).
+
+3. **`selectorList`** — JSDoc `Object of string data selectors` (component) or `...for the e2e`. Keys camelCase; values = exact **`data-test-locator`** (or other `data-test-*` when targeted by name+value), visible labels for `getByText`, or **full locator string** for rare exceptions (e.g. `'[role="tooltip"]'` for Quasar portaled tooltips — centralized in `selectorList`, not hard-coded in body; [DialogAppSettings.playwright.test.ts](src/components/dialogs/DialogAppSettings/_tests/DialogAppSettings.playwright.test.ts) `selectorList.quasarTooltip`). Dynamic suffix locators: stable `selectorList` entries + helper beside it (same file `appSettingsSelector`).
+
+4. **Extra timers** when needed (e.g. [checkDevToolsFunctionality.playwright.spec.ts](e2e-tests/checkDevToolsFunctionality.playwright.spec.ts) `menuAnimationTimer = 600`; splash `testSplashscreenTimeout` local).
+
+5. **Inline fixture objects** — typed `const` (menus, props, key lists) in same file before `extraEnvSettings` or beside test mutating props.
+
+## Serial suites (`test.describe.serial`) and each `test(...)`
+
+- Group under **`test.describe.serial(...)`**. **`let electronApp`**, **`appWindow`**, **`suiteTestInfo`**; **`beforeAll`**: **`suiteTestInfo = testInfo`**, **`await`** launcher, assign **`electronApp`**, **`appWindow`**. **`afterAll`**: **`await tearDownFaPlaywrightElectronSerialSuite({ electronApp, suiteTestInfo, afterAllTestInfo })`** (optional **`afterClose`**) — WebM under suite **last** test when group **>1** case. **`getFaPlaywrightElectronRecordVideoPartial`** inside launch — specs **do not** call directly.
+- **Video**: teardown forwards **`suiteTestInfo`**, **`afterAllTestInfo`** to **`closeFaElectronAppWithRecordedVideoAttachments`** ([playwrightElectronRecordVideo.ts](helpers/playwrightHelpers_universal/playwrightElectronRecordVideo.ts)).
+- **No** **`test.describe.parallel`** for root config unless user requests. Config **`workers: 1`**, **`fullyParallel: false`**.
+- **`test.describe.serial.only`**: temporary local focus only; **do not commit** **`.only`** to default branch.
+- **Multiple env snapshots** ([FantasiaMascotImage.playwright.test.ts](src/components/elements/FantasiaMascotImage/_tests/FantasiaMascotImage.playwright.test.ts)): separate top-level **`test.describe.serial`** blocks, each own **`beforeAll` / `afterAll`**.
+- **UI state between tests**: order so later steps match app state (dialog **close** last if later tests need **open**). Quasar menus toggle on repeated wrapper clicks → dismiss open panels between tests if needed (**`dismissOpenMenus`** in [AppControlSingleMenu.playwright.test.ts](src/components/globals/AppControlSingleMenu/_tests/AppControlSingleMenu.playwright.test.ts)).
+
+Each **`test(...)`**:
+
+- **JSDoc** before: short baseline line (full sentence), optional ` * - ` bullets; no mid-sentence wrap ([AGENTS.md](../../AGENTS.md) code comments).
+- **Title**: readable sentence (`Check if ...`, `Test if ...`, `Click ...`, `Open ...`).
+- **Body** (shared **`appWindow`**):
+  1. `// Prepare the ... locator` — `appWindow.locator` + `selectorList` ([GlobalWindowButtons.playwright.test.ts](src/components/globals/GlobalWindowButtons/_tests/GlobalWindowButtons.playwright.test.ts)) or `getByText` + `selectorList` ([checkDevToolsFunctionality.playwright.spec.ts](e2e-tests/checkDevToolsFunctionality.playwright.spec.ts))
+  2. `// Check if ...` — `await expect(...).toHaveCount(1)` or equivalent
+  3. Interactions, `waitForTimeout` animations (often `600` ms menus), `appWindow.evaluate` for `window.faContentBridgeAPIs...` when needed
+- Nested callbacks (`expect.poll`) keep `async () => { ... }` — no `testInfo` unless Playwright hook receives it.
+- **1920×1080** (`recordVideo.size`) unless `FA_PLAYWRIGHT_NO_VIDEO` `'1'`/`'true'`. Launch composes **`getFaPlaywrightElectronRecordVideoPartial(testInfo)`** once per **`beforeAll`**.
+
+## Locators
+
+- **Default**: **`data-test-locator`** + other `data-test-*` from `.vue`: `appWindow.locator(\`[data-test-locator="${selectorList.someKey}"]\`)` or `appWindow.locator(\`[${selectorList.someDataTestAttributeName}]\`)` when entry = full attribute name (e.g. `data-test-tooltip-text`). Scope under parent `[data-test-locator="..."]` when same static child hook in multiple rows. **No** BEM/Quasar classes unless no practical hook.
+- **Exceptions**: stable **`id`** only if component does not mirror with `data-test-locator` (prefer adding locator on same node). **`role="*"`** / ARIA for portal content (Quasar `q-tooltip`); **entire** selector in `selectorList` (e.g. `quasarTooltip: '[role="tooltip"]'`) — no scattered literals. **`locator.hover()`** fails small trigger under Electron → **`page.mouse.move`** to bounding box center after `scrollIntoViewIfNeeded` for that interaction only ([DialogAppSettings.playwright.test.ts](src/components/dialogs/DialogAppSettings/_tests/DialogAppSettings.playwright.test.ts)). **E2E**: **`getByText`** + `selectorList` for real menu/button copy ([checkDevToolsFunctionality.playwright.spec.ts](e2e-tests/checkDevToolsFunctionality.playwright.spec.ts)).
+- **Menu attributes**: exactly what component sets, e.g. `[data-test-menu-test="..."]`, `[data-test-menu-any="..."]` ([AppControlMenus.playwright.test.ts](src/components/globals/AppControlMenus/_tests/AppControlMenus.playwright.test.ts)).
+- **Heavy tooltip suites**: duplicate body on trigger (`data-test-tooltip-text` on help icon) so specs assert copy without hovering every row; keep **≥1** hover + `selectorList.quasarTooltip` per suite for real tooltip display ([DialogAppSettings.vue](src/components/dialogs/DialogAppSettings/DialogAppSettings.vue), [DialogAppSettings.playwright.test.ts](src/components/dialogs/DialogAppSettings/_tests/DialogAppSettings.playwright.test.ts)). Quasar **`q-tooltip`** portaled + **`FA_Q_TOOLTIP_DELAY_MS`** (**500** ms) under Electron: prefer **`locator.hover({ force: true })`** over raw **`page.mouse.move`**, **`FA_PLAYWRIGHT_Q_TOOLTIP_OPEN_SETTLE_MS`** (delay + slack) or derived hover timers, **last** matching **`[role="tooltip"]`** when stale nodes linger, wrap hover + visibility in **`expect(async () => { ... }).toPass({ timeout: ... })`** — retry after pointer away to dismiss.
+- **WebM cursor**: window capture often omits OS pointer. **`launchFaPlaywrightElectronSerialSuiteWindow`** calls **`installFaPlaywrightCursorMarkerIfVideoEnabled(appWindow)`** after readiness ([playwrightElectronRecordVideo.ts](helpers/playwrightHelpers_universal/playwrightElectronRecordVideo.ts)). **`FA_PLAYWRIGHT_CURSOR_MARKER`** **`0`**/**`false`** disable; **`FA_PLAYWRIGHT_NO_VIDEO`** skips video + marker.
+- **`getByRole` strict mode**: **`getByRole('button', { name: 'Project', exact: true })`** avoids collisions with names merely **containing** **project** (welcome **Create new project**, etc.). Import **`title`** from **`L_project`**. [checkProjectManagementFlow.playwright.spec.ts](e2e-tests/checkProjectManagementFlow.playwright.spec.ts).
+- **Splash Resume Latest** (**`SplashControlsResumeDropdown`**): prefer **`splashPage-btn-resume-latest`**, **`splashPage-btn-resume-latest-primary`** (runtime on primary segment), **`splashPage-resumeMenu`**, **`splashPage-recentProject-<index>`** over BEM. Dropdown caret: **`.q-btn-dropdown__arrow-container`** under **`splashPage-btn-resume-latest`**; primary segment clicks: **`splashPage-btn-resume-latest-primary`** — not the dropdown root.
+- **E2E `.faproject` path override**: **`TEST_ENV: 'e2e'`** → **`e2eSetNextProjectCreatePath(electronApp, baseName)`** from [playwrightE2eProjectPaths.ts](helpers/playwrightHelpers_e2e/playwrightE2eProjectPaths.ts) — next **`createProject`** IPC absolute path under isolated Playwright **`userData`**, not native save dialog. Sync with **`src-electron/mainScripts/projectManagement/functions/faProjectManagementE2ePathOverride.ts`** (global setter key constants).
+- **Workspace sidebar splitter (E2E)**: **`mainLayout-sidebarSplitter`**, native **`.q-splitter__separator`** drag via [faPlaywrightE2eWorkspaceSidebar.ts](helpers/playwrightHelpers_e2e/faPlaywrightE2eWorkspaceSidebar.ts); cold-restart **`sidebar_width`** persist in [checkWorkspaceSidebar.playwright.spec.ts](e2e-tests/checkWorkspaceSidebar.playwright.spec.ts) (dual serial groups; second **`resetUserData: false`**).
+- **Workspace document/tree E2E**: **`e2e-tests/checkWorkspace*.playwright.spec.ts`** (tabs, temp promote, edit/save, hierarchy create/DnD/search/settings). Shared seed/drag helpers: **`helpers/playwrightHelpers_e2e/e2eWorkspaceHierarchyTree*.ts`**.
+- **Component suite paths**: **`yarn test:components`** runs **`src/components`**, **`src/layouts`**, **`src/pages`** (`playwright.config.ts` **`testMatch`**).
+
+## Keyboard strings (cross-OS keybinds and Playwright `keyboard.press`)
+
+- **Why**: App defaults with **`primary`** → **Meta** darwin, **Control** win32/linux (`faKeybindExpandDefaultChord` in [faKeybindsChordEqualityAndResolve.ts](../../src/scripts/keybinds/functions/faKeybindsChordEqualityAndResolve.ts)). User capture storing **ctrl** in keybind model → **physical Control** in Playwright **all** hosts (not **Meta** macOS). Hard-coded single **Control+…** or **Meta+…** breaks one side unless matches rule.
+- **Shared module** — [faPlaywrightKeyboardChords.ts](helpers/playwrightHelpers_universal/faPlaywrightKeyboardChords.ts): **prefer** in **`*.playwright.test.ts`** / **`*.playwright.spec.ts`** over ad hoc `keyboard.press` for cases below.
+- **Default global shortcuts (primary in definitions)** — **`getFaPlaywrightDefaultToggleDevtoolsPressString()`** (F12), **`getFaPlaywrightDefaultActionMonitorOpenPressString()`** (F11), or same Meta-vs-Control pattern for new getters beside them.
+- **Literal Control in capture/overrides** — chords persisting **ctrl** (e.g. user **Control+Shift+F12**): **`FA_PLAYWRIGHT_PRESS_CONTROL_SHIFT_F12`**, **`FA_PLAYWRIGHT_PRESS_CONTROL_SHIFT_F11`**, **`FA_PLAYWRIGHT_PRESS_ADJUSTED_TOGGLE_DEVTOOLS_F12`** for E2E **Control+Alt+Shift+F12** documented chord.
+- **Monaco select all** — **`getFaPlaywrightMonacoSelectAllPressString()`** (**Meta+A** darwin, **Control+A** elsewhere), not hardcoded **Control+A**.
+- **Other defaults using primary** — Playwright should send **Command** macOS / **Control** Windows/Linux for flow not yet covered by getter: **`ControlOrMeta+…`** in **`keyboard.press`** OK ([checkKeybinds.playwright.spec.ts](e2e-tests/checkKeybinds.playwright.spec.ts) **defaultChord**, **`triggerGlobalShortcut`**).
+
+## Shared test data
+
+- **No** `_tests/_data/`. **Production** feeds stay component **`_data/`** (menu sections, `buttonList`).
+- **Playwright fixtures** inside same `*.playwright.test.ts` as typed **`const`** — not separate **`_tests/<name>.ts`** data-only modules. Mount data via `COMPONENT_PROPS` / per-test `JSON.stringify` ([AppControlSingleMenu.playwright.test.ts](src/components/globals/AppControlSingleMenu/_tests/AppControlSingleMenu.playwright.test.ts)).
+- Avoid importing `_data` pulling Vite-only/heavy i18n into Playwright Node loader when small parallel constant enough (duplicate key list beside [SocialContactButtons/_data/buttons.ts](src/components/other/SocialContactButtons/_data/buttons.ts) in spec with sync comment).
+
+## Assertions
+
+- Prefer `await expect(locator).toHaveCount(1)` before clicks.
+- `expect` (non-async) for plain values from `evaluate` when codebase does ([GlobalWindowButtons.playwright.test.ts](src/components/globals/GlobalWindowButtons/_tests/GlobalWindowButtons.playwright.test.ts) — follow **immediate surrounding file** for new tests in folder).
+- No `any` in selector maps, fixtures, helper signatures; explicit interfaces/types, `unknown` + narrowing for untyped Playwright values.
+
+## Layout size (width and height)
+
+- **Declared size/caps (default components)**: spec checks **intended** width/height from props/static markup → assert **`data-test-layout-width`**, **`data-test-layout-height`** on same node as other `data-test-*` (or **`data-test-error-card-width`** on **ErrorCard** for numeric max-width cap CSS px). Vue binds from same source as sizing props. Stable when Electron window/parent narrow + **`max-width: min(100%, …)`** shrinks rendered box.
+- **`boundingBox()` (optional)**: rounded comparisons only when need **rendered** CSS px + harness guarantees viewport/parent space, or **inequality** matching real CSS contract (laid-out width ≤ cap).
+- **Reference specs**: [FantasiaMascotImage.playwright.test.ts](src/components/elements/FantasiaMascotImage/_tests/FantasiaMascotImage.playwright.test.ts), [SocialContactSingleButton.playwright.test.ts](src/components/elements/SocialContactSingleButton/_tests/SocialContactSingleButton.playwright.test.ts), [ErrorCard.playwright.test.ts](src/components/elements/ErrorCard/_tests/ErrorCard.playwright.test.ts), [DialogAppSettings.playwright.test.ts](src/components/dialogs/DialogAppSettings/_tests/DialogAppSettings.playwright.test.ts), [checkAppSplashScreen.playwright.spec.ts](e2e-tests/checkAppSplashScreen.playwright.spec.ts).
+- **Native img**: **`data-test-locator="fantasiaMascotImage-image"`** on **`<img>`** itself. No **`.locator('img')`** chain under that locator; assert **tagName**, **src**, dimensions on located node.
+
+## Do not
+
+- No **`test.describe.parallel`** for **`src/components/**`** / **`e2e-tests/**`** Electron specs unless user requests.
+- No commit **`test.describe.serial.only`** / other **`.only`** except short-lived local debug.
+- No change `COMPONENT_NAME` / env contract without updating component harness + docs.
+- No Playwright (or other) tests whose **SUT** is **`_data/`** file; assert through `.vue`/non-`_data/` consumer.
+- Storybook VRT ([storybook.visual.playwright.test.ts](../../.storybook-workspace/visual-tests/storybook.visual.playwright.test.ts)): exclude harness-only stories: `layouts-componenttestinglayout--with-social-contact-single-button`, `pages-componenttesting--social-contact-single-button`. Component story **`id`** in **`index.json`**: **`components-<bucket>-<componentfolder>-<story>`** (e.g. **`components-elements-fantasiamascotimage--reading`**) when **`meta.title`** **`Components/<bucket>/<ComponentName>`** — match in **`EXCLUDED_STORY_IDS`** when excluding harness-only component previews.

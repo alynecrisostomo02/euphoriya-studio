@@ -1,0 +1,56 @@
+@use './variables' as *;
+@use '../../../elements/FaLocaleTranslationsInput/styles/variables' as faLocaleTranslationsInput;
+
+.dialogProjectSettingsWorldTemplateLayoutTreeNode__contextMenu.q-menu {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  /* Same cap as field locale menus so inner menuPanel scroll can shrink. */
+  max-height: faLocaleTranslationsInput.$faLocaleTranslationsInput-menu-maxHeight;
+  overflow: hidden;
+  z-index: $dialogProjectSettings-worldTemplateLayout-groupContextMenu-zIndex !important;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutTreeNode__contextMenu.q-menu .dialogProjectSettingsWorldTemplateLayoutTreeNode__renameMenuBody {
+  background-color: $dialogProjectSettings-worldColorPalette-contextMenu-backgroundColor;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  /* Inherit menu cap — max-height alone on q-menu does not shrink flex children. */
+  max-height: faLocaleTranslationsInput.$faLocaleTranslationsInput-menu-maxHeight;
+  min-height: 0;
+  overflow: hidden;
+  padding: $dialogProjectSettings-worldTemplateLayout-renameMenuBody-padding;
+  width: 100%;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutTreeNode__renameMenuBody {
+  background-color: $dialogProjectSettings-worldColorPalette-contextMenu-backgroundColor;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  padding: $dialogProjectSettings-worldTemplateLayout-renameMenuBody-padding;
+  width: 100%;
+
+  .q-field__append {
+    align-items: center;
+    align-self: stretch;
+    display: flex;
+    padding-right: 0;
+  }
+}
+
+/*
+ * Tree group/document rename hosts FaLocaleTranslationsInput as menuPanel — shell chrome
+ * lives on this outer body (inner menuBody stays padding 0 / transparent).
+ * Left-only padding docks scrollbar to the menu side (same as field locale menus).
+ */
+body.fa-appTheme--fantasy {
+  .dialogProjectSettingsWorldTemplateLayoutTreeNode__contextMenu.q-menu .dialogProjectSettingsWorldTemplateLayoutTreeNode__renameMenuBody,
+  .dialogProjectSettingsWorldTemplateLayoutTreeNode__renameMenuBody {
+    background-color: faLocaleTranslationsInput.$faLocaleTranslationsInput-menu-backgroundColor-fantasy;
+  }
+}

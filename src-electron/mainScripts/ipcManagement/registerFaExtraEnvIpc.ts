@@ -1,0 +1,66 @@
+import { ipcMain, app } from 'electron'
+import { Result } from 'neverthrow'
+
+import { FA_EXTRA_ENV_IPC } from 'app/src-electron/electron-ipc-bridge'
+import { resolveFaElectronMainJsPath } from 'app/src-electron/mainScripts/windowManagement/windowManagement_manager'
+import { FA_FRONTEND_RENDER_TIMER_MS } from 'app/src-electron/shared/faFrontendRenderTimerMs'
+import type { I_extraEnvVariablesAPI } from 'app/types/I_faElectronRendererBridgeAPIs'
+
+let registered = false
+
+function optionalTruthyEnv (key: 'TEST_ENV' | 'COMPONENT_NAME'): string | false {
+  const value = process.env[key]
+
+  return value || false
+}
+
+function parseComponentProps (): I_extraEnvVariablesAPI['COMPONENT_PROPS'] {
+  const raw = process.env.COMPONENT_PROPS
+
+  if (!raw) {
+    return false
+  }
+
+  return Result.fromThrowable(
+    (): Record<string, unknown> => JSON.parse(raw) as Record<string, unknown>,
+    (): false => false
+  )().match(
+    (ok) => ok,
+    (parseFailed) => parseFailed
+  )
+}
+
+function buildExtraEnvSnapshot (): I_extraEnvVariablesAPI {
+  const COMPONENT_NAME = optionalTruthyEnv('COMPONENT_NAME')
+  const COMPONENT_PROPS = parseComponentProps()
+  const ELECTRON_MAIN_FILEPATH = app.isPackaged
+    ? null
+    : resolveFaElectronMainJsPath()
+  const FA_FRONTEND_RENDER_TIMER = FA_FRONTEND_RENDER_TIMER_MS
+  const TEST_ENV = optionalTruthyEnv('TEST_ENV')
+  const snapshot: I_extraEnvVariablesAPI = {
+    COMPONENT_NAME,
+    COMPONENT_PROPS: COMPONENT_PROPS === undefined ? false : COMPONENT_PROPS,
+    ELECTRON_MAIN_FILEPATH,
+    FA_FRONTEND_RENDER_TIMER,
+    TEST_ENV
+  }
+
+  return snapshot
+}
+
+/**
+ * Registers async IPC so sandboxed preload can read harness paths and env without Node filesystem APIs.
+ * Safe to call once from 'startApp'; subsequent calls no-op.
+ */
+export function registerFaExtraEnvIpc (): void {
+  if (registered) {
+    return
+  }
+
+  registered = true
+
+  ipcMain.handle(FA_EXTRA_ENV_IPC.snapshotAsync, () => {
+    return buildExtraEnvSnapshot()
+  })
+}

@@ -1,0 +1,140 @@
+@use './variables' as *;
+@use '../../../../css/globals/faQIconDisplay.mixin.scss' as faQIconDisplay;
+
+.projectHierarchyTreeNode {
+  min-height: $projectHierarchyTree-node-minHeight;
+  width: 100%;
+
+  --projectHierarchyTreeNode-focusHelperColor: currentcolor;
+}
+
+.projectHierarchyTreeNode.q-hoverable > :not(.q-focus-helper, .projectHierarchyTreeOrderNumberBadge) {
+  position: relative;
+  z-index: 1;
+}
+
+.projectHierarchyTreeNode > .q-focus-helper {
+  border-radius: $projectHierarchyTree-node-borderRadius !important;
+}
+
+.projectHierarchyTreeNode--document,
+.projectHierarchyTreeNode--documentTemplate {
+  color: $projectHierarchyTree-documentRow-color;
+
+  .projectHierarchyTreeNode__icon {
+    --fa-color-glyph-base: #{$projectHierarchyTree-documentRow-color};
+
+    color: var(--fa-color-glyph-base);
+  }
+
+  .projectHierarchyTreeNode__label {
+    color: $projectHierarchyTree-documentRow-color;
+  }
+}
+
+.projectHierarchyTreeNode--addNewDocument {
+  color: $projectHierarchyTree-addNewDocumentRow-color;
+
+  .projectHierarchyTreeNode__icon {
+    --fa-color-glyph-base: #{$projectHierarchyTree-addNewDocumentRow-color};
+
+    color: var(--fa-color-glyph-base);
+  }
+
+  .projectHierarchyTreeNode__label {
+    color: $projectHierarchyTree-addNewDocumentRow-color;
+  }
+}
+
+.projectHierarchyTreeNode--group {
+  color: $projectHierarchyTree-groupRow-color;
+  font-weight: $projectHierarchyTree-groupRow-fontWeight;
+
+  .projectHierarchyTreeNode__icon {
+    --fa-color-glyph-base: #{$projectHierarchyTree-groupRow-color};
+
+    color: var(--fa-color-glyph-base);
+  }
+
+  .projectHierarchyTreeNode__label {
+    color: $projectHierarchyTree-groupRow-color;
+  }
+}
+
+.projectHierarchyTreeNode--tag,
+.projectHierarchyTreeNode--tagWrapper {
+  color: $projectHierarchyTree-documentRow-color;
+
+  .projectHierarchyTreeNode__icon {
+    --fa-color-glyph-base: #{$projectHierarchyTree-groupRow-color};
+
+    color: var(--fa-color-glyph-base);
+  }
+
+  .projectHierarchyTreeNode__label {
+    color: $projectHierarchyTree-documentRow-color;
+  }
+}
+
+/* Solid mdi-tag on leaf tags reads heavier than outline icons; wrapper Tags glyph stays full size. */
+.projectHierarchyTreeNode--tag .projectHierarchyTreeNode__icon--layoutKind {
+  --fa-q-icon-display-mdi-fit-scale: #{$projectHierarchyTree-tagNodeIcon-mdiFitScale};
+}
+
+.projectHierarchyTreeNode--world .projectHierarchyTreeNode__icon {
+  margin-right: $projectHierarchyTree-nodeIcon-marginRight;
+}
+
+.projectHierarchyTreeNode__icon--worldGlyph {
+  color: var(--fa-color-glyph-base);
+  flex-shrink: 0;
+}
+
+.projectHierarchyTreeNode__icon {
+  flex-shrink: 0;
+}
+
+.projectHierarchyTreeNode__label {
+  flex: 0 1 auto;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.projectHierarchyTreeNode__label--dead {
+  text-decoration: line-through;
+  text-decoration-color: currentcolor;
+}
+
+.projectHierarchyTreeNode__deadMarker {
+  flex-shrink: 0;
+  margin-right: $projectHierarchyTree-statusMarker-marginRight;
+}
+
+.projectHierarchyTreeNode__finishedMarker {
+  flex-shrink: 0;
+  margin-right: $projectHierarchyTree-statusMarker-marginRight;
+}
+
+.projectHierarchyTreeNode__icon--layoutKind {
+  @include faQIconDisplay.fa-q-icon-display-constrain-glyph-in-box;
+
+  // FA uses mixin default solid fit-scale; MDI fills the tree icon box.
+  --fa-q-icon-display-glyph-font-size: #{$projectHierarchyTree-nodeIcon-boxSize};
+  --fa-q-icon-display-mdi-fit-scale: 1;
+  --fa-q-icon-display-mdi-font-size: #{$projectHierarchyTree-nodeIcon-boxSize};
+
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: $projectHierarchyTree-nodeIcon-boxSize;
+  height: $projectHierarchyTree-nodeIcon-boxSize;
+  justify-content: center;
+  margin-right: $projectHierarchyTree-nodeIcon-marginRight;
+  max-height: $projectHierarchyTree-nodeIcon-boxSize;
+  max-width: $projectHierarchyTree-nodeIcon-boxSize;
+  width: $projectHierarchyTree-nodeIcon-boxSize;
+
+  &:not(.fa-brands, .fa-regular, .fa-solid) {
+    margin-top: 0;
+  }
+}

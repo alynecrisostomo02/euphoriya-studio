@@ -1,0 +1,37 @@
+import { suppressChromiumDevtoolsAutofillStderrNoise } from 'app/src-electron/mainScripts/chromiumFixes/chromiumFixes_manager'
+
+suppressChromiumDevtoolsAutofillStderrNoise()
+
+import { fixAppName } from 'app/src-electron/mainScripts/appIdentity/appIdentity_manager'
+import { installFaProjectOsOpenListeners } from 'app/src-electron/mainScripts/projectManagement/projectManagement_manager'
+import { windowsDevToolsExtensionsFix } from 'app/src-electron/mainScripts/chromiumFixes/chromiumFixes_manager'
+import { startApp, openAppWindowManager, closeAppManager } from 'app/src-electron/mainScripts/appManagement'
+import { setupFaAppProtocol } from 'app/src-electron/mainScripts/appProtocol/appProtocol_manager'
+import { tweakMenuRemover, tweakRetriveOS } from 'app/src-electron/mainScripts/nativeShell/nativeShell_manager'
+
+// Determines what platform the app is running on
+// - Needed in case process is undefined under Linux (Linux bug?)
+const platform = tweakRetriveOS()
+
+// Fix app name and connected pathing to it
+fixAppName()
+
+installFaProjectOsOpenListeners()
+
+// Fix Windows-only DevTools-bug concerning dark mode
+windowsDevToolsExtensionsFix(platform)
+
+// Privileged 'app://' scheme registration must happen before 'app.whenReady()' so the handler installed below works for the first BrowserWindow load. The handler itself is wired post-ready.
+setupFaAppProtocol()
+
+// Register all ipcMain handlers before any BrowserWindow loads; preload uses invoke for bridge APIs after load.
+startApp()
+
+// Remove normal app menu
+tweakMenuRemover()
+
+// Set up manager for opening a singular app window
+openAppWindowManager()
+
+// Set up manager for closing app instance
+closeAppManager(platform)

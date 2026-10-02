@@ -1,0 +1,49 @@
+@use './variables' as *;
+
+.faDeleteConfirmButton__confirmMenu.q-menu {
+  /* Teleported q-menu; stack above modal QDialog chrome (same band as FaColorPickerInput). */
+  min-width: $faDeleteConfirmButton-confirm-maxWidth;
+  z-index: $faDeleteConfirmButton-confirm-menu-zIndex !important;
+}
+
+.faDeleteConfirmButton__confirmMenu {
+  background-color: $faDeleteConfirmButton-confirm-backgroundColor;
+  max-width: $faDeleteConfirmButton-confirm-maxWidth;
+}
+
+.faDeleteConfirmButton__confirmInner {
+  padding:
+    $faDeleteConfirmButton-confirm-paddingY
+    $faDeleteConfirmButton-confirm-paddingX;
+}
+
+.faDeleteConfirmButton__confirmMessage {
+  color: $faDeleteConfirmButton-confirmMessage-color;
+  margin: 0 0 $faDeleteConfirmButton-confirm-message-marginBottom;
+}
+
+.faDeleteConfirmButton__confirmActions {
+  display: flex;
+  gap: $faDeleteConfirmButton-confirm-actions-gap;
+  justify-content: center;
+}
+
+.faDeleteConfirmButton__confirmButton .q-btn__content {
+  position: relative;
+}
+
+.faDeleteConfirmButton__confirmButton--countdownActive {
+  .faDeleteConfirmButton__confirmLabel {
+    color: transparent;
+  }
+}
+
+.faDeleteConfirmButton__countdown {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  line-height: $faDeleteConfirmButton-confirm-countdown-lineHeight;
+  pointer-events: none;
+  position: absolute;
+}

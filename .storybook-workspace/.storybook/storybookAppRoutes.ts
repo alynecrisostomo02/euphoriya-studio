@@ -1,0 +1,85 @@
+import type { RouteRecordRaw } from 'vue-router'
+import { defineComponent, h } from 'vue'
+
+import 'app/types/vueRouterRouteMetaAugmentation'
+
+import ComponentTestingLayout from '../../src/layouts/ComponentTestingLayout/ComponentTestingLayout.vue'
+import MainLayout from '../../src/layouts/MainLayout/MainLayout.vue'
+import ComponentTesting from '../../src/pages/ComponentTesting/ComponentTesting.vue'
+import DocumentWorkspacePage from '../../src/pages/DocumentWorkspacePage/DocumentWorkspacePage.vue'
+import ErrorNotFound from '../../src/pages/ErrorNotFound/ErrorNotFound.vue'
+import IndexPage from '../../src/pages/IndexPage/IndexPage.vue'
+import SplashPage from '../../src/pages/SplashPage/SplashPage.vue'
+
+/**
+ * Minimal outlet so 'MainLayout' can be previewed without loading the full index page.
+ */
+export const StoryEmptyOutlet = defineComponent({
+  name: 'StoryEmptyOutlet',
+  setup () {
+    return () =>
+      h(
+        'div',
+        { class: 'q-pa-md text-body2 text-white' },
+        'Empty outlet — Storybook preview (add a child route to show a page).'
+      )
+  }
+})
+
+/**
+ * Single route table for all layout/page previews. Stories switch view via 'initialPath' + 'router.replace'.
+ */
+export const STORYBOOK_APP_ROUTES: RouteRecordRaw[] = [
+  {
+    path: '/',
+    component: MainLayout,
+    children: [{
+      path: '',
+      name: 'storybook-splash',
+      component: SplashPage
+    }]
+  },
+  {
+    path: '/home',
+    component: MainLayout,
+    children: [
+      {
+        path: '',
+        name: 'storybook-home',
+        component: IndexPage
+      },
+      {
+        path: 'document/:documentId',
+        name: 'storybook-home-document',
+        component: DocumentWorkspacePage
+      }
+    ]
+  },
+  {
+    path: '/main-empty',
+    component: MainLayout,
+    children: [{
+      path: '',
+      name: 'storybook-main-empty',
+      component: StoryEmptyOutlet
+    }]
+  },
+  {
+    path: '/componentTesting/:componentName',
+    component: ComponentTestingLayout,
+    children: [{
+      path: '',
+      name: 'storybook-component-testing',
+      component: ComponentTesting
+    }]
+  },
+  {
+    path: '/error-not-found',
+    component: MainLayout,
+    children: [{
+      path: '',
+      name: 'storybook-error-not-found',
+      component: ErrorNotFound
+    }]
+  }
+]

@@ -1,0 +1,25 @@
+@use '../../../../css/app.palette.scss' as *;
+@use '../../../../css/globals/faQIconDisplay.variables.scss' as *;
+
+/* COMPONENT - FA ICON PICKER INPUT */
+$faIconPickerInput-menu-width: 720px;
+$faIconPickerInput-menu-maxHeight: 60vh;
+$faIconPickerInput-menu-zIndex: 7002;
+$faIconPickerInput-row-gap: 8px;
+$faIconPickerInput-field-width: 75px;
+$faIconPickerInput-trigger-size: 40px;
+$faIconPickerInput-triggerIcon-scaleFactor: 1.1;
+$faIconPickerInput-triggerIcon-boxSize: calc(#{$faQIconDisplay-iconFontSize} * #{$faIconPickerInput-triggerIcon-scaleFactor});
+$faIconPickerInput-triggerIcon-glyphFontSize: calc(#{$faQIconDisplay-faFontGlyph-fontSize} * #{$faIconPickerInput-triggerIcon-scaleFactor});
+$faIconPickerInput-iconsPerRow: 16;
+$faIconPickerInput-iconCell-size: 44px;
+$faIconPickerInput-iconRow-gap: 5px;
+$faIconPickerInput-virtualRow-height: 52px;
+$faIconPickerInput-list-paddingInline: 12px;
+$faIconPickerInput-list-paddingBottom: 12px;
+$faIconPickerInput-statusMessage-paddingBlock: 16px;
+$faIconPickerInput-virtualScroll-minHeight: 200px;
+$faIconPickerInput-menu-backgroundColor: fa-v('dark-lighter', $dark-lighter);
+$faIconPickerInput-menuIcon-color: fa-v('white', $white);
+$faIconPickerInput-selected-iconColor: fa-v('primary-bright', $primary-bright);
+$faIconPickerInput-triggerIcon-color: fa-v('text-label', $text-label);

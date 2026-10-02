@@ -1,0 +1,572 @@
+@use './variables' as *;
+@use '../../../../layouts/MainLayout/styles/variables' as mainLayout;
+@use '../../../../css/globals/faColorGlyph.mixin.scss' as colorGlyph;
+@use '../../../../css/globals/faOutlineButtonGlow.variables.scss' as outlineBtnGlow;
+@use '../../../../css/globals/faQIconDisplay.mixin.scss' as faQIconDisplay;
+@use '../../../../css/theme/quasar-components/qFocusable.variables' as *;
+@use '../../../../css/theme/quasar-components/qMenu.variables' as *;
+@import '@quasar/extras/animate/fadeIn.css';
+@import '@quasar/extras/animate/fadeOut.css';
+
+.projectAppControlBarHost {
+  flex-shrink: 0;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.projectAppControlBar--fixedStrip {
+  background-color: $projectAppControlBar-backgroundColor;
+  left: $projectAppControlBar-widthOffsetPx;
+  min-height: $projectAppControlBar-minHeightPx;
+  min-width: calc(100vw - #{$projectAppControlBar-widthOffsetPx});
+  position: fixed;
+  right: 0;
+  top: calc(#{mainLayout.$mainLayout-appHeader-heightPx} + #{$projectAppControlBar-topOffsetPx});
+  z-index: $projectAppControlBar-zIndex;
+
+  &--treeHidden {
+    left: 0;
+    min-width: 100vw;
+  }
+}
+
+.projectAppControlBar__blocker {
+  background-color: $projectAppControlBar-backgroundColor;
+  height: $projectAppControlBar-blockerHeightPx;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: calc(-1 * #{$projectAppControlBar-blockerHeightPx});
+  z-index: $projectAppControlBar-zIndex;
+}
+
+.projectAppControlBar__wrapper {
+  display: flex;
+  justify-content: space-between;
+  min-height: $projectAppControlBar-minHeightPx;
+  padding: $projectAppControlBar-stripPaddingBlockPx $projectAppControlBar-stripPaddingInlinePx;
+  position: relative;
+  width: 100%;
+
+  &::after {
+    background-color: $projectAppControlBar-bottomRuleColor;
+    bottom: 0;
+    content: ' ';
+    height: $projectAppControlBar-bottomRuleHeightPx;
+    left: 0;
+    position: absolute;
+    right: 0;
+  }
+}
+
+.projectAppControlBar__left,
+.projectAppControlBar__right {
+  display: flex;
+}
+
+.projectAppControlBarFixedStripLeft {
+  align-items: stretch;
+  display: flex;
+
+  &__noteboardButton.q-btn {
+    overflow: visible;
+    position: relative;
+
+    .q-btn__content {
+      overflow: visible;
+    }
+
+    .faCornerContentDot {
+      right: $projectAppControlBar-noteboardContentDot-offsetRight;
+      top: $projectAppControlBar-noteboardContentDot-offsetTop;
+    }
+  }
+}
+
+.projectAppControlBar__left {
+  justify-content: flex-start;
+
+  .q-btn {
+    margin-right: $projectAppControlBar-stripButtonSpacingPx;
+  }
+
+  .projectAppControlBar__actionSeparator {
+    margin: $projectAppControlBar-actionSeparator-marginBlockPx $projectAppControlBar-actionSeparator-marginInlineEndPx $projectAppControlBar-actionSeparator-marginBlockPx 0;
+  }
+}
+
+.projectAppControlBar__right {
+  align-items: stretch;
+  justify-content: flex-end;
+  margin-left: auto;
+
+  .q-btn {
+    margin-left: $projectAppControlBar-stripButtonSpacingPx;
+  }
+}
+
+.projectAppControlBarDeleteDocumentAction {
+  align-items: stretch;
+  display: flex;
+}
+
+/*
+ * Fixed-strip outline icons (Quasar icon prop → .q-icon). Pin --fa-color-glyph-base by
+ * Quasar text-* class so save dirty/clean swaps (teal-14 ↔ primary-bright) track like
+ * faOutlineButtonGlow Chromium pins — never rely on currentColor after transparent fill.
+ */
+.projectAppControlBarFixedStripLeft .q-btn--outline,
+.projectAppControlBar__right .q-btn--outline,
+.projectAppControlBarDeleteDocumentAction .q-btn--outline {
+  .q-icon {
+    @include faQIconDisplay.fa-q-icon-display-constrain-glyph-in-box;
+
+    --fa-color-glyph-base: #{outlineBtnGlow.$faOutlineButtonGlow-color-primaryBright};
+    --fa-q-icon-display-glyph-font-size: #{$projectAppControlBar-stripIcon-boxSize};
+    --fa-q-icon-display-mdi-fit-scale: 1;
+    --fa-q-icon-display-mdi-font-size: #{$projectAppControlBar-stripIcon-boxSize};
+
+    color: var(--fa-color-glyph-base);
+    flex: 0 0 auto;
+    font-size: $projectAppControlBar-stripIcon-boxSize;
+    height: $projectAppControlBar-stripIcon-boxSize;
+    max-height: $projectAppControlBar-stripIcon-boxSize;
+    max-width: $projectAppControlBar-stripIcon-boxSize;
+    width: $projectAppControlBar-stripIcon-boxSize;
+
+    &.fa-brands::before,
+    &.fa-regular::before {
+      margin-top: 0;
+    }
+
+    &.fa-solid::before {
+      --fa-q-icon-display-glyph-fit-scale: #{$faQIconDisplay-faSolidGlyph-fitScale};
+
+      margin-top: 0;
+    }
+
+    &:not(.fa-brands, .fa-regular, .fa-solid) {
+      margin-top: 0;
+    }
+  }
+
+  &.text-primary-bright .q-icon {
+    --fa-color-glyph-base: #{outlineBtnGlow.$faOutlineButtonGlow-color-primaryBright};
+
+    color: var(--fa-color-glyph-base);
+  }
+
+  &.text-teal-14 .q-icon {
+    --fa-color-glyph-base: #{outlineBtnGlow.$faOutlineButtonGlow-color-teal14};
+
+    color: var(--fa-color-glyph-base);
+  }
+
+  &.text-secondary .q-icon {
+    --fa-color-glyph-base: #{$qMenu-destructiveItem-icon-color};
+
+    color: var(--fa-color-glyph-base);
+  }
+}
+
+/* QBtn icon prop cannot take fa-color-glyph class; shade via mixin under fantasy. */
+body.fa-appTheme--fantasy {
+  .projectAppControlBarFixedStripLeft .q-btn--outline .q-icon,
+  .projectAppControlBar__right .q-btn--outline .q-icon,
+  .projectAppControlBarDeleteDocumentAction .q-btn--outline .q-icon {
+    @include colorGlyph.fa-color-glyph-shading;
+  }
+}
+
+.projectAppControlBar__actionSeparator {
+  background-color: $projectAppControlBar-actionSeparatorColor;
+  margin-bottom: $projectAppControlBar-actionSeparator-marginBlockPx;
+  margin-left: $projectAppControlBar-stripButtonSpacingPx;
+  margin-top: $projectAppControlBar-actionSeparator-marginBlockPx;
+  opacity: $projectAppControlBar-actionSeparator-opacity;
+}
+
+.projectAppControlBar__buttonTooltip.q-tooltip {
+  max-width: $projectAppControlBar-buttonTooltip-maxWidth;
+  width: max-content;
+}
+
+.projectAppControlBarTabs {
+  -webkit-app-region: no-drag;
+  overflow: hidden;
+}
+
+.projectAppControlBarTabs--header {
+  background-color: transparent;
+  display: flex;
+  flex: 1 1 auto;
+  max-width: 100%;
+  min-height: mainLayout.$mainLayout-appHeader-heightPx;
+  min-width: 0;
+  width: 100%;
+}
+
+/*
+ * Default: hide Quasar outside scroll arrows and the 36px side padding they reserve.
+ * Modifier --showScrollButtons restores Quasar defaults when App Settings enables them.
+ */
+.projectAppControlBarTabs:not(.projectAppControlBarTabs--showScrollButtons) {
+  .tabsWrapper.q-tabs--scrollable.q-tabs__arrows--outside.q-tabs--horizontal {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .tabsWrapper .q-tabs__arrow {
+    display: none;
+  }
+}
+
+/*
+ * Scroll buttons off: trailing gap; right-edge fade only while overflow is clipped on the right.
+ * Paint matches .appHeader (fa-v dark-middle) so flat, fantasy, and Custom app CSS stay in sync.
+ */
+.appHeader__tabsRegion:has(.projectAppControlBarTabs:not(.projectAppControlBarTabs--showScrollButtons)) {
+  margin-right: $projectAppControlBar-tabsRegion-marginInlineEndWhenScrollButtonsHiddenPx;
+  position: relative;
+}
+
+.appHeader__tabsRegion:has(
+  .projectAppControlBarTabs:not(
+    .projectAppControlBarTabs--showScrollButtons,
+    .projectAppControlBarTabs--scrolledToInlineEnd
+  )
+)::before {
+  background-color: mainLayout.$mainLayout-appHeader-backgroundColor;
+  content: '';
+  height: 100%;
+  -webkit-mask-image: linear-gradient(to right, transparent, $projectAppControlBar-tabsRegion-endBlendMaskOpaqueStopColor);
+  mask-image: linear-gradient(to right, transparent, $projectAppControlBar-tabsRegion-endBlendMaskOpaqueStopColor);
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: $projectAppControlBar-tabsRegion-endBlendWidthPx;
+  z-index: $projectAppControlBar-tabsRegion-endBlendZIndex;
+}
+
+.projectAppControlBar__flowSpacer {
+  flex-shrink: 0;
+  min-height: $projectAppControlBar-minHeightPx;
+  pointer-events: none;
+  width: 100%;
+}
+
+.projectAppControlBarTabs__tabs {
+  height: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  width: 100%;
+}
+
+.projectAppControlBarTabs__tabTransitionGroup {
+  align-items: stretch;
+  display: flex;
+  height: 100%;
+}
+
+/* animate.css base; TransitionGroup :duration overrides animation-duration per enter/leave. */
+.animated {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+
+.projectAppControlBarTabs__tabClose {
+  --fa-color-glyph-base: #{$projectAppControlBar-tabClose-color};
+
+  color: var(--fa-color-glyph-base);
+
+  .q-icon {
+    color: var(--fa-color-glyph-base);
+  }
+}
+
+body.fa-appTheme--fantasy .projectAppControlBarTabs__tabClose .q-icon {
+  @include colorGlyph.fa-color-glyph-shading;
+}
+
+.projectAppControlBarTabs__tab.q-tab {
+  background-color: $projectAppControlBar-tabDefaultBackgroundColor;
+  cursor: grab;
+  margin-inline-end: $projectAppControlBar-tabMarginInlineEndPx;
+  max-width: $projectAppControlBar-tabWidthPx;
+  /* overflow visible: absolute unsaved feather hangs top-right without clip */
+  overflow: visible;
+  position: relative;
+  /* q-route-tab is an <a>; block Chromium native link-drag so Sortable forceFallback wins first try. */
+  -webkit-user-drag: none;
+  width: $projectAppControlBar-tabWidthPx;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  * {
+    -webkit-user-drag: none;
+  }
+}
+
+.projectAppControlBarTabs__tab.q-tab:first-child {
+  margin-inline-start: $projectAppControlBar-tabFirstMarginInlineStartPx;
+}
+
+.projectAppControlBarTabs__tab.q-tab--active:not(.projectAppControlBarTabs__tab--customDocumentBackground) {
+  background-color: $projectAppControlBar-tabActiveBackgroundColor;
+}
+
+.projectAppControlBarTabs__tab--customDocumentBackground.q-tab {
+  background-color: var(--projectAppControlBarTab-backgroundColor);
+}
+
+.projectAppControlBarTabs__tabWorldIndicator {
+  align-items: center;
+  color: var(--fa-color-glyph-base);
+  display: inline-flex;
+  font-size: $projectAppControlBar-tabWorldIndicator-fontSize;
+  height: $projectAppControlBar-tabWorldIndicator-fontSize;
+  justify-content: center;
+  left: $projectAppControlBar-tabWorldIndicator-offsetLeft;
+  line-height: 1;
+  pointer-events: none;
+  position: absolute;
+  top: $projectAppControlBar-tabWorldIndicator-offsetTop;
+  width: $projectAppControlBar-tabWorldIndicator-fontSize;
+  z-index: 1;
+}
+
+body.fa-appTheme--fantasy .projectAppControlBarTabs__tabWorldIndicator {
+  @include colorGlyph.fa-color-glyph-shading;
+}
+
+.tabsWrapper {
+  &.q-tabs--dense .q-tab {
+    height: mainLayout.$mainLayout-appHeader-heightPx;
+    min-height: mainLayout.$mainLayout-appHeader-heightPx;
+  }
+
+  .q-tabs__content {
+    height: 100%;
+  }
+
+  .q-tab {
+    --projectAppControlBarTab-focusHelperColor: currentcolor;
+
+    border-bottom: $projectAppControlBar-tabBottomBorderWidthPx solid $projectAppControlBar-tabBottomBorderColor;
+    color: $projectAppControlBar-tabContent-color;
+    padding: 0 $projectAppControlBar-tabPadding-inlinePx;
+    transition:
+      background-color $projectAppControlBar-tabFocusTransitionDurationMs $projectAppControlBar-tabFocusTransitionEase,
+      border-bottom-color $projectAppControlBar-tabFocusTransitionDurationMs $projectAppControlBar-tabFocusTransitionEase,
+      color $projectAppControlBar-tabFocusTransitionDurationMs $projectAppControlBar-tabFocusTransitionEase,
+      opacity $projectAppControlBar-tabFocusTransitionDurationMs $projectAppControlBar-tabFocusTransitionEase;
+  }
+
+  .q-tab--active {
+    border-bottom-color: transparent;
+  }
+
+  .projectAppControlBarTabs__tab.q-tab--active:not(.projectAppControlBarTabs__tab--customAppearance) {
+    .projectAppControlBarTabs__deadMarker,
+    .projectAppControlBarTabs__finishedMarker,
+    .projectAppControlBarTabs__tabLabelText,
+    .q-tab__label {
+      color: $projectAppControlBar-tabActiveContentColor;
+    }
+
+    .q-tab__icon {
+      --fa-color-glyph-base: #{$projectAppControlBar-tabActiveContentColor};
+
+      color: var(--fa-color-glyph-base);
+    }
+  }
+
+  .projectAppControlBarTabs__tab--statusMuted.q-tab:not(.q-tab--active) {
+    .projectAppControlBarTabs__deadMarker,
+    .projectAppControlBarTabs__finishedMarker,
+    .projectAppControlBarTabs__tabLabelText,
+    .q-tab__label {
+      color: $projectAppControlBar-tabStatusMutedColor;
+    }
+
+    .q-tab__icon {
+      --fa-color-glyph-base: #{$projectAppControlBar-tabStatusMutedColor};
+
+      color: var(--fa-color-glyph-base);
+    }
+  }
+
+  .projectAppControlBarTabs__tab--withWorldIndicator.q-tab {
+    padding-inline-start: calc(#{$projectAppControlBar-tabPadding-inlinePx} + #{$projectAppControlBar-tabWorldIndicator-extraPaddingInlineStartPx});
+
+    .q-tab__icon {
+      margin-inline-start: $projectAppControlBar-tabWorldIndicator-iconMarginInlineStartPx;
+    }
+  }
+
+  .projectAppControlBarTabs__tab--withUnsavedAlert.q-tab {
+    padding-right: $projectAppControlBar-tabPadding-inlineEndWithUnsavedAlertPx;
+  }
+
+  .q-tab__content {
+    align-items: center;
+    box-sizing: border-box;
+    height: 100%;
+    justify-content: flex-start;
+    max-width: $projectAppControlBar-tabContent-widthPx;
+    min-height: 0;
+    min-width: 0;
+    /* label/ellipsis clip on children; keep visible for absolute alert overlay */
+    overflow: visible;
+    /* Quasar default padding 4px 0 biases dense 36px header tabs off-center. */
+    padding-bottom: 0;
+    padding-top: 0;
+    text-align: left;
+    width: $projectAppControlBar-tabContent-widthPx;
+  }
+
+  .q-tab__indicator {
+    display: none;
+  }
+
+  .q-tab .q-tab__icon {
+    @include faQIconDisplay.fa-q-icon-display-constrain-glyph-in-box;
+
+    /* Same glyph sizing as ProjectHierarchyTreeNode__icon--layoutKind. */
+    --fa-color-glyph-base: #{$projectAppControlBar-tabContent-color};
+    --fa-q-icon-display-glyph-font-size: #{$projectAppControlBar-tabIcon-boxSize};
+    --fa-q-icon-display-mdi-fit-scale: 1;
+    --fa-q-icon-display-mdi-font-size: #{$projectAppControlBar-tabIcon-boxSize};
+
+    align-items: center;
+    color: var(--fa-color-glyph-base);
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: $projectAppControlBar-tabIcon-boxSize;
+    height: $projectAppControlBar-tabIcon-boxSize;
+    justify-content: center;
+    margin-inline-end: $projectAppControlBar-tabIcon-marginInlineEndPx;
+    max-height: $projectAppControlBar-tabIcon-boxSize;
+    max-width: $projectAppControlBar-tabIcon-boxSize;
+    transition:
+      color $projectAppControlBar-tabFocusTransitionDurationMs $projectAppControlBar-tabFocusTransitionEase,
+      opacity $projectAppControlBar-tabFocusTransitionDurationMs $projectAppControlBar-tabFocusTransitionEase;
+    width: $projectAppControlBar-tabIcon-boxSize;
+
+    /* Dense header tabs: drop FA/MDI glyph top nudge from shared display mixin. */
+    &.fa-brands::before,
+    &.fa-regular::before,
+    &.fa-solid::before {
+      margin-top: 0;
+    }
+
+    &:not(.fa-brands, .fa-regular, .fa-solid) {
+      margin-top: 0;
+    }
+  }
+
+  body.fa-appTheme--fantasy & .q-tab .q-tab__icon {
+    @include colorGlyph.fa-color-glyph-shading;
+  }
+
+  .q-tab__label {
+    color: $projectAppControlBar-tabContent-color;
+    flex: 1 1 auto;
+    font-size: $projectAppControlBar-tabLabel-fontSize;
+    font-weight: $projectAppControlBar-tabLabel-fontWeight;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition:
+      color $projectAppControlBar-tabFocusTransitionDurationMs $projectAppControlBar-tabFocusTransitionEase,
+      opacity $projectAppControlBar-tabFocusTransitionDurationMs $projectAppControlBar-tabFocusTransitionEase;
+    white-space: nowrap;
+  }
+
+  .projectAppControlBarTabs__tab--customAppearance.q-tab {
+    .projectAppControlBarTabs__deadMarker,
+    .projectAppControlBarTabs__finishedMarker,
+    .projectAppControlBarTabs__tabLabelText,
+    .q-tab__label {
+      color: var(--projectAppControlBarTab-textColor);
+    }
+
+    .q-tab__icon {
+      --fa-color-glyph-base: var(--projectAppControlBarTab-textColor);
+
+      color: var(--fa-color-glyph-base);
+    }
+  }
+
+  .projectAppControlBarTabs__tabLabel {
+    align-items: center;
+    display: inline-flex;
+    flex: 1 1 auto;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .projectAppControlBarTabs__tabLabelText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .projectAppControlBarTabs__tabLabelText--dead {
+    text-decoration: line-through;
+    text-decoration-color: currentcolor;
+  }
+
+  .projectAppControlBarTabs__deadMarker {
+    flex-shrink: 0;
+    margin-right: $projectAppControlBar-tabDeadMarker-marginRight;
+  }
+
+  .projectAppControlBarTabs__finishedMarker {
+    flex-shrink: 0;
+    margin-left: $projectAppControlBar-tabFinishedMarker-marginLeft;
+    margin-right: $projectAppControlBar-tabFinishedMarker-marginRight;
+  }
+
+  .q-tab__alert-icon {
+    --fa-color-glyph-base: #{$projectAppControlBar-unsavedTabIconColor};
+
+    color: var(--fa-color-glyph-base);
+    font-size: $projectAppControlBar-tabAlertIcon-fontSize !important;
+    height: $projectAppControlBar-tabAlertIcon-fontSize;
+    line-height: $projectAppControlBar-tabAlertIcon-fontSize;
+    pointer-events: none;
+    position: absolute;
+    right: $projectAppControlBar-tabAlertIcon-positionRight;
+    top: $projectAppControlBar-tabAlertIcon-positionTop;
+    width: $projectAppControlBar-tabAlertIcon-fontSize;
+    z-index: 2;
+  }
+
+  body.fa-appTheme--fantasy & .q-tab__alert-icon {
+    @include colorGlyph.fa-color-glyph-shading;
+  }
+
+  .projectAppControlBarTabs__tab.q-focusable:focus > .q-focus-helper,
+  .projectAppControlBarTabs__tab.q-hoverable:hover > .q-focus-helper {
+    background: var(--projectAppControlBarTab-focusHelperColor);
+    opacity: $qFocusable-hoverHelper-opacity !important;
+
+    &::after,
+    &::before {
+      opacity: 0 !important;
+    }
+  }
+
+  .projectAppControlBarTabs__tab.q-tab--active.q-focusable:focus > .q-focus-helper,
+  .projectAppControlBarTabs__tab.q-tab--active.q-hoverable:hover > .q-focus-helper {
+    background: transparent;
+    opacity: 0 !important;
+  }
+}

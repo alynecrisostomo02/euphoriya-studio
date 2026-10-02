@@ -1,0 +1,63 @@
+@use './variables' as *;
+
+.dialogProjectSettingsWorldTemplateLayoutPanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutPanel__columns {
+  flex: 1 1 auto;
+  gap: $dialogProjectSettings-worldTemplateLayout-columnsGap;
+  min-height: 0;
+  min-width: 0;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutPanel__layoutCol {
+  padding-right: $dialogProjectSettings-worldTemplateLayout-layoutCol-paddingRight;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutPanel__layoutCol,
+.dialogProjectSettingsWorldTemplateLayoutPanel__availableCol {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutPanel__separator {
+  align-self: stretch;
+  margin:
+    0
+    $dialogProjectSettings-worldTemplateLayout-separatorMarginRight
+    0
+    $dialogProjectSettings-worldTemplateLayout-separatorMarginLeft;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutPanel__treeHost {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutPanel .dialogProjectSettings__panelTitle {
+  margin-top: 0;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutPanel__availableCol .dialogProjectSettings__panelTitle {
+  padding-left: $dialogProjectSettings-worldTemplateLayout-availableTitleRow-paddingLeft;
+  padding-right: 0;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutPanel__availableTitleRow {
+  gap: $dialogProjectSettings-worldTemplateLayout-availableTitleRow-gap;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.dialogProjectSettingsWorldTemplateLayoutPanel__addGroupRow {
+  flex-shrink: 0;
+}

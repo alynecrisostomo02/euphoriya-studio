@@ -1,0 +1,39 @@
+---
+description: >-
+  When a Vue feature needs a separate SCSS/CSS file (for example to satisfy SFC
+  line limits), styles live only under that feature's styles/ subfolder — never
+  beside the .vue at the feature root.
+globs: "src/components/**/*.vue"
+alwaysApply: false
+---
+
+# Component-level `styles/` folder (`src/components/`)
+
+SFC pulls **external** styles via `<style lang="scss" src="...">` (or CSS) — typically **250-line** `.vue` cap ([code-size-decomposition.mdc](code-size-decomposition.mdc)).
+
+## Placement
+
+- Files under **`src/components/<bucket>/<FeatureName>/styles/`** (**`styles`** inside same folder as feature `.vue`).
+- **No** standalone **`*.scss`** / **`*.css`** beside **`.vue`** at feature root (not `DialogFoo/DialogFoo.unscoped.scss` beside `DialogFoo.vue`).
+- **`src/layouts/`**, **`src/pages/`**: same pattern if external sheet needed — **`styles/`** next to **`.vue`**, not loose siblings.
+
+## Naming
+
+- **Feature-scoped** basename, e.g. **`WindowAppStyling.unscoped.scss`**, **`WindowAppStyling.floatingWindowPopTransition.unscoped.scss`**, **`DialogKeybindSettings.unscoped.scss`** — multiple sheets under **`styles/`** stay distinguishable.
+- **`_variables.scss`** (fixed name): feature/layout/page **`$` theme variables** re-exported through [quasar.variables.scss](src/css/quasar.variables.scss). **Not** second `<style src>` — **`@use`d** from other SCSS only. Start with **`@use` … [app.palette.scss](src/css/app.palette.scss) `as *`** when needed; **no** barrel **`@use`** from here. New feature tokens here, not monolith. **Keep every name SFC/foundation catalogue still references** — removal → **Sass undefined variable** at build, not Stylelint. [project-scss.mdc](project-scss.mdc) **Theme token layout**; **`$q*`** only → **`yarn audit:quasar-component-tokens`**.
+- Scoped blocks may stay in SFC; **unscoped** or large extracts often **`.unscoped.scss`** suffix when matches dialogs/windows.
+
+## Wiring
+
+- SFC relative import into `styles/`:
+
+```vue
+<style lang="scss" src="./styles/WindowAppStyling.unscoped.scss"></style>
+```
+
+- SFC block order: **`<template>`**, **`<script>`**, **`<style>`** last ([vue-quasar.mdc](vue-quasar.mdc)).
+
+## Related
+
+- Sheet contents: [vue-bem-scss.mdc](vue-bem-scss.mdc), [project-scss.mdc](project-scss.mdc) (**palette** vs **semantic** color tokens in consumer SCSS)
+- Extract vs inline: [code-size-decomposition.mdc](code-size-decomposition.mdc)

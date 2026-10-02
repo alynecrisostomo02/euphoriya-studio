@@ -1,0 +1,128 @@
+import type { ElectronApplication, Page } from 'playwright'
+import { expect, test } from '@playwright/test'
+import type { TestInfo } from '@playwright/test'
+import { launchFaPlaywrightComponentHarnessWindow } from 'app/helpers/playwrightHelpers_component/faPlaywrightComponentHarnessLifecycle'
+import { FA_FRONTEND_RENDER_TIMER } from 'app/helpers/playwrightHelpers_universal/faPlaywrightElectronLaunchConstants'
+import { tearDownFaPlaywrightElectronSerialSuite } from 'app/helpers/playwrightHelpers_universal/faPlaywrightSerialSuiteLifecycleTeardown'
+import type { I_socialContactButton } from 'app/types/I_socialContactButtons'
+
+/**
+ * Button payload for this spec — must match what the app receives via 'COMPONENT_PROPS.dataInput'.
+ */
+const testData: I_socialContactButton = {
+  label: 'Patreon - Label',
+  url: 'https://www.patreon.com/c/vishiri',
+  icon: 'patreon_logo.png',
+  width: 26,
+  height: 26,
+  cssClass: 'patreon'
+}
+
+/**
+ * Extra env settings to trigger component testing via Playwright
+ */
+const extraEnvSettings = {
+  TEST_ENV: 'components',
+  COMPONENT_NAME: 'SocialContactSingleButton',
+  COMPONENT_PROPS: JSON.stringify({ dataInput: testData })
+}
+
+/**
+ * Buffer before assertions so the component-testing shell finishes rendering.
+ * - Tune this constant only when this spec needs a different wait.
+ */
+const faFrontendRenderTimer:number = FA_FRONTEND_RENDER_TIMER
+
+/**
+ * Object of string data selectors for the component
+ */
+const selectorList = {
+  singleButton: 'socialContactSingleButton',
+  singleButtonImage: 'socialContactSingleButton-image',
+  singleButtonImageQuasarElement: '.q-img__image',
+  singleButtonText: 'socialContactSingleButton-text'
+}
+
+test.describe.serial('Social contact single button', () => {
+  let electronApp: ElectronApplication
+  let appWindow: Page
+  let suiteTestInfo: TestInfo
+
+  test.beforeAll(async ({}, testInfo) => {
+    suiteTestInfo = testInfo
+    extraEnvSettings.COMPONENT_PROPS = JSON.stringify({ dataInput: testData })
+    const launched = await launchFaPlaywrightComponentHarnessWindow({
+      buildLaunchEnv (): Record<string, string> {
+        return {
+          COMPONENT_NAME: extraEnvSettings.COMPONENT_NAME,
+          COMPONENT_PROPS: extraEnvSettings.COMPONENT_PROPS,
+          TEST_ENV: extraEnvSettings.TEST_ENV
+        }
+      },
+      renderDelayMs: faFrontendRenderTimer,
+      testInfo
+    })
+    electronApp = launched.electronApp
+    appWindow = launched.appWindow
+  })
+
+  test.afterAll(async ({}, afterAllTestInfo) => {
+    await tearDownFaPlaywrightElectronSerialSuite({
+      afterAllTestInfo,
+      electronApp,
+      suiteTestInfo
+    })
+  })
+
+  /**
+   * Test if the component exists
+   */
+  test('Test if the component exists', async () => {
+    const buttonElement = appWindow.locator(`[data-test-locator="${selectorList.singleButton}"]`)
+
+    await expect(buttonElement).toHaveCount(1)
+  })
+
+  /**
+   * Check if the component has proper url and classes
+   */
+  test('Check if the component has proper url and classes', async () => {
+    const buttonElement = appWindow.locator(`[data-test-locator="${selectorList.singleButton}"]`)
+
+    await expect(buttonElement).toHaveCount(1)
+
+    await expect(buttonElement).toHaveAttribute('href', testData.url)
+    await expect(buttonElement).toHaveClass(new RegExp(`\\b${testData.cssClass}\\b`))
+  })
+
+  /**
+   * Check if the component icon has proper src, height and width
+   */
+  test('Check if the component icon has proper src, height and width', async () => {
+    const imgHost = appWindow.locator(`[data-test-locator="${selectorList.singleButtonImage}"]`)
+
+    await expect(imgHost).toHaveCount(1)
+    await expect(imgHost).toHaveAttribute('data-test-layout-width', String(testData.width))
+    await expect(imgHost).toHaveAttribute('data-test-layout-height', String(testData.height))
+
+    const buttonIconQuasarElement = appWindow.locator(selectorList.singleButtonImageQuasarElement)
+    await expect(buttonIconQuasarElement).toHaveCount(1)
+
+    const buttonIcon = await buttonIconQuasarElement.evaluate((el: HTMLImageElement) => el.src)
+    const dataIcon = testData.icon
+    expect(buttonIcon).toContain(dataIcon)
+  })
+
+  /**
+   * Check if the component has proper text content
+   */
+  test('Check if the component has proper text content', async () => {
+    const buttonIconText = appWindow.locator(`[data-test-locator="${selectorList.singleButtonText}"]`)
+
+    await expect(buttonIconText).toHaveCount(1)
+
+    const buttonText = await buttonIconText.textContent()
+    const dataText = testData.label
+    expect(buttonText).toBe(dataText)
+  })
+})

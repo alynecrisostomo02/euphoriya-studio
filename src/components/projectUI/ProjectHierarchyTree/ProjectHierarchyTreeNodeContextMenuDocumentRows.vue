@@ -1,0 +1,133 @@
+<template>
+  <template v-if="showsOpenEdit !== false">
+    <q-item
+      v-close-popup
+      clickable
+      class="projectHierarchyTreeNodeContextMenu__item non-selectable"
+      data-test-locator="projectHierarchyTree-nodeContextMenu-openDocument"
+      role="menuitem"
+      @click="onOpenDocumentClick"
+    >
+      <q-item-section>
+        <span class="projectHierarchyTreeNodeContextMenu__primaryLabel">
+          {{ openDocumentLabel }}
+        </span>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-icon
+          class="projectHierarchyTreeNodeContextMenu__icon fa-color-glyph"
+          name="mdi-book-open-page-variant-outline"
+        />
+      </q-item-section>
+    </q-item>
+
+    <q-separator
+      class="projectHierarchyTreeNodeContextMenu__separatorAlt"
+      dark
+      role="separator"
+    />
+
+    <q-item
+      v-close-popup
+      clickable
+      class="projectHierarchyTreeNodeContextMenu__item non-selectable"
+      data-test-locator="projectHierarchyTree-nodeContextMenu-editDocument"
+      role="menuitem"
+      @click="onEditDocumentClick"
+    >
+      <q-item-section>
+        <span class="projectHierarchyTreeNodeContextMenu__primaryLabel">
+          {{ editDocumentLabel }}
+        </span>
+      </q-item-section>
+      <q-item-section avatar>
+        <q-icon
+          class="projectHierarchyTreeNodeContextMenu__icon fa-color-glyph"
+          name="mdi-pencil"
+        />
+      </q-item-section>
+    </q-item>
+  </template>
+
+  <q-separator
+    v-if="showsOpenEdit !== false && showsCopyDocument !== false"
+    class="projectHierarchyTreeNodeContextMenu__separatorAlt"
+    dark
+    role="separator"
+  />
+
+  <q-item
+    v-if="showsCopyDocument !== false"
+    v-close-popup
+    clickable
+    class="projectHierarchyTreeNodeContextMenu__item non-selectable"
+    data-test-locator="projectHierarchyTree-nodeContextMenu-copyDocument"
+    role="menuitem"
+    @click="onCopyDocumentClick"
+  >
+    <q-item-section>
+      <span class="projectHierarchyTreeNodeContextMenu__primaryLabel">
+        {{ copyDocumentLabel }}
+      </span>
+    </q-item-section>
+    <q-item-section avatar>
+      <q-icon
+        class="projectHierarchyTreeNodeContextMenu__icon fa-color-glyph"
+        name="mdi-content-copy"
+      />
+    </q-item-section>
+  </q-item>
+
+  <q-separator
+    v-if="showsCopyDocument !== false && showsAddUnder !== false"
+    class="projectHierarchyTreeNodeContextMenu__separatorAlt"
+    dark
+    role="separator"
+  />
+
+  <q-item
+    v-if="showsAddUnder !== false"
+    v-close-popup
+    clickable
+    class="projectHierarchyTreeNodeContextMenu__item non-selectable"
+    data-test-locator="projectHierarchyTree-nodeContextMenu-addNewDocumentUnderThis"
+    role="menuitem"
+    @click="onAddNewDocumentUnderThisClick"
+  >
+    <q-item-section>
+      <span class="projectHierarchyTreeNodeContextMenu__primaryLabel">
+        {{ addNewDocumentUnderThisLabel }}
+      </span>
+    </q-item-section>
+    <q-item-section avatar>
+      <q-icon
+        class="projectHierarchyTreeNodeContextMenu__icon fa-color-glyph"
+        name="mdi-file-tree"
+      />
+    </q-item-section>
+  </q-item>
+</template>
+
+<script setup lang="ts">
+defineOptions({
+  name: 'ProjectHierarchyTreeNodeContextMenuDocumentRows'
+})
+
+withDefaults(defineProps<{
+  addNewDocumentUnderThisLabel: string
+  copyDocumentLabel: string
+  editDocumentLabel: string
+  onAddNewDocumentUnderThisClick: () => void
+  onCopyDocumentClick: () => void
+  onEditDocumentClick: () => void
+  onOpenDocumentClick: () => void
+  openDocumentLabel: string
+  showsAddUnder?: boolean
+  showsCopyDocument?: boolean
+  showsOpenEdit?: boolean
+}>(), {
+  showsAddUnder: true,
+  showsCopyDocument: true,
+  showsOpenEdit: true
+})
+</script>

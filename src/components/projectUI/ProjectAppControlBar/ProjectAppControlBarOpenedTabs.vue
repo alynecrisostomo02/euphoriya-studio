@@ -1,0 +1,244 @@
+<template>
+  <Teleport
+    v-if="showDocumentTabs"
+    :to="FA_PROJECT_APP_CONTROL_BAR_HEADER_MOUNT_SELECTOR"
+  >
+    <div
+      ref="tabsRootRef"
+      class="projectAppControlBarTabs projectAppControlBarTabs--header"
+      :class="{
+        'projectAppControlBarTabs--scrolledToInlineEnd': tabsScrolledToInlineEnd,
+        'projectAppControlBarTabs--showScrollButtons': showTabBarScrollButtons
+      }"
+      @wheel="onProjectAppControlBarTabsWheel"
+    >
+      <q-tabs
+        align="left"
+        class="projectAppControlBarTabs__tabs tabsWrapper"
+        dense
+        inline-label
+        mobile-arrows
+        :model-value="activeDocumentTabName"
+        no-caps
+        outside-arrows
+      >
+        <VueDraggable
+          v-model="sortableTabs"
+          v-bind="projectAppControlBarTabsSortableDragOptions"
+          :animation="PROJECT_APP_CONTROL_BAR_TABS_SORTABLE_ANIMATION_MS"
+          class="projectAppControlBarTabs__tabTransitionGroup"
+          :set-data="setOpenedTabsNativeSortableDragGhost"
+          :touch-start-threshold="5"
+          @end="onTabsDragEndWithCursorClear"
+          @start="onTabsDragStart"
+        >
+          <q-route-tab
+            v-for="tab in sortableTabs"
+            :key="tab.documentId"
+            :alert="tab.hasUnsavedChanges"
+            alert-icon="mdi-feather"
+            class="projectAppControlBarTabs__tab"
+            :class="{
+              'projectAppControlBarTabs__tab--customAppearance':
+                resolveProjectAppControlBarTabHasUserCustomTextColor(tab),
+              'projectAppControlBarTabs__tab--customDocumentBackground':
+                resolveDocumentTabAppearanceChrome(tab)?.backgroundColor !== undefined,
+              'projectAppControlBarTabs__tab--dead': tab.isDeadDraft === true,
+              'projectAppControlBarTabs__tab--statusMuted':
+                resolveProjectAppControlBarTabShowsStatusMuted(tab),
+              'projectAppControlBarTabs__tab--withUnsavedAlert': tab.hasUnsavedChanges,
+              'projectAppControlBarTabs__tab--withWorldIndicator':
+                showWorldTabIndicators && resolveTabWorldIndicatorColor(tab) !== null
+            }"
+            :data-test-locator="`projectAppControlBar-tab-${tab.documentId}`"
+            draggable="false"
+            :icon="resolveDocumentTabDisplayIcon(tab)"
+            :name="tab.documentId"
+            :ripple="false"
+            :style="resolveDocumentTabInlineStyle(tab)"
+            :to="resolveDocumentTabRoute(tab.documentId)"
+            @auxclick.stop.prevent="onTabAuxClick(tab.documentId, $event)"
+          >
+            <span class="projectAppControlBarTabs__tabLabel">
+              <span
+                v-if="tab.isFinishedDraft === true"
+                class="projectAppControlBarTabs__finishedMarker"
+              >✓</span>
+              <span
+                v-if="tab.isDeadDraft === true"
+                class="projectAppControlBarTabs__deadMarker"
+              >†</span>
+              <span
+                class="projectAppControlBarTabs__tabLabelText"
+                :class="{
+                  'projectAppControlBarTabs__tabLabelText--dead': tab.isDeadDraft === true
+                }"
+              >{{ resolveDocumentTabLabel(tab) }}</span>
+            </span>
+            <ProjectAppControlBarTabWorldIndicator
+              :color="resolveTabWorldIndicatorColor(tab)"
+              :document-id="tab.documentId"
+              :visible="showWorldTabIndicators"
+            />
+            <q-btn
+              v-if="!hideTabCloseButton"
+              class="projectAppControlBarTabs__tabClose z-max q-ml-auto"
+              dense
+              flat
+              icon="close"
+              round
+              size="xs"
+              :data-test-locator="`projectAppControlBar-tabClose-${tab.documentId}`"
+              @click.stop.prevent="onTabCloseClick(tab.documentId)"
+            />
+            <ProjectAppControlBarTabContextMenu
+              :active-document-tab-name="activeDocumentTabName"
+              :move-document-tab-left-keybind-label="moveDocumentTabLeftKeybindLabel"
+              :move-document-tab-right-keybind-label="moveDocumentTabRightKeybindLabel"
+              :on-tab-close-all-without-changes-click="onTabCloseAllWithoutChangesClick"
+              :on-tab-close-all-without-changes-except-click="onTabCloseAllWithoutChangesExceptClick"
+              :on-tab-close-click="onTabCloseClick"
+              :on-tab-copy-background-color-click="onTabCopyBackgroundColorClick"
+              :on-tab-copy-document-click="onTabCopyDocumentClick"
+              :on-tab-copy-name-click="onTabCopyNameClick"
+              :on-tab-copy-text-color-click="onTabCopyTextColorClick"
+              :on-tab-add-new-document-under-this-click="onTabAddNewDocumentUnderThisClick"
+              :on-tab-delete-click="onTabDeleteClick"
+              :on-tab-force-close-all-click="onTabForceCloseAllClick"
+              :on-tab-force-close-all-except-click="onTabForceCloseAllExceptClick"
+              :on-tab-move-click="onTabMoveClick"
+              :opened-document-tabs="openedDocumentTabs"
+              :resolve-document-tab-appearance-chrome="resolveDocumentTabAppearanceChrome"
+              :resolve-document-tab-display-icon="resolveDocumentTabDisplayIcon"
+              :resolve-document-tab-inline-style="resolveDocumentTabInlineStyle"
+              :resolve-document-tab-label="resolveDocumentTabLabel"
+              :resolve-document-tab-route="resolveDocumentTabRoute"
+              :resolve-tab-world-indicator-color="resolveTabWorldIndicatorColor"
+              :show-world-tab-indicators="showWorldTabIndicators"
+              :tab="tab"
+            />
+          </q-route-tab>
+        </VueDraggable>
+      </q-tabs>
+    </div>
+  </Teleport>
+</template>
+
+<script setup lang="ts">
+import type { CSSProperties } from 'vue'
+import { onBeforeUnmount, ref } from 'vue'
+
+import type { I_faDocumentAppearanceChromeStyle } from 'app/types/I_faDocumentAppearanceChromeStyle'
+import type { I_faOpenedDocumentTab } from 'app/types/I_faOpenedDocumentsDomain'
+
+import ProjectAppControlBarTabContextMenu from './ProjectAppControlBarTabContextMenu.vue'
+import ProjectAppControlBarTabWorldIndicator from './ProjectAppControlBarTabWorldIndicator.vue'
+
+import {
+  FA_PROJECT_APP_CONTROL_BAR_HEADER_MOUNT_SELECTOR,
+  PROJECT_APP_CONTROL_BAR_TABS_SORTABLE_ANIMATION_MS,
+  VueDraggable,
+  applyFaVerticalDraggableTabsDocumentDragCursor,
+  clearFaVerticalDraggableTabsDocumentDragCursor,
+  hideNativeSortableDragGhost,
+  onProjectAppControlBarTabsWheel,
+  projectAppControlBarTabsSortableDragOptions,
+  resolveProjectAppControlBarTabHasUserCustomTextColor,
+  resolveProjectAppControlBarTabShowsStatusMuted,
+  startProjectAppControlBarTabsDragEdgeScroll,
+  stopProjectAppControlBarTabsDragEdgeScroll,
+  useProjectAppControlBarOpenedTabsSortable,
+  useProjectAppControlBarTabsInlineEndBlend
+} from './scripts/projectAppControlBar_manager'
+
+defineOptions({
+  name: 'ProjectAppControlBarOpenedTabs'
+})
+
+const props = defineProps<{
+  activeDocumentTabName: string | undefined
+  hideTabCloseButton: boolean
+  moveDocumentTabLeftKeybindLabel: string | null
+  moveDocumentTabRightKeybindLabel: string | null
+  onTabAddNewDocumentUnderThisClick: (documentId: string) => Promise<void>
+  onTabAuxClick: (documentId: string, event: MouseEvent) => void
+  onTabCloseAllWithoutChangesClick: () => void
+  onTabCloseAllWithoutChangesExceptClick: (documentId: string) => void
+  onTabCloseClick: (documentId: string) => void
+  onTabCopyBackgroundColorClick: (documentId: string) => Promise<void>
+  onTabCopyDocumentClick: (documentId: string) => Promise<void>
+  onTabCopyNameClick: (documentId: string) => Promise<void>
+  onTabCopyTextColorClick: (documentId: string) => Promise<void>
+  onTabDeleteClick: (documentId: string) => void | Promise<void>
+  onTabForceCloseAllClick: () => void
+  onTabForceCloseAllExceptClick: (documentId: string) => void
+  onTabMoveClick: (documentId: string, direction: 'left' | 'right') => void
+  onTabReorder: (fromIndex: number, toIndex: number) => void
+  openedDocumentTabs: readonly I_faOpenedDocumentTab[]
+  resolveDocumentTabAppearanceChrome: (
+    tab: I_faOpenedDocumentTab
+  ) => I_faDocumentAppearanceChromeStyle | undefined
+  resolveDocumentTabDisplayIcon: (tab: I_faOpenedDocumentTab) => string
+  resolveDocumentTabInlineStyle: (tab: I_faOpenedDocumentTab) => CSSProperties | undefined
+  resolveDocumentTabLabel: (tab: I_faOpenedDocumentTab) => string
+  resolveDocumentTabRoute: (documentId: string) => string
+  resolveTabWorldIndicatorColor: (tab: I_faOpenedDocumentTab) => string | null
+  showDocumentTabs: boolean
+  showTabBarScrollButtons: boolean
+  showWorldTabIndicators: boolean
+}>()
+
+const tabsRootRef = ref<HTMLElement | null>(null)
+
+function getOpenedDocumentTabs (): readonly I_faOpenedDocumentTab[] {
+  return props.openedDocumentTabs
+}
+
+const {
+  onTabsDragEnd,
+  sortableTabs
+} = useProjectAppControlBarOpenedTabsSortable({
+  getOpenedDocumentTabs,
+  onTabReorder: props.onTabReorder
+})
+
+const { tabsScrolledToInlineEnd } = useProjectAppControlBarTabsInlineEndBlend({
+  tabsRootRef,
+  watchSource: () => {
+    return props.openedDocumentTabs.length
+  }
+})
+
+function setOpenedTabsNativeSortableDragGhost (dataTransfer: DataTransfer): void {
+  hideNativeSortableDragGhost(dataTransfer)
+}
+
+function onTabsDragStart (event: unknown): void {
+  applyFaVerticalDraggableTabsDocumentDragCursor()
+  let initialPointerClientX: number | undefined
+  if (
+    typeof event === 'object' &&
+    event !== null &&
+    'originalEvent' in event
+  ) {
+    const originalEvent = (event as { originalEvent?: Event }).originalEvent
+    if (
+      originalEvent instanceof MouseEvent ||
+      originalEvent instanceof PointerEvent
+    ) {
+      initialPointerClientX = originalEvent.clientX
+    }
+  }
+  startProjectAppControlBarTabsDragEdgeScroll(tabsRootRef.value, initialPointerClientX)
+}
+
+function onTabsDragEndWithCursorClear (event: { newIndex?: number | undefined, oldIndex?: number | undefined }): void {
+  stopProjectAppControlBarTabsDragEdgeScroll()
+  clearFaVerticalDraggableTabsDocumentDragCursor()
+  onTabsDragEnd(event)
+}
+
+onBeforeUnmount(() => {
+  stopProjectAppControlBarTabsDragEdgeScroll()
+})
+</script>
