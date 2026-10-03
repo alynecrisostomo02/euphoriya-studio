@@ -285,7 +285,9 @@ Visual reading:
 - layered, flowing fabric and a controlled silhouette;
 - melancholy, nobility, mystery, absence, and restraint;
 - darkened hands and hooded presentation as potentially important character
-  details.
+  details;
+- pointed ears are canonical; their absence in the supplied concept sheet is a
+  visual error to correct in future art.
 
 Dossier translation:
 
@@ -312,10 +314,11 @@ Dossier translation:
 - restrained light motes or constellation lines when effects are enabled;
 - a brighter character atmosphere that still belongs to mystical twilight.
 
-The pointed ears shown in the supplied sheet are confirmed as canonical to Emilly
-and should be preserved in future structured appearance data and approved art.
-This character-level decision does not by itself establish pointed ears as a trait
-shared by every Crownis; species-wide anatomy still requires an explicit lore rule.
+Pointed ears are confirmed as canonical to Natasha, Emilly, and Lilith. Emilly's
+sheet depicts them correctly; their absence from Natasha's and Lilith's current
+sheets is a concept-art error that future approved art must correct. This shared
+character detail does not by itself establish a species-wide anatomy rule; that
+still requires an explicit lore decision.
 
 ### Lilith
 
@@ -325,7 +328,9 @@ Visual reading:
 - faceted crystal and angular diamond motifs;
 - short dark hair, violet eyes, asymmetry, fitted combat clothing, and sharp
   accessories;
-- confident, dangerous, precise, and contemporary-fantasy energy.
+- confident, dangerous, precise, and contemporary-fantasy energy;
+- pointed ears are canonical; their absence in the supplied concept sheet is a
+  visual error to correct in future art.
 
 Dossier translation:
 
