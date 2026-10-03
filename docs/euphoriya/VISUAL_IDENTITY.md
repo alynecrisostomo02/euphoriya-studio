@@ -264,6 +264,93 @@ fallbacks in [PERFORMANCE_PRINCIPLES.md](PERFORMANCE_PRINCIPLES.md).
 
 Every experience must remain usable with reduced motion and effects disabled.
 
+## Character-specific visual dossiers
+
+A character may tint their own dossier without redefining the application-wide
+theme. The shell, typography, spacing, accessibility, and interaction language
+remain Euphoriya; palette, motif, portrait treatment, and ambient detail may adapt
+to the character.
+
+The supplied sheets are visual references, not automatic canon records. Details
+must be confirmed in Character Studio before they become structured identity,
+appearance, species, ability, costume, or canon data.
+
+### Natasha
+
+Visual reading:
+
+- graphite, near-black, midnight blue, muted indigo, cold gray, and pale skin;
+- elongated diamond motif;
+- layered, flowing fabric and a controlled silhouette;
+- melancholy, nobility, mystery, absence, and restraint;
+- darkened hands and hooded presentation as potentially important character
+  details.
+
+Dossier translation:
+
+- quiet indigo atmosphere rather than pure black;
+- elongated frames, slow ink reveals, and sparse cold highlights;
+- portrait and expression studies prioritized over decorative effects;
+- her visual darkness remains character-specific and must not set the global
+  application palette.
+
+### Emilly
+
+Visual reading:
+
+- ivory, warm cream, pearl, antique gold, and soft blush;
+- sun/star insignia and iridescent accents;
+- large white wings with cream and gold variation;
+- noble, celestial, paladin-influenced structure;
+- luminous and ordered silhouette.
+
+Dossier translation:
+
+- warm ivory surfaces, celestial gold rules, and very subtle prismatic light;
+- wing studies, insignia, portrait, and costume construction as primary media;
+- restrained light motes or constellation lines when effects are enabled;
+- a brighter character atmosphere that still belongs to mystical twilight.
+
+The supplied sheet depicts pointed ears. This must not be inferred as canonical
+species anatomy from the image alone; confirm it against Emilly's species record
+before structured data or future generated art uses it.
+
+### Lilith
+
+Visual reading:
+
+- black, amethyst, plum, gunmetal, and cool silver;
+- faceted crystal and angular diamond motifs;
+- short dark hair, violet eyes, asymmetry, fitted combat clothing, and sharp
+  accessories;
+- confident, dangerous, precise, and contemporary-fantasy energy.
+
+Dossier translation:
+
+- amethyst selection glow, faceted separators, and sharper panel geometry;
+- faster, more decisive transitions than Natasha's dossier while remaining
+  subtle;
+- costume/accessory details organized as media studies, not reduced to form rows;
+- avoid letting the fitted black combat aesthetic turn the product into a
+  universal dark-action interface.
+
+### Future visual-profile boundary
+
+When the existing data-core versions are reconciled, evaluate a small
+character-visual profile or equivalent existing abstraction for:
+
+- palette tokens or approved swatches;
+- primary symbol/motif;
+- portrait and gallery focal point;
+- atmosphere preset;
+- optional motion/effect cue;
+- approved media references;
+- costume/appearance study grouping.
+
+Do not add a new table or migration solely from this document. Search for an
+existing Character Studio/media/custom-field abstraction first and keep visual
+configuration separate from canonical biography.
+
 ## Originality and reuse rule
 
 Reference projects and supplied images provide composition and interaction
