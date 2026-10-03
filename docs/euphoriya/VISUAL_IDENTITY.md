@@ -271,9 +271,10 @@ theme. The shell, typography, spacing, accessibility, and interaction language
 remain Euphoriya; palette, motif, portrait treatment, and ambient detail may adapt
 to the character.
 
-The supplied sheets are visual references, not automatic canon records. Details
-must be confirmed in Character Studio before they become structured identity,
-appearance, species, ability, costume, or canon data.
+The supplied sheets are evolving visual concepts rather than frozen final designs.
+They guide the current direction, while changeable costume, accessory, palette, and
+presentation details must be confirmed in Character Studio before becoming final
+structured appearance or canon data.
 
 ### Natasha
 
@@ -311,9 +312,10 @@ Dossier translation:
 - restrained light motes or constellation lines when effects are enabled;
 - a brighter character atmosphere that still belongs to mystical twilight.
 
-The supplied sheet depicts pointed ears. This must not be inferred as canonical
-species anatomy from the image alone; confirm it against Emilly's species record
-before structured data or future generated art uses it.
+The pointed ears shown in the supplied sheet are confirmed as canonical to Emilly
+and should be preserved in future structured appearance data and approved art.
+This character-level decision does not by itself establish pointed ears as a trait
+shared by every Crownis; species-wide anatomy still requires an explicit lore rule.
 
 ### Lilith
 
