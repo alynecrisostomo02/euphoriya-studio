@@ -276,6 +276,47 @@ They guide the current direction, while changeable costume, accessory, palette, 
 presentation details must be confirmed in Character Studio before becoming final
 structured appearance or canon data.
 
+### Raffaell Tyrrell
+
+The official surname spelling is **Tyrrell**.
+
+The supplied sheet is a **canonical alternate outfit**, not a replacement for
+Raffaell's primary design. Stable identity across outfits:
+
+- mature appearance, approximately forty years old;
+- tall, extremely strong and muscular build;
+- warm light-to-medium skin;
+- very long, voluminous, wavy brown hair, partially tied;
+- light beard/stubble and a commanding, controlled expression;
+- pointed ears;
+- enormous near-black feathered wings with restrained green, teal, violet,
+  magenta, gold, and warm iridescence;
+- aristocratic-warrior presence centered on burgundy/crimson.
+
+Alternate-outfit characteristics shown in this sheet:
+
+- forest green layered with burgundy;
+- pale fur at the shoulders;
+- exposed torso and structured draped panels;
+- aged gold/bronze geometric fittings;
+- green gemstone details;
+- runic tattoos and matching woven/embroidered patterns.
+
+Character Studio must treat this as an outfit/media variation belonging to the
+same character identity. A costume change must not create a duplicate Raffaell
+entity or silently replace the primary portrait. The user can choose which
+approved outfit is primary for a story period, scene, gallery, or character cover.
+
+Dossier translation:
+
+- burgundy remains the identity anchor while forest green signals this alternate
+  phase;
+- wing iridescence appears in media details and restrained selection accents,
+  never as constant rainbow UI glow;
+- runic tattoos and garment construction belong in Appearance/Media views;
+- mature facial proportions must be preserved in every portrait and Story Mode
+  scene.
+
 ### Natasha
 
 Visual reading:
