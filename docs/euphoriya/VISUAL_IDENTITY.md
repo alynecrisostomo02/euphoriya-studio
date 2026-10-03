@@ -287,7 +287,8 @@ Visual reading:
 - darkened hands and hooded presentation as potentially important character
   details;
 - pointed ears are canonical; their absence in the supplied concept sheet is a
-  visual error to correct in future art.
+  visual error to correct in future art;
+- Natasha does not possess wings; their absence is correct and must be preserved.
 
 Dossier translation:
 
@@ -316,9 +317,11 @@ Dossier translation:
 
 Pointed ears are confirmed as canonical to Natasha, Emilly, and Lilith. Emilly's
 sheet depicts them correctly; their absence from Natasha's and Lilith's current
-sheets is a concept-art error that future approved art must correct. This shared
-character detail does not by itself establish a species-wide anatomy rule; that
-still requires an explicit lore decision.
+sheets is a concept-art error that future approved art must correct. Wings differ:
+Emilly and Lilith possess wings, while Natasha does not. Lilith's current sheet
+incorrectly omits her wings; Natasha's wingless silhouette is correct. These
+character-level decisions do not by themselves establish species-wide anatomy
+rules; those still require explicit lore decisions.
 
 ### Lilith
 
@@ -330,7 +333,9 @@ Visual reading:
   accessories;
 - confident, dangerous, precise, and contemporary-fantasy energy;
 - pointed ears are canonical; their absence in the supplied concept sheet is a
-  visual error to correct in future art.
+  visual error to correct in future art;
+- Lilith possesses wings; their absence in the supplied concept sheet is a visual
+  error to correct in future art.
 
 Dossier translation:
 
