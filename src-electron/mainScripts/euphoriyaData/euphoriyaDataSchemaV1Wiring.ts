@@ -1,8 +1,8 @@
 import type { I_euphoriyaSchemaDb } from 'app/types/I_euphoriyaSchemaDb'
 
-import { EUPHORIYA_DATA_SCHEMA_V1_CORE_SQL } from './euphoriyaDataSchemaV1CoreSql'
-import { EUPHORIYA_DATA_SCHEMA_V1_EXTENSIONS_SQL } from './euphoriyaDataSchemaV1ExtensionsSql'
-import { EUPHORIYA_DATA_SCHEMA_V1_SEARCH_SQL } from './euphoriyaDataSchemaV1SearchSql'
+import { EUPHORIYA_DATA_SCHEMA_V1_CORE_SQL } from './functions/euphoriyaDataSchemaV1CoreSql'
+import { EUPHORIYA_DATA_SCHEMA_V1_EXTENSIONS_SQL } from './functions/euphoriyaDataSchemaV1ExtensionsSql'
+import { EUPHORIYA_DATA_SCHEMA_V1_SEARCH_SQL } from './functions/euphoriyaDataSchemaV1SearchSql'
 
 export const EUPHORIYA_DATA_SCHEMA_V1_SQL = [
   EUPHORIYA_DATA_SCHEMA_V1_CORE_SQL,

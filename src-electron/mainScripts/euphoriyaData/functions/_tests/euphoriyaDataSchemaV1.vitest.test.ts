@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import { afterEach, expect, test } from 'vitest'
 
-import { applyEuphoriyaDataSchemaV1 } from '../euphoriyaDataSchemaV1'
+import { applyEuphoriyaDataSchemaV1 } from '../../euphoriyaDataSchemaV1Wiring'
 
 let db: Database | null = null
 
