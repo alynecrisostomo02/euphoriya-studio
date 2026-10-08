@@ -53,8 +53,12 @@ test('creates Euphoriya entities and seeds extensible entity types idempotently'
     VALUES ('alias-1', 'world-1', 'char-1', 'Em', 'em', 1)
   `).run()
 
+  const expectedPsychology = {
+    desire: 'Freedom',
+    wound: 'Exile'
+  }
   expect(db.prepare('SELECT desire, wound FROM character_psychology WHERE character_id = ?')
-    .get('char-1')).toEqual({ desire: 'Freedom', wound: 'Exile' })
+    .get('char-1')).toEqual(expectedPsychology)
   expect(db.prepare("SELECT rowid FROM euphoriya_search WHERE euphoriya_search MATCH 'Emilly'")
     .all()).toHaveLength(1)
   expect(db.prepare("SELECT rowid FROM euphoriya_search WHERE euphoriya_search MATCH 'Em'")
