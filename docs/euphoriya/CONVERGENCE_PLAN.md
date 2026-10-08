@@ -1,5 +1,8 @@
 # Euphoriya convergence plan
 
+> **AVISO 2026-10-07: SHELL VISUAL FANTASIA ARCHIVE DESAPROVADO.** O plano abaixo é histórico e sua proposta de usar a interface/shell do Fantasia Archive como base foi anulada. Adotar a [auditoria corrigida](./RESET_AUDIT_2026-10-07.md) e o [contrato visual](./VISUAL_CONTRACT_V0.md) como ponto de partida. Preservar apenas conceitos e dados avaliados, não a aparência.
+
+
 ## Decision summary
 
 - **Product:** one Euphoriya Studio desktop product, not three co-launched applications.
