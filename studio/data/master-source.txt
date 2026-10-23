@@ -1,0 +1,2106 @@
+# EUPHORIYA STUDIO — MASTER PROMPT
+## Expansão completa do aplicativo, universo, personagens, história e cânone
+
+Você está trabalhando em um projeto existente chamado **Euphoriya Studio**.
+
+Sua missão é transformar o protótipo atual em um aplicativo privado, sofisticado e funcional para criação, documentação, exploração e desenvolvimento de um universo original de fantasia chamado **EUPHORIYA**.
+
+**ATENÇÃO: ESTE PROMPT É AUTOSSUFICIENTE. NÃO EXISTEM FICHAS DE PERSONAGENS, CONCEPT SHEETS OU OUTRAS IMAGENS QUE VOCÊ DEVA ESPERAR RECEBER.**
+
+As informações textuais abaixo constituem a base disponível para implementação.
+
+Não peça imagens adicionais para começar.
+
+Quando uma característica física, personalidade, relação, idade ou regra não estiver definida, registre literalmente **"Não definido"** ou **"Pendente de aprovação"**.
+
+Não invente informação para preencher lacunas.
+
+Não reescreva a história para facilitar o desenvolvimento do aplicativo.
+
+Não substitua o projeto existente por outro.
+
+A aplicação inteira deverá estar em português brasileiro.
+
+---
+
+# PARTE I — IDENTIDADE DO PROJETO
+
+## 1. O QUE É EUPHORIYA?
+
+Euphoriya é um universo original de fantasia adulta, criado para comportar histórias, romances, graphic novels e narrativas paralelas.
+
+O mundo reúne:
+
+- Seres divinos e sobrenaturais.
+- Diferentes povos humanoides.
+- Civilizações antigas.
+- Famílias extraordinariamente longevas.
+- Governos e instituições complexas.
+- Conflitos sociais e políticos.
+- Sistemas de poder.
+- Tradições culturais e religiosas.
+- Tragédias históricas.
+- Mistérios e segredos familiares.
+- Histórias que se passam em diferentes períodos.
+
+A narrativa principal acompanha **Lizzie**, uma menina de origem Canius cuja aldeia é destruída. Ela é resgatada por Raffaell Tyrrell, um ser divino que posteriormente a reconhece como filha.
+
+A história começa apresentando o cotidiano de uma criança, sua família e sua cultura.
+
+Gradualmente, transforma-se em uma narrativa sobre identidade, poder, desigualdade, família, política e responsabilidade moral.
+
+O universo deve ser desenvolvido como um mundo coerente, onde cada personagem pode possuir sua própria história.
+
+## 2. FILOSOFIA NARRATIVA
+
+Evite a estrutura simplista de heróis absolutamente bons contra vilões absolutamente maus.
+
+Os personagens podem ser:
+
+- Afetuosos em relações pessoais e cruéis em decisões institucionais.
+- Honestos em determinadas situações e moralmente contraditórios em outras.
+- Poderosos, mas desinteressados em governar.
+- Privilegiados, mas presos a responsabilidades que não escolheram.
+
+Euphoriya não deve apresentar todas as instituições como malignas.
+
+Existem governos funcionais, pessoas responsáveis e organizações que prestam serviços importantes.
+
+O mundo também possui corrupção, brutalidade, desigualdade e interesses conflitantes.
+
+---
+
+# PARTE II — DIREÇÃO ARTÍSTICA DO APLICATIVO
+
+## 3. IDENTIDADE VISUAL
+
+O Euphoriya Studio deve transmitir a sensação de explorar uma biblioteca ancestral, um códice fantástico e um arquivo celestial.
+
+Referências conceituais:
+
+- Fantasia vintage.
+- Fantasia adulta.
+- Editorial literário.
+- Manuscritos antigos.
+- Bibliotecas misteriosas.
+- Arquitetura monumental.
+- Elementos celestiais.
+- Livros raros.
+- Atlas históricos.
+- Arte 2D autoral.
+
+### Paleta
+
+- Preto profundo e preto suavizado.
+- Bordô e vinho escuro.
+- Marfim envelhecido.
+- Branco pergaminho.
+- Azul noturno.
+- Prata antiga.
+- Dourado envelhecido, usado com moderação.
+
+### Tipografia
+
+Use uma combinação de:
+
+- Serifadas elegantes para títulos e destaques.
+- Sans-serif legível para menus, formulários e informações técnicas.
+
+### Composição
+
+- Bastante espaço visual.
+- Elementos ornamentais discretos.
+- Texturas suaves de papel e material antigo.
+- Bordas finas.
+- Animações leves.
+- Transições refinadas.
+- Organização editorial.
+
+Evite:
+
+- Aparência de SaaS empresarial.
+- Dashboard de vendas.
+- Visual futurista tecnológico genérico.
+- Excesso de cartões arredondados.
+- Interfaces de RPG genérico.
+- Excesso de brilho.
+- Ornamentos aleatórios.
+- Retratos artificiais hiper-realistas.
+
+O aplicativo deve ser bonito, mas principalmente utilizável.
+
+---
+
+# PARTE III — REGRAS DE APARÊNCIA DOS PERSONAGENS
+
+## 4. ESTILO ARTÍSTICO CANÔNICO
+
+Os personagens de Euphoriya devem ser representados como ilustrações 2D de fantasia adulta.
+
+Características do desenho:
+
+- Lineart escura, expressiva e bem definida.
+- Espessura variável das linhas.
+- Silhuetas reconhecíveis.
+- Anatomia humana estilizada.
+- Expressões naturais.
+- Rostos individualizados.
+- Cabelos desenhados em massas gráficas.
+- Cores organizadas.
+- Sombras cel-shading.
+- Poucos degradês.
+- Texturas discretas.
+- Traços com aparência artesanal.
+
+Evite:
+
+- Fotorrealismo.
+- Renderização 3D.
+- Aparência de videogame.
+- Chibi.
+- Anime genérico.
+- Rostos excessivamente perfeitos.
+- Olhos gigantes.
+- Cabelos hiper-realistas.
+- Materiais plásticos.
+- Anatomia desproporcional.
+- Personagens com rostos intercambiáveis.
+
+Cada Tyrrell possui identidade visual própria.
+
+**Não criar um uniforme visual compartilhado para toda a família.**
+
+Suas roupas variam conforme personalidade, idade aparente, mentalidade, interesses e contexto.
+
+Seus corpos também podem manifestar características relacionadas às forças divinas que representam.
+
+Essas manifestações não devem depender apenas de roupas, acessórios ou efeitos de luz.
+
+## 5. POLÍTICA PARA RETRATOS
+
+Os personagens com descrições detalhadas podem receber estudos visuais ilustrativos baseados exclusivamente neste documento.
+
+Esses estudos devem ser identificados como:
+
+**"Representação textual experimental — não aprovada como design canônico."**
+
+Não apresente um rosto gerado como se fosse uma arte oficial aprovada.
+
+Para personagens com aparência insuficientemente descrita, utilize silhuetas ilustrativas neutras ou placeholders elegantes com seus nomes.
+
+Se o ambiente não possuir geração de imagem disponível, use placeholders bem desenhados, sem comprometer a navegação.
+
+---
+
+# PARTE IV — ESPÉCIES E CIVILIZAÇÕES
+
+## 6. CROWNIS
+
+Seres de aparência predominantemente humana.
+
+Características físicas:
+
+- Anatomia humana.
+- Orelhas pontudas.
+- Um par de asas naturais.
+- As asas emergem biologicamente das costas.
+- As asas podem ser retráteis.
+
+Não são aves antropomórficas.
+
+Não possuem bicos nem anatomia inteiramente animal.
+
+A aparência, tamanho, textura e coloração das asas podem variar entre indivíduos.
+
+Não atribuir automaticamente a todos os Crownis a mesma aparência.
+
+## 7. CANIUS
+
+Seres predominantemente humanos com características naturais de lobos.
+
+Características físicas:
+
+- Rostos e corpos humanos.
+- Orelhas de lobo.
+- Caudas de lobo.
+- Características físicas que podem variar entre clãs.
+
+Não possuem focinho de cachorro, patas animais ou corpo completamente coberto de pelos.
+
+### Clã de Lizzie
+
+Os tons de cinza são predominantes nas características lupinas de seu clã.
+
+### Cultura Canius
+
+Características culturais estabelecidas:
+
+- Relação profunda com a natureza.
+- Organização comunitária.
+- Tradições e rituais.
+- Conhecimentos de caça.
+- Sobrevivência em ambientes naturais.
+- Respeito às responsabilidades coletivas.
+- Espiritualidade ligada às forças da natureza.
+
+Entidades religiosas conhecidas:
+
+**Lupin:** associado à lua e aos instintos.
+
+**Mãe da Mata:** associada à natureza, à vida e à cura.
+
+Não inventar uma estrutura religiosa completa.
+
+### Organização social
+
+A comunidade pode ser formada por alcateias e lideranças reconhecidas.
+
+O termo "Alfa", quando utilizado no contexto de Khevar, refere-se a uma responsabilidade de liderança reconhecida.
+
+**Não adotar hierarquias biológicas fictícias de alfa, beta e ômega.**
+
+A organização cultural também não estabelece superioridade social automática entre homens e mulheres.
+
+## 8. NARANTHS
+
+Seres humanoides de características aquáticas.
+
+Características físicas conhecidas:
+
+- Anatomia predominantemente humana.
+- Guelras.
+- Escamas.
+- Adaptações naturais relacionadas ao ambiente aquático.
+- Capacidade de assumir aparência humanoide.
+
+Os registros narrativos também os associam à capacidade de permanecer na superfície por períodos limitados.
+
+Detalhes ainda não definidos:
+
+- Coloração exata da pele.
+- Distribuição das escamas.
+- Variações entre indivíduos.
+- Organização política.
+- Cultura.
+- Hierarquia social.
+- Aparência de suas lideranças.
+
+Não inventar essas informações.
+
+Não presumir que a expressão "Naranji", utilizada em contextos militares anteriores, seja automaticamente sinônimo de Naranths. Registrar a relação terminológica como pendente de confirmação.
+
+## 9. OS TYRRELLS
+
+A família Tyrrell é composta por seres divinos e extraordinariamente longevos.
+
+Não são simplesmente Crownis comuns.
+
+Suas forças sobrenaturais podem alterar sua aparência e produzir características físicas próprias.
+
+A referência conceitual para sua dinâmica é a de um panteão mitológico.
+
+**Essa referência não significa copiar os deuses gregos ou sua organização política.**
+
+Cada Tyrrell possui personalidade, interesses, aparência e manifestações próprias.
+
+---
+
+# PARTE V — PERSONAGENS PRINCIPAIS
+
+## 10. RAFFAELL TYRRELL
+
+### Identidade
+
+- Nome oficial: Raffaell Tyrrell.
+- Ser divino.
+- Força associada: Tempo.
+- Fundador da Patente de Elite.
+- Autoridade superior da estrutura imperial.
+- Marido de Natasha.
+- Pai dos seis filhos Tyrrell.
+- Pai de Lizzie por reconhecimento explícito.
+
+### Idade
+
+- Aparência aproximada: 40 anos.
+- Idade cronológica: superior a 200 anos.
+- Idade exata: não definida.
+
+### Aparência física
+
+- Homem muito alto.
+- Corpo forte e musculoso.
+- Ombros largos.
+- Presença aristocrática e guerreira.
+- Rosto maduro.
+- Mandíbula marcante.
+- Barba curta ou por fazer.
+- Pele clara a média, com subtom quente.
+- Cabelos castanhos muito longos.
+- Cabelos volumosos e ondulados.
+- Parte do cabelo pode estar presa.
+- Orelhas pontudas.
+- Olhar intenso e imponente.
+
+Não fixar uma cor exata para os olhos enquanto não houver confirmação final.
+
+### Asas
+
+Possui asas enormes, naturais e emplumadas.
+
+Coloração:
+
+- Base quase negra.
+- Reflexos iridescentes.
+- Verde profundo.
+- Teal.
+- Ciano.
+- Violeta.
+- Magenta.
+- Reflexos quentes discretos.
+
+As cores aparecem nas penas conforme a incidência da luz.
+
+As asas não devem parecer acessórios.
+
+### Vestuário principal
+
+- Bordô.
+- Vermelho crimson.
+- Tecidos nobres em camadas.
+- Detalhes em bronze e ouro envelhecido.
+- Peças com aspecto aristocrático e guerreiro.
+- Ornamentação geométrica controlada.
+
+### Vestuário alternativo já desenvolvido
+
+Existe uma proposta de traje alternativo com:
+
+- Bordô.
+- Verde-floresta.
+- Torso parcialmente exposto.
+- Tecidos sobrepostos.
+- Elementos rúnicos.
+- Ferragens geométricas.
+- Pedras verdes.
+
+Registrar separadamente como variante visual.
+
+Não substituir automaticamente o traje principal.
+
+### Personalidade e comportamento
+
+Raffaell é uma figura de autoridade extraordinária.
+
+Pode demonstrar:
+
+- Afeto familiar.
+- Proteção.
+- Controle.
+- Capacidade de decisão.
+- Frieza institucional.
+- Convicções morais complexas.
+
+Não retratá-lo como um pai constantemente cruel.
+
+Também não retratá-lo como um governante inocente e desinformado sobre todas as estruturas que criou.
+
+### Papel político
+
+Não administra pessoalmente todos os assuntos do império.
+
+Criou estruturas delegadas para reduzir sua carga de responsabilidades.
+
+Recebe prioritariamente assuntos graves, sobretudo ligados à segurança e à esfera militar.
+
+Conhece e aceita as punições extremas praticadas legalmente pelo governo interno da Elite.
+
+### Informação secreta do autor
+
+Raffaell teve uma relação romântica com Peter há mais de duzentos anos.
+
+Peter possui ligação com sua ascensão política.
+
+As circunstâncias dessa relação e de seu término envolvem questões pessoais e políticas ainda não completamente detalhadas.
+
+Essa informação não deve aparecer em interfaces destinadas à leitura sem spoilers.
+
+---
+
+## 11. NATASHA TYRRELL
+
+### Identidade
+
+- Nome: Natasha Tyrrell.
+- Esposa de Raffaell.
+- Ser divino.
+- Força associada: Vazio.
+- Membro central da família Tyrrell.
+
+### Idade
+
+- Aparência aproximada: 40 anos.
+- Idade cronológica: superior a 200 anos.
+- Idade exata: indefinida.
+
+### Aparência física
+
+- Mulher adulta e elegante.
+- Alta, de silhueta esguia.
+- Pele extremamente pálida.
+- Tonalidade fria e quase sem vitalidade aparente.
+- Rosto levemente alongado.
+- Maçãs do rosto marcadas.
+- Traços nobres.
+- Região dos olhos naturalmente cansada.
+- Discretos sinais de maturidade.
+- Não deve parecer idosa.
+- Cabelos pretos, longos e ondulados.
+- Penteados parcialmente presos, com mechas soltas.
+- Orelhas pontudas.
+- Olhar frio, melancólico e distante.
+- Mãos com marcas escuras semelhantes a manchas de tinta ou sombra.
+
+**Natasha não possui asas.**
+
+Nunca adicionar asas a ela.
+
+### Paleta
+
+- Preto.
+- Índigo.
+- Azul-marinho profundo.
+- Carvão.
+- Cinza azulado.
+- Tons frios dessaturados.
+
+### Vestuário
+
+- Vestidos ou mantos longos.
+- Silhueta aristocrática.
+- Tecidos escuros em camadas.
+- Golas estruturadas.
+- Mangas amplas.
+- Painéis fluidos.
+- Detalhes geométricos.
+- Joias discretas.
+- Possíveis brincos longos.
+
+### Personalidade visual
+
+- Melancolia.
+- Mistério.
+- Controle.
+- Nobreza.
+- Ausência emocional aparente.
+
+Sua personalidade psicológica completa, sua atuação política e seu posicionamento diante da Elite ainda não estão integralmente definidos.
+
+Não criar decisões canônicas nessas áreas.
+
+---
+
+## 12. EMILLY TYRRELL
+
+### Identidade
+
+- Filha de Raffaell e Natasha.
+- Ser divino.
+- Força associada: Luz.
+- Possui autonomia real para exercer autoridade sobre a Elite.
+
+### Aparência visual atual
+
+Jovem adulta.
+
+- Pele clara e luminosa.
+- Traços aristocráticos delicados.
+- Rosto levemente angular.
+- Maçãs do rosto suavemente definidas.
+- Olhos dourados.
+- Cabelos strawberry blonde muito claros.
+- Loiro quente com discretos reflexos rosados e pêssego.
+- Cabelos volumosos.
+- Penteado aristocrático preso, com mechas soltas.
+- Orelhas pontudas.
+- Expressão controlada e confiante.
+
+### Asas
+
+Possui um par de grandes asas naturais emplumadas.
+
+Paleta:
+
+- Branco predominante.
+- Creme.
+- Reflexos dourados discretos.
+
+As asas devem transmitir elegância celestial.
+
+### Vestuário
+
+Visual inspirado na aristocracia francesa, com influência cerimonial.
+
+- Branco.
+- Marfim.
+- Creme.
+- Champagne.
+- Dourado moderado.
+- Parte superior estruturada.
+- Saia separada da peça superior.
+- Tecidos nobres.
+- Costuras elegantes.
+- Acabamento refinado.
+
+A peça superior e a saia devem ser visualmente distintas.
+
+Não transformar o traje em armadura pesada.
+
+### Acessório marcante
+
+Brincos dourados com desenho solar.
+
+### Personalidade
+
+Características desenvolvidas:
+
+- Orgulhosa.
+- Aristocrática.
+- Inteligente.
+- Consciente dos próprios privilégios.
+- Politicamente perspicaz.
+- Capaz de demonstrar superioridade social.
+- Presença controlada e refinada.
+
+Não presumir que queira suceder Raffaell ou administrar todo o império.
+
+---
+
+## 13. LILITH TYRRELL
+
+### Identidade
+
+- Filha de Raffaell e Natasha.
+- Ser divino.
+- Força associada: Sombras e escuridão.
+- Possui autonomia real para exercer autoridade sobre a Elite.
+
+### Aparência visual atual
+
+Jovem adulta.
+
+- Pele clara.
+- Cabelos pretos e curtos.
+- Estilo de cabelo moderno, com silhueta expressiva.
+- Olhos violetas ou roxos.
+- Orelhas pontudas.
+- Corpo com musculatura discreta e definida.
+- Expressão intensa.
+- Presença imponente.
+
+### Asas
+
+Lilith possui asas naturais.
+
+A ausência de asas em representações anteriores é um erro.
+
+A coloração exata das penas não deve ser fixada sem aprovação.
+
+### Paleta
+
+- Preto.
+- Carvão.
+- Roxo profundo.
+- Violeta.
+- Ameixa.
+- Prata.
+
+### Vestuário
+
+Mistura de:
+
+- Nobreza sombria.
+- Moda aristocrática de combate.
+- Alfaiataria ajustada.
+- Couro preto.
+- Detalhes metálicos prateados.
+- Calças pretas ajustadas.
+- Correntes na cintura.
+- Elementos assimétricos.
+- Botas.
+- Estruturas geométricas.
+
+### Elemento característico
+
+Peça cristalina roxa no ombro direito.
+
+Deve parecer facetada, elegante e integrada ao traje.
+
+### Personalidade
+
+Características conhecidas:
+
+- Observadora.
+- Pragmática.
+- Direta.
+- Irônica e debochada em determinados contextos.
+- Capaz de demonstrar frieza ou superioridade.
+- Pode agir de forma protetora quando a situação exige.
+
+Não reduzir Lilith a uma vilã sádica nem a uma personagem exclusivamente cruel.
+
+---
+
+## 14. ANGELO TYRRELL
+
+### Identidade
+
+- Filho de Raffaell e Natasha.
+- Ser divino.
+- Força associada: Fogo, calor e energia.
+- Possui autonomia real para exercer autoridade sobre a Elite.
+
+### Aparência visual atual
+
+Jovem adulto.
+
+Seguir as correções visuais mais recentes:
+
+- Pele parda e intensamente bronzeada.
+- Subtom dourado e quente.
+- Vermelhidão natural discreta em determinadas regiões da pele.
+- Olhos vermelhos.
+- Cabelos ruivos.
+- Mechas avermelhadas.
+- Corte com influência punk, incluindo proposta de mullet.
+- Orelhas pontudas.
+- Aparência expressiva e energética.
+- Presença física intensa.
+
+Não utilizar a versão antiga de pele extremamente clara como referência principal.
+
+### Asas
+
+Possui características aladas em seus designs.
+
+Utilizar a identidade associada ao fogo e aos tons quentes sem fixar detalhes anatômicos de versões antigas que não tenham sido consolidados.
+
+### Paleta
+
+- Vermelho vinho.
+- Vermelho sangue.
+- Laranja.
+- Preto.
+- Branco.
+
+### Vestuário
+
+Direção punk e rebelde.
+
+- Peças mais modernas e expressivas.
+- Regata.
+- Elementos de couro.
+- Contrastes marcantes.
+- Recortes e acessórios coerentes com o estilo.
+- Silhueta dinâmica.
+
+Não utilizar cropped como peça principal: essa opção foi rejeitada em uma revisão anterior.
+
+### Personalidade
+
+- Impulsivo.
+- Irritadiço.
+- Pavio curto.
+- Confrontador.
+- Explosivo.
+- Intenso.
+- Autêntico.
+- Rebelde.
+
+Sua expressão deve priorizar tensão e irritação, não apenas arrogância sedutora ou sorriso debochado.
+
+---
+
+## 15. PETRA TYRRELL
+
+### Identidade
+
+- Filha de Raffaell e Natasha.
+- Ser divino.
+- Força associada: Espaço.
+- Ainda tratada como criança em relação à autonomia institucional da Elite.
+
+### Aparência visual atual
+
+Jovem adulta, com aparência relativamente juvenil.
+
+- Pele parda.
+- Sardas visíveis no rosto.
+- Olhos castanhos em descrições visuais anteriores.
+- Orelhas pontudas.
+- Cabelos até aproximadamente os ombros.
+- Base castanha ou escura.
+- Mechas claras.
+- Elementos rosados e arroxeados.
+- Penteado moderno e expressivo.
+
+As nuances exatas do cabelo pertencem a versões visuais que podem exigir revisão.
+
+### Paleta
+
+- Rosa.
+- Roxo.
+- Magenta.
+- Tons de galáxia.
+- Preto.
+- Branco.
+- Detalhes metálicos discretos.
+
+### Vestuário
+
+Identidade moderna inspirada em streetwear Y2K.
+
+- Calça cargo.
+- Peças cropped.
+- Jaqueta.
+- Sobreposições moderadas.
+- Detalhes rúnicos.
+- Elementos associados ao espaço.
+- Acessórios contemporâneos.
+
+Não exagerar nas camadas de roupas.
+
+### Personalidade
+
+A direção visual sugere:
+
+- Confiança.
+- Movimento.
+- Expressividade.
+- Liberdade.
+- Identidade moderna.
+
+Essas características não constituem uma personalidade psicológica completa.
+
+Não inventar atitudes, relacionamentos ou ambições específicas.
+
+---
+
+## 16. CAELLUM TYRRELL
+
+### Identidade
+
+- Filho de Raffaell e Natasha.
+- Ser divino.
+- Força associada: Água e frio.
+- Irmão gêmeo de Eryx.
+- Sua autonomia perante a Elite ainda é limitada por Raffaell.
+
+### Aparência visual atual
+
+Jovem adulto.
+
+Características estabelecidas:
+
+- Pele negra.
+- Cabelos azul-escuros.
+- Reflexos azuis mais claros.
+- Cabelo curto e cacheado.
+- Rosto masculino.
+- Olhos de tonalidade azul profundo em registros anteriores.
+
+A aparência deve refletir sua ligação com água e frio sem transformá-lo numa criatura aquática de outra espécie.
+
+### Direção visual
+
+- Azul profundo.
+- Tons frios.
+- Referências à água.
+- Elementos fluidos na linguagem das roupas.
+
+Os detalhes definitivos do vestuário e da anatomia sobrenatural não estão completamente descritos.
+
+### Personalidade
+
+**Ainda não suficientemente definida.**
+
+Não presumir que ele seja calmo, tímido, gentil ou emocionalmente frio apenas por seu poder estar associado à água.
+
+---
+
+## 17. ERYX TYRRELL
+
+### Identidade
+
+- Filho de Raffaell e Natasha.
+- Ser divino.
+- Força associada: Força e gravidade.
+- Irmão gêmeo de Caellum.
+- Autonomia institucional ainda limitada por Raffaell.
+
+### Aparência visual atual
+
+Jovem adulto.
+
+- Pele clara.
+- Cabelos brancos.
+- Reflexos ciano muito claros.
+- Olhos claros, próximos de azul muito pálido.
+- Corpo atlético.
+- Ombros largos.
+- Musculatura definida sem excesso.
+- Expressão confiante.
+- Postura descontraída.
+
+### Paleta
+
+- Branco neve.
+- Branco gelo.
+- Azul muito claro.
+- Ciano pálido.
+- Prata.
+
+A paleta glacial **não significa que seu domínio divino seja gelo**.
+
+Seu domínio estabelecido é força e gravidade.
+
+### Personalidade e presença
+
+Inspirado no arquétipo do jovem popular e esportivo.
+
+- Carismático.
+- Confiante.
+- Socialmente seguro.
+- Descontraído.
+- Levemente convencido.
+- Atlético.
+- Presença marcante.
+
+A inspiração não significa que ele jogue futebol americano ou pertença literalmente a uma equipe esportiva.
+
+---
+
+## 18. LIZZIE TYRRELL
+
+### Identidade
+
+- Nome: Lizzie.
+- Origem: Canius.
+- Filha biológica de Peter e Maela.
+- Filha reconhecida por Raffaell Tyrrell.
+- Integrante legítima da família Tyrrell.
+
+A palavra de Raffaell sobre sua filiação possui autoridade absoluta.
+
+Lizzie não deve ser apresentada como uma filha inferior ou informal.
+
+### Aparência aos cinco anos
+
+Utilizar a definição infantil mais recente:
+
+- Menina pequena.
+- Cabelos cinza.
+- Longos e lisos.
+- Franja reta.
+- Orelhas de lobo.
+- Cauda de lobo.
+- Características lupinas predominantemente cinzentas.
+- Anatomia humana.
+- Proporções inequivocamente infantis.
+
+Descrições anteriores também associaram Lizzie a pele parda bronzeada e olhos âmbar-esverdeados. Preservar essas informações como características documentadas anteriormente, assinalando que a revisão visual mais recente confirmou principalmente o cabelo cinza.
+
+### Roupas na infância
+
+- Tecidos naturais.
+- Peças infantis.
+- Influências da cultura Canius.
+- Tons cinza, marrom e branco.
+- Vestuário adequado à vida na aldeia.
+
+Não criar traje adulto ou sexualizado.
+
+### Aparência após dez anos
+
+Lizzie possui aproximadamente quinze anos.
+
+A identidade Canius continua predominante.
+
+A versão adolescente ainda não possui um design final consolidado.
+
+Não apresentá-la como uma mulher de vinte anos.
+
+Não reutilizar diretamente uma aparência adulta dos Tyrrells.
+
+### Personalidade
+
+- Gentil.
+- Sensível.
+- Reservada.
+- Tímida.
+- Observadora.
+- Empática.
+- Reflexiva.
+- Ligada às próprias origens.
+
+Sua personalidade evolui conforme conhece novas pessoas e compreende as contradições de The Crown.
+
+### Desenvolvimento narrativo
+
+Lizzie começa sua vida em Khevar.
+
+Após uma tragédia, é acolhida por Raffaell.
+
+Cresce junto aos filhos Tyrrell.
+
+Mais tarde, começa a explorar The Crown e conhecer diferentes realidades sociais.
+
+Ela possui autoridade familiar, mas Raffaell ainda limita sua autonomia institucional.
+
+Não transformá-la automaticamente em uma rebelde política experiente no começo da história.
+
+---
+
+# PARTE VI — PERSONAGENS DE KHEVAR
+
+## 19. PETER
+
+### Identidade
+
+- Pai biológico de Lizzie.
+- Canius.
+- Figura de liderança na aldeia Khevar.
+- Possui passado secreto com Raffaell.
+
+### Aparência
+
+- Homem adulto alto.
+- Cabelos grisalhos.
+- Olhos amarelo-esverdeados.
+- Cicatrizes visíveis.
+- Orelhas de lobo.
+- Cauda de lobo.
+- Anatomia predominantemente humana.
+
+Vestuário exato e demais detalhes faciais: pendentes de descrição consolidada.
+
+### Personalidade demonstrada
+
+- Protetor.
+- Responsável.
+- Atento à comunidade.
+- Capaz de tomar decisões difíceis.
+- Preocupado com a segurança de Lizzie e dos moradores.
+
+### Destino
+
+Morre durante os acontecimentos da destruição de Khevar.
+
+Antes de morrer, confia Lizzie à proteção de Raffaell.
+
+Não revelar antecipadamente seu passado romântico com Raffaell.
+
+## 20. MAELA
+
+- Mãe biológica de Lizzie.
+- Integrante da comunidade Canius de Khevar.
+- Participa da organização do acolhimento, provisões e retirada.
+- Demonstra cuidado com crianças, feridos e refugiados.
+- É arrastada pela correnteza durante a evacuação.
+- Destino final não confirmado.
+
+Aparência física detalhada: não definida.
+
+Não atribuir cor de cabelo, olhos ou roupas específicas sem aprovação.
+
+## 21. DARA
+
+- Artesã de Khevar.
+- Trabalha com estruturas, pisos, traves e carroças.
+- Participa dos esforços de defesa e retirada.
+- Protege Lizzie durante a travessia do rio.
+- Sobrevive com lesão na perna.
+- Segue com refugiados.
+
+Aparência física: pendente.
+
+## 22. YARO
+
+- Caçador.
+- Lidera buscas.
+- Participa dos esforços de proteção da comunidade.
+- Sobrevive ao ataque.
+- Pretende procurar desaparecidos e recuperar o corpo de Peter.
+
+Aparência: pendente.
+
+## 23. BRINA
+
+- Liderança de alcateia.
+- Mãe de Nerin e Tavi.
+- Sobrevive à destruição de Khevar.
+- Participa das buscas por desaparecidos.
+
+Aparência: pendente.
+
+## 24. NERIN
+
+- Filho de Brina.
+- Irmão de Tavi.
+- Jovem em processo de reconhecimento de maturidade.
+- Sofre ferimento no braço esquerdo.
+- Sobrevive e segue com refugiados.
+
+Aparência: pendente.
+
+## 25. TAVI
+
+- Filho mais novo de Brina.
+- Irmão de Nerin.
+- Amigo de infância de Lizzie.
+- Participa de brincadeiras e descobertas com ela.
+- Sobrevive aos acontecimentos no pomar.
+- Situação após a separação dos grupos precisa de confirmação.
+
+Aparência: pendente.
+
+## 26. EDRAN
+
+- Crownis.
+- Comandante da pequena força enviada para ajudar Khevar.
+- Associado à Patente de Elite.
+- Participa da defesa da aldeia.
+- Possui asas naturais.
+- Sobrevive ao ataque com uma asa ferida.
+
+Cores, rosto e vestuário: não definidos.
+
+## 27. PERSONAGENS SECUNDÁRIOS
+
+Criar registros para os seguintes personagens usando somente os dados disponíveis:
+
+**Oren:** responsável por registros e provisões. Desaparece durante a retirada.
+
+**Nera:** conhecedora de rotas e água. Sofre lesão no tornozelo. Destino posterior pendente.
+
+**Sori:** desaparece e é encontrada viva, traumatizada e ferida. Seu destino após a fuga permanece parcialmente aberto.
+
+**Hale:** irmã de Sori, empenhada em procurá-la.
+
+**Sena:** curandeira de Khevar. Cuida dos feridos e segue com refugiados.
+
+**Iven:** viajante e condutor de carroça. Participa das buscas por Evi.
+
+**Sela:** viajante grávida acolhida em Khevar.
+
+**Daven:** pai de Sela.
+
+**Ponta:** ave pertencente a Sela.
+
+**Marek:** viajante e tio de Evi. Morre antes do ataque principal.
+
+**Evi:** menina de seis anos, sobrinha de Marek. Desaparecida.
+
+**Miren:** refugiada da região oeste, ferida por queimadura no braço. Ajuda a cuidar de Lissa.
+
+**Lissa:** menina febril, separada de sua mãe durante o deslocamento.
+
+**Loran:** caçador associado à alcateia de Yaro, morto durante a defesa.
+
+Todos esses registros devem possuir campos editáveis para complementar posteriormente:
+
+- Aparência.
+- Espécie.
+- Idade.
+- Personalidade.
+- Origem.
+- Relações.
+- Destino.
+- Histórico.
+
+Não inventar essas informações.
+
+---
+
+# PARTE VII — FORÇAS DIVINAS DOS TYRRELLS
+
+## 28. DOMÍNIOS CONHECIDOS
+
+Associar os personagens às seguintes forças:
+
+| Personagem | Domínio |
+|---|---|
+| Raffaell | Tempo |
+| Natasha | Vazio |
+| Emilly | Luz |
+| Lilith | Sombras e escuridão |
+| Angelo | Fogo, calor e energia |
+| Petra | Espaço |
+| Caellum | Água e frio |
+| Eryx | Força e gravidade |
+
+Esses domínios ajudam a explicar a identidade sobrenatural de cada Tyrrell.
+
+**Não inventar automaticamente habilidades específicas, ataques, limites, fraquezas ou escalas de poder.**
+
+Por exemplo:
+
+- O domínio do tempo não significa que Raffaell possa alterar qualquer acontecimento livremente.
+- O domínio do vazio não determina automaticamente todos os poderes de Natasha.
+- A cor branca e azulada de Eryx não transforma seu domínio em gelo.
+
+Criar campos separados para:
+
+- Domínio.
+- Habilidades confirmadas.
+- Habilidades hipotéticas.
+- Limitações.
+- Manifestação física.
+- Consequências.
+- Regras mágicas relacionadas.
+
+---
+
+# PARTE VIII — FAMÍLIA E MONARQUIA TYRRELL
+
+## 29. NATUREZA DA MONARQUIA
+
+A monarquia Tyrrell não é uma monarquia humana convencional.
+
+Seus integrantes são longevos e divinos.
+
+Não vivem necessariamente sob a lógica de um governante morrer e seu herdeiro assumir.
+
+A comparação com um panteão grego é apenas uma referência conceitual à natureza dos seres e à sua dinâmica familiar.
+
+Não copiar a mitologia grega.
+
+### Autoridade
+
+Raffaell é a autoridade central.
+
+A família Tyrrell possui autoridade superior sobre a Patente de Elite.
+
+Entretanto, autoridade e autonomia são conceitos diferentes.
+
+### Autonomia dos filhos
+
+**Emilly, Lilith e Angelo:** possuem autonomia real para exercer sua autoridade.
+
+**Petra, Caellum, Eryx e Lizzie:** possuem legitimidade familiar, mas ainda são tratados como crianças em relação à independência institucional.
+
+Raffaell determina quando seus filhos podem exercer maior autonomia.
+
+Nenhum dos filhos demonstrou, até o momento, interesse contínuo e profundo em supervisionar a situação de todo o reino.
+
+Não presumir que desejem suceder o pai.
+
+### Natasha
+
+O alcance específico de sua autoridade institucional ainda não foi completamente estabelecido.
+
+---
+
+# PARTE IX — THE CROWN
+
+## 30. A GRANDE CAPITAL
+
+The Crown é um importante centro de poder, com profundas diferenças sociais e arquitetônicas.
+
+A cidade deve ser organizada em regiões.
+
+### LOWER CITY
+
+Cidade inferior.
+
+Características:
+- População numerosa.
+- Espaços densamente ocupados.
+- Diferenças sociais visíveis.
+- Comércio e circulação cotidiana.
+- Infraestrutura sujeita a desigualdades.
+
+Não transformar todos os habitantes em miseráveis ou criminosos.
+
+### UPPER NOBLE CITY
+
+Cidade elevada.
+
+Características:
+- Arquitetura sofisticada.
+- Regiões privilegiadas.
+- Famílias influentes.
+- Edificações monumentais.
+- Maior concentração de recursos.
+
+### CASTELO
+
+Local associado à residência e presença da família Tyrrell.
+
+Possui importância familiar, política e institucional.
+
+### ESTRUTURAS ELEVADAS
+
+The Crown apresenta arquitetura vertical e estruturas suspensas.
+
+Esses elementos devem influenciar o visual do atlas, mas sem inventar um mapa definitivo.
+
+---
+
+# PARTE X — KHEVAR E AETHERGARD
+
+## 31. KHEVAR
+
+Aldeia e comunidade Canius associada à família de Lizzie.
+
+Ambiente:
+- Floresta.
+- Grandes árvores.
+- Madeira.
+- Pedras.
+- Raízes expostas.
+- Caminhos naturais.
+- Estruturas comunitárias.
+- Salão coletivo.
+- Cultura ligada à natureza.
+
+A comunidade possui lideranças e responsabilidades compartilhadas.
+
+Peter exerce papel importante nas decisões.
+
+A organização social não deve ser retratada como uma monarquia tribal hereditária sem base narrativa.
+
+## 32. AETHERGARD
+
+Local associado à chegada de Lizzie após o ataque.
+
+Características visuais:
+- Muralhas claras.
+- Torres monumentais.
+- Passagens elevadas.
+- Grandes arcos.
+- Arquitetura imponente.
+
+A relação geográfica e administrativa exata entre Aethergard e The Crown permanece pendente de definição.
+
+Não fundir automaticamente os dois lugares.
+
+---
+
+# PARTE XI — POLÍTICA DO IMPÉRIO
+
+## 33. GOVERNO CIVIL
+
+The Crown possui uma administração civil funcional, semelhante a uma república em determinados aspectos.
+
+Ela administra:
+- Infraestrutura.
+- Economia.
+- Serviços públicos.
+- Administração cotidiana.
+- Políticas civis.
+- Organização social.
+
+O sistema possui autoridades competentes e também setores corruptos.
+
+Não é uma estrutura inteiramente controlada de maneira direta pela família Tyrrell.
+
+O método de escolha dos governantes ainda não foi confirmado.
+
+Não inventar regras eleitorais, constituições ou cargos específicos.
+
+---
+
+# PARTE XII — PATENTE DE ELITE
+
+## 34. DEFINIÇÃO DA ELITE
+
+A Patente de Elite é uma instituição imperial fundada por Raffaell Tyrrell.
+
+Ela não se limita a militares, políticos ou nobres.
+
+Pessoas de qualquer profissão ou camada social podem integrar a Elite.
+
+Exemplo:
+
+Um faxineiro do castelo pode possuir a patente, mesmo mantendo sua profissão cotidiana.
+
+A patente pode proporcionar:
+
+- Prestígio.
+- Reconhecimento.
+- Fama.
+- Dinheiro.
+- Influência.
+- Benefícios materiais.
+- Autoridade.
+- Responsabilidades extraordinárias.
+
+Esses benefícios são regulados.
+
+### Natureza da organização
+
+A Elite atua em diferentes instituições e setores da sociedade.
+
+Possui integrantes presentes dentro de estruturas públicas e agentes que operam externamente.
+
+Ela observa, supervisiona, influencia e intervém em questões estratégicas.
+
+A imagem simbólica da Elite é a de uma mão que controla fios de marionetes nos bastidores.
+
+Isso **não** significa que controle individualmente cada decisão do governo civil.
+
+### Imagem pública
+
+A população geral não vive necessariamente aterrorizada pela Elite.
+
+Para algumas pessoas, a patente representa reconhecimento e prestígio.
+
+Outras sequer conhecem a verdadeira extensão de suas atividades.
+
+O aspecto mais brutal da instituição é vivido principalmente por seus próprios integrantes.
+
+---
+
+## 35. O SEGUNDO GOVERNO
+
+A Elite possui um governo interno próprio.
+
+Esse governo administra:
+- Recrutamento.
+- Treinamento.
+- Autorizações.
+- Operações.
+- Disciplina.
+- Benefícios.
+- Privilégios.
+- Fiscalização.
+- Sanções.
+- Responsabilidades.
+
+O governo da Elite possui autoridade delegada.
+
+Não precisa consultar Raffaell em cada procedimento.
+
+Contudo, a família Tyrrell permanece acima da instituição em termos de autoridade superior.
+
+### Sistema regulador
+
+Existe um sistema responsável por controlar os privilégios, atribuições e conduta dos integrantes.
+
+A forma exata desse sistema ainda não foi definida.
+
+Não inventar nomes de tribunais, ministérios, diretores ou conselhos como se fossem canônicos.
+
+---
+
+## 36. INGRESSO NA ELITE
+
+O ingresso utiliza diferentes caminhos:
+
+- Indicação.
+- Mérito.
+- Avaliação.
+- Treinamento.
+- Hereditariedade concedida.
+
+### Hereditariedade
+
+Algumas famílias receberam o direito de transmitir a patente aos descendentes.
+
+Descendentes de integrantes do antigo governo podem fazer parte dessas linhagens.
+
+A hereditariedade não é automaticamente transmitida pelos filhos de qualquer integrante.
+
+### Consequências
+
+Uma criança pode nascer na Elite e herdar:
+
+- Prestígio.
+- Benefícios.
+- Obrigações.
+- Deveres.
+- Responsabilidades familiares e institucionais.
+
+Pertencer à Elite pode ser um privilégio e uma condenação.
+
+---
+
+## 37. TREINAMENTO
+
+O treinamento da Elite é rigoroso.
+
+A preparação acontece independentemente da profissão ou cargo cotidiano.
+
+Pode envolver:
+
+- Disciplina.
+- Resistência.
+- Preparação física.
+- Defesa.
+- Estratégia.
+- Sigilo.
+- Preparação mental.
+- Conhecimentos institucionais.
+- Responsabilidade.
+- Formação especializada.
+
+Alguns integrantes recebem formação extremamente severa desde a infância.
+
+Não presumir que todos tenham experiências idênticas.
+
+---
+
+## 38. GRAUS DE EXPOSIÇÃO
+
+A Elite possui diferentes níveis de sigilo.
+
+### Público
+
+A condição de integrante pode ser reconhecida.
+
+### Reservado
+
+A condição é conhecida apenas por pessoas autorizadas.
+
+### Oculto
+
+O vínculo é protegido por protocolos de sigilo mais rígidos.
+
+A visibilidade não determina automaticamente a autoridade.
+
+Um integrante público pode possuir poucas prerrogativas operacionais.
+
+Um integrante oculto pode exercer grande influência.
+
+---
+
+## 39. O LADO BRUTAL DA ELITE
+
+O descumprimento de determinadas obrigações pode resultar em punições consideradas piores que a morte.
+
+Essas punições fazem parte da realidade institucional conhecida pela autoridade superior.
+
+**Raffaell conhece e aceita o regime de punições extremas.**
+
+Isso é cânone.
+
+A forma específica dessas punições ainda não está definida.
+
+Não criar automaticamente:
+- Torturas sobrenaturais.
+- Maldições.
+- Apagamento de memória.
+- Prisões eternas.
+- Sentenças mágicas.
+- Mecanismos de condicionamento específicos.
+
+Essas possibilidades precisam de aprovação.
+
+A Elite deve apresentar contradições:
+
+Pode proteger o império enquanto impõe sofrimento aos próprios integrantes.
+
+Pode possuir profissionais íntegros dentro de uma estrutura institucional brutal.
+
+Não retratar todos os membros como psicopatas ou assassinos.
+
+---
+
+# PARTE XIII — HISTÓRIA PRINCIPAL
+
+## 40. ARCO I — A TERRA QUE NOS GUARDOU
+
+A história começa com Lizzie aos cinco anos.
+
+Ela vive em Khevar com Peter e Maela.
+
+A comunidade apresenta relações familiares, tradições e atividades cotidianas.
+
+Gradualmente, surgem:
+- Desaparecimentos.
+- Estradas interrompidas.
+- Ameaças.
+- Refugiados.
+- Dificuldades de abastecimento.
+- Preparativos defensivos.
+
+Uma pequena força Crownis chega para ajudar a comunidade.
+
+A ameaça é muito maior do que o esperado.
+
+O exército invasor avança sobre Khevar.
+
+A comunidade tenta resistir.
+
+Durante a fuga, Maela desaparece na correnteza.
+
+Peter é mortalmente ferido.
+
+Raffaell chega e salva Lizzie.
+
+Peter confia a proteção da filha a Raffaell.
+
+Lizzie é levada para Aethergard.
+
+### Segredos
+
+Não revelar antecipadamente a antiga relação romântica entre Peter e Raffaell.
+
+Não explicar definitivamente os motivos do ataque sem confirmação narrativa.
+
+Não confirmar a morte de Maela.
+
+---
+
+## 41. GRAPHIC NOVEL DO ARCO I
+
+Existe uma adaptação planejada em quinze páginas verticais.
+
+Título:
+**Euphoriya — A Terra Que Nos Guardou**
+
+Páginas:
+
+1. O caminho de volta.
+2. A aldeia viva.
+3. A primeira ausência.
+4. O aviso.
+5. Quem procura abrigo.
+6. Vestígios.
+7. A última normalidade.
+8. As saídas fechadas.
+9. Aqueles que vieram do céu.
+10. A linha de defesa.
+11. A porta baixa.
+12. O vau.
+13. A mão que desapareceu.
+14. O pomar.
+15. O outro lado do céu.
+
+### Regras da graphic novel
+
+As ilustrações não possuem:
+
+- Falas.
+- Balões.
+- Legendas.
+- Textos narrativos.
+- Onomatopeias.
+- Numeração dentro da arte.
+
+Os acontecimentos devem ser compreendidos por:
+
+- Enquadramento.
+- Movimento.
+- Composição.
+- Expressão.
+- Continuidade.
+- Iluminação.
+- Cores.
+
+Cada página deve preservar as características físicas dos personagens.
+
+As páginas são verticais e podem conter múltiplos quadros.
+
+Não apresentar páginas planejadas como se já estivessem ilustradas e aprovadas.
+
+---
+
+## 42. APÓS O SALTO TEMPORAL
+
+Passam-se aproximadamente dez anos.
+
+Lizzie está com cerca de quinze anos.
+
+Ela cresceu junto aos Tyrrells.
+
+Durante esse período, os jovens tiveram sua liberdade externa restringida por Raffaell.
+
+Eles não precisam ser retratados como prisioneiros permanentemente trancados em quartos.
+
+Passam a explorar The Crown com maior independência.
+
+A narrativa acompanha:
+- Descobertas.
+- Amizades.
+- Aventuras.
+- Conflitos familiares.
+- Contato com diferentes classes sociais.
+- Desigualdade.
+- Corrupção.
+- Questionamentos sobre poder.
+
+A progressão tonal é gradual.
+
+Não começar essa fase com Lizzie plenamente consciente de toda a estrutura política e dos segredos da Elite.
+
+---
+
+# PARTE XIV — SISTEMA DE CÂNONE
+
+## 43. ESTADOS DAS INFORMAÇÕES
+
+Toda informação deve ser classificada como:
+
+**Confirmada**
+Aprovada pelo autor.
+
+**Registrada no manuscrito**
+Presente no material narrativo, mas ainda sujeita a revisão de continuidade.
+
+**Em desenvolvimento**
+Parcialmente definida.
+
+**Hipótese**
+Possibilidade criativa ainda não aprovada.
+
+**Contraditória**
+Informações diferentes exigem resolução.
+
+**Descartada**
+Não integra mais a continuidade.
+
+Exemplos:
+
+- A filiação de Lizzie a Raffaell: confirmada.
+- Raffaell conhece as punições da Elite: confirmado.
+- A morte de Maela: não confirmada.
+- A aparência adolescente definitiva de Lizzie: em desenvolvimento.
+- Detalhes das punições extremas da Elite: não definidos.
+- Relação exata entre Aethergard e The Crown: pendente.
+
+Nunca transformar hipóteses em fatos automaticamente.
+
+---
+
+# PARTE XV — O APLICATIVO
+
+## 44. PORTAL PRINCIPAL
+
+A tela inicial precisa parecer a entrada do universo Euphoriya.
+
+Elementos:
+
+- Título EUPHORIYA.
+- Atmosfera mística.
+- Animações suaves.
+- Acesso à biblioteca.
+- Acesso aos personagens.
+- Acesso ao atlas.
+- Acesso à história.
+- Acesso à graphic novel.
+
+Não quero que o portal seja simplesmente uma caixa de texto para escrever ideias.
+
+O portal deve ser uma experiência de entrada.
+
+---
+
+## 45. CHARACTER ARCHIVE
+
+Criar galeria de personagens.
+
+Cada personagem possui:
+- Nome.
+- Retrato ou placeholder.
+- Espécie.
+- Família.
+- Domínio.
+- Idade aparente.
+- Idade cronológica.
+- Origem.
+- Status canônico.
+
+Filtros funcionais:
+- Família.
+- Espécie.
+- Período.
+- Status.
+- Local.
+- Participação narrativa.
+
+---
+
+## 46. CHARACTER STUDIO
+
+Criar fichas completas e editáveis.
+
+Campos:
+
+### Identidade
+Nome, sobrenome, apelidos, espécie, origem e família.
+
+### Aparência
+Altura, corpo, pele, olhos, cabelo, rosto, marcas, asas, orelhas, caudas e roupas.
+
+### Psicologia
+Personalidade, comportamento, conflitos, objetivos, valores, relações e desenvolvimento emocional.
+
+### Poderes
+Domínio, manifestações, habilidades, limitações e consequências.
+
+### História
+Passado, acontecimentos, capítulos e cronologia.
+
+### Relações
+Família, amizades, romances, rivalidades, alianças e vínculos institucionais.
+
+### Design
+Aparência oficial, versões experimentais, mudanças por idade e variantes de traje.
+
+### Segredos
+Informações reservadas ao autor.
+
+O editor deve permitir salvar, alterar, cancelar, restaurar e pesquisar registros.
+
+---
+
+## 47. ÁRVORE FAMILIAR INTERATIVA
+
+Criar uma visualização para:
+
+Raffaell e Natasha.
+
+Os seis filhos:
+- Emilly.
+- Lilith.
+- Angelo.
+- Petra.
+- Caellum.
+- Eryx.
+
+E Lizzie, reconhecida como filha de Raffaell.
+
+Mostrar também:
+- Peter como pai biológico de Lizzie.
+- Maela como mãe biológica de Lizzie.
+
+Não diminuir a legitimidade de Lizzie na representação familiar.
+
+Permitir diferentes tipos de conexão.
+
+As relações secretas devem poder ficar ocultas na visualização sem spoilers.
+
+---
+
+## 48. ATLAS INTERATIVO
+
+Criar fichas para:
+- The Crown.
+- Lower City.
+- Upper Noble City.
+- Castelo Tyrrell.
+- Khevar.
+- Aethergard.
+
+Cada local poderá conter:
+- Descrição.
+- História.
+- Geografia.
+- População.
+- Espécies.
+- Personagens.
+- Eventos.
+- Relações políticas.
+- Imagens.
+- Mapas.
+
+Não inventar fronteiras ou coordenadas.
+
+---
+
+## 49. GOVERNOS E INSTITUIÇÕES
+
+Criar interfaces para explorar:
+
+- Monarquia Tyrrell.
+- Governo civil de The Crown.
+- Patente de Elite.
+- Governo interno da Elite.
+- Sistema regulador da Elite.
+- Linhagens hereditárias.
+- Graus de sigilo.
+- Autoridades e permissões.
+
+Visualizar conexões institucionais.
+
+Distinguir autoridade, autonomia e função.
+
+---
+
+## 50. CRONOLOGIA
+
+Criar linha do tempo interativa.
+
+Permitir:
+- Adicionar acontecimentos.
+- Editar acontecimentos.
+- Relacionar personagens.
+- Relacionar locais.
+- Relacionar capítulos.
+- Registrar consequências.
+- Identificar períodos indefinidos.
+- Marcar acontecimentos secretos.
+- Visualizar eventos por personagem.
+
+Não inventar datas exatas.
+
+---
+
+## 51. BIBLIOTECA DE HISTÓRIAS
+
+Criar área para:
+- Arcos.
+- Capítulos.
+- Cenas.
+- Rascunhos.
+- Manuscritos.
+- Versões.
+- Revisões.
+- Anotações.
+
+Separar a história literária, que pode conter diálogos e texto, da adaptação em graphic novel silenciosa.
+
+---
+
+## 52. GRAPHIC NOVEL STUDIO
+
+Criar um sistema para organizar adaptações visuais.
+
+Funcionalidades:
+
+- Criar projetos.
+- Associar arcos.
+- Criar páginas verticais.
+- Definir número de quadros.
+- Registrar descrição visual.
+- Importar imagens.
+- Ordenar páginas.
+- Registrar personagens presentes.
+- Vincular eventos.
+- Controlar versões.
+- Aprovar ou rejeitar páginas.
+
+Status:
+
+- Planejada.
+- Em produção.
+- Em revisão.
+- Aprovada.
+
+Criar também um leitor vertical imersivo para celular e desktop.
+
+Não gerar automaticamente páginas fictícias e apresentá-las como material final.
+
+---
+
+## 53. ARQUIVO DE SEGREDOS
+
+Criar uma área privada com níveis de informação.
+
+Exemplos:
+
+**Segredo 1:** relação romântica histórica entre Peter e Raffaell.
+
+**Segredo 2:** conhecimento e aceitação de Raffaell quanto às punições extremas da Elite.
+
+**Segredo 3:** informações ainda não reveladas sobre a origem e o funcionamento de certas instituições.
+
+Permitir determinar:
+- Quem conhece a informação.
+- Quando ela é revelada na história.
+- Quais capítulos podem exibi-la.
+- Quais personagens são afetados.
+- Qual é seu status canônico.
+
+---
+
+## 54. DATA CORE
+
+O sistema deve ser organizado como um banco de conhecimento estruturado.
+
+Modelos principais:
+
+- Characters
+- CharacterAppearances
+- Species
+- Families
+- Relationships
+- DivineDomains
+- Locations
+- Governments
+- Institutions
+- EliteMembers
+- EliteLineages
+- AuthorityPermissions
+- CanonRules
+- TimelineEvents
+- StoryArcs
+- Chapters
+- Scenes
+- GraphicNovelPages
+- Secrets
+- References
+- Assets
+- RevisionHistory
+
+Utilizar IDs estáveis.
+
+Não duplicar personagens para representar relações diferentes.
+
+As entidades devem ser conectadas por relacionamentos estruturados.
+
+---
+
+## 55. PERSISTÊNCIA
+
+O Euphoriya Studio é um aplicativo pessoal e privado.
+
+Direção técnica:
+
+- Next.js.
+- React.
+- TypeScript.
+- Tailwind CSS.
+- Componentes reutilizáveis.
+- Estrutura de dados modular.
+- Preparação para SQLite.
+- Preparação para funcionamento offline-first.
+- Preparação para futura sincronização com Supabase.
+
+Nesta fase, priorizar persistência local funcional.
+
+Utilizar IndexedDB quando fizer sentido.
+
+Não depender exclusivamente de estado temporário em memória.
+
+Não implementar integrações fictícias.
+
+Não inventar uma autenticação funcional.
+
+Não solicitar senhas ou tokens.
+
+---
+
+## 56. MIA — ASSISTENTE DE DESENVOLVIMENTO
+
+Preparar uma área futura para uma IA chamada Mia.
+
+Sua função será auxiliar na construção do universo.
+
+Ela deverá:
+- Consultar o cânone.
+- Identificar contradições.
+- Comparar versões.
+- Analisar personagens.
+- Examinar lógica política.
+- Avaliar cronologia.
+- Identificar inconsistências.
+- Sugerir alternativas narrativas.
+
+Ela deve ser crítica, não excessivamente concordante.
+
+**Nenhuma sugestão pode modificar o cânone sem aprovação do autor.**
+
+Não simular uma IA realmente conectada se não houver integração disponível.
+
+---
+
+# PARTE XVI — REGRAS FINAIS DE IMPLEMENTAÇÃO
+
+## 57. REGRAS INEGOCIÁVEIS
+
+1. Preserve o projeto v0 existente.
+2. Use as informações deste documento como base inicial.
+3. Não peça concept sheets.
+4. Não invente características físicas não descritas.
+5. Não invente personalidade para personagens pouco desenvolvidos.
+6. Não crie retratos supostamente canônicos a partir de informações insuficientes.
+7. Não altere as relações familiares.
+8. Não substitua o cabelo cinza da versão infantil mais recente de Lizzie pelo castanho de descrições antigas.
+9. Não adicione asas a Natasha.
+10. Não retire as asas de Lilith ou Emilly.
+11. Não transforme os Tyrrells em uma monarquia humana comum.
+12. Não transforme Eryx num personagem de domínio glacial apenas por sua paleta.
+13. Não confunda o governo civil com o governo da Elite.
+14. Não retrate a Elite como temida universalmente pela população.
+15. Não esconda de Raffaell o conhecimento das punições extremas que ele aceita.
+16. Não revele automaticamente os segredos de Peter e Raffaell.
+17. Não transforme a graphic novel silenciosa em quadrinhos com diálogos.
+18. Não confunda designs atuais de jovens adultos com versões infantis ainda não desenvolvidas.
+19. Não invente a aparência das Rainhas ou sua história.
+20. Não declare que funcionalidades demonstrativas estão concluídas.
+
+---
+
+# PARTE XVII — PRIORIDADES DE CONSTRUÇÃO
+
+## 58. ORDEM DE IMPLEMENTAÇÃO
+
+**FASE 1 — IDENTIDADE E NAVEGAÇÃO**
+
+Melhorar o portal inicial e construir navegação consistente.
+
+**FASE 2 — PERSONAGENS**
+
+Implementar o Character Archive e preencher as fichas com todas as informações fornecidas.
+
+**FASE 3 — MUNDO**
+
+Criar páginas para espécies, culturas, lugares e instituições.
+
+**FASE 4 — RELAÇÕES**
+
+Criar a árvore da família Tyrrell e o sistema de relações.
+
+**FASE 5 — HISTÓRIA**
+
+Implementar cronologia, arcos, capítulos e cenas.
+
+**FASE 6 — GRAPHIC NOVEL**
+
+Construir o editor e o leitor vertical.
+
+**FASE 7 — DATA CORE**
+
+Consolidar a persistência, relacionamentos entre entidades, versionamento e exportação.
+
+---
+
+# PARTE XVIII — RESULTADO ESPERADO
+
+O resultado precisa ser uma aplicação funcional, original e visualmente consistente.
+
+Ao abrir o Euphoriya Studio, quero sentir que estou acessando o arquivo de um universo fantástico antigo, complexo e vivo.
+
+Quero explorar a família Tyrrell, conhecer suas diferenças físicas e sobrenaturais, entender a cultura Canius, consultar a tragédia de Khevar, acompanhar Lizzie, estudar a política de The Crown e descobrir a estrutura da Patente de Elite.
+
+As informações devem estar conectadas.
+
+Exemplos de navegação:
+
+**Lizzie → Peter → Khevar → Ataque → Raffaell → Família Tyrrell.**
+
+**Raffaell → Patente de Elite → Governo interno → Hereditariedade → Regras institucionais.**
+
+**Emilly → Domínio da Luz → Família Tyrrell → Autoridade sobre a Elite.**
+
+Não quero apenas telas bonitas. Quero um sistema que funcione como a Bíblia viva de Euphoriya.
+
+### Entrega
+
+Implemente no projeto atual o máximo possível das fases em sequência, sem sacrificar a integridade das informações.
+
+Ao concluir, apresente:
+
+- Funcionalidades realmente implementadas.
+- Páginas navegáveis.
+- Personagens cadastrados.
+- Dados canônicos carregados.
+- Informações ainda indefinidas.
+- Recursos demonstrativos.
+- Pendências técnicas.
+- Próximos passos.
+
+**EUPHORIYA STUDIO — Um universo para criar, compreender e explorar.**

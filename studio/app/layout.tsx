@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./archive.css";
 export const metadata: Metadata = {
   title: "EUPHORIYA — Arquivo de um universo",
   description:
-    "Um espaço para imaginar, conectar e preservar seu universo. Explore o Character Studio e os laços de Euphoriya.",
+    "A bíblia viva de Euphoriya: personagens, cânone, atlas, instituições, histórias e graphic novel em um arquivo autoral local.",
+  robots: { index: false, follow: false },
 };
 export const viewport: Viewport = { themeColor: "#151414" };
 export default function RootLayout({
