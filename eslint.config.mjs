@@ -90,6 +90,7 @@ export default [...neostandard({
   filesTs: ['**/*.mts', '**/*.cts'],
   env: ['browser', 'node'],
   ignores: [
+    'studio/**',
     '.arbor/**',
     '.cursor/hooks/**',
     '**/node_modules/**',

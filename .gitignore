@@ -81,6 +81,8 @@ NUL
 
 .nyc_output
 coverage/
+/studio/.next/
+/studio/tsconfig.tsbuildinfo
 
 # Vitest 5+ shared artifact root (coverage caches, reports)
 .vitest/

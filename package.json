@@ -8,6 +8,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "yarn --cwd studio dev",
     "lint:commit": "commitlint",
     "lint:eslint": "eslint . --max-warnings 0",
     "lint:stylelint": "stylelint \"src/**/*.{vue,css,scss,sass}\" \".storybook-workspace/.storybook/**/*.{vue,css,scss,sass}\"",
